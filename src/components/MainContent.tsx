@@ -39,6 +39,8 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
   const onRun = useCallback(
     (selection?: string) => {
       if (!activeTab) return;
+      // DEBUG: log the SQL and TabID
+      console.log("[MainContent] onRun called. selection:", selection, "activeTabId:", activeTab.id);
       runSql(selection || activeTab.sql, activeTab.id);
     },
     [activeTab, runSql]

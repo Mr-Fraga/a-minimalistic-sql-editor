@@ -113,6 +113,8 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
           selected = state.doc.sliceString(from, to);
         }
       }
+      // LOG WHAT IS BEING SENT TO onRun
+      console.log("[SqlEditor] handleRunButton: selected:", selected ? selected : value);
       // Only run selected statement (or statement at cursor)
       onRun(selected || undefined);
     };
