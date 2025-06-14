@@ -130,16 +130,16 @@ const Index: React.FC = () => {
       setActiveTab(newId);
     };
 
-  // For table explorer insertion
+  // --- FOR TABLE EXPLORER INSERTION (Fix to ensure proper ref logic): ---
   const handleInsertSchemaTable = (schema: string, table: string) => {
     const tab = tabs.find(t => t.id === activeTab);
-    if (tab && sqlEditorRefs.current[tab.id]) {
+    if (tab && sqlEditorRefs.current[tab.id] && typeof sqlEditorRefs.current[tab.id]?.insertAtCursor === "function") {
       sqlEditorRefs.current[tab.id]?.insertAtCursor(`${schema}.${table}`);
     }
   };
   const handleInsertColumn = (col: string) => {
     const tab = tabs.find(t => t.id === activeTab);
-    if (tab && sqlEditorRefs.current[tab.id]) {
+    if (tab && sqlEditorRefs.current[tab.id] && typeof sqlEditorRefs.current[tab.id]?.insertAtCursor === "function") {
       sqlEditorRefs.current[tab.id]?.insertAtCursor(col);
     }
   };
@@ -263,21 +263,28 @@ const Index: React.FC = () => {
                   <button
                     key={tab.id}
                     className={`
-                      relative font-mono text-[13px] px-3 py-2 min-w-[5.2rem] transition
+                      relative font-mono text-[14px] px-5 py-2 min-w-[9.5rem] max-w-[16rem] transition
                       border-b-2 focus:outline-none
                       ${activeTab === tab.id
                         ? "bg-white border-black text-black font-medium shadow"
                         : "bg-gray-100 border-transparent text-gray-700 hover:bg-gray-200"}
                       rounded-t-md
                     `}
-                    style={{ marginRight: 2, paddingRight: 35 /* reserve space for icons */ }}
+                    style={{
+                      marginRight: 4,
+                      paddingRight: 42,
+                      minWidth: 152,
+                      maxWidth: 260,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden"
+                    }}
                     onClick={() => setActiveTab(tab.id)}
                     type="button"
                   >
                     {/* Editable tab name (smaller input) */}
                     {renamingTabId === tab.id ? (
                       <input
-                        className="font-mono text-[13px] bg-white border border-gray-300 rounded px-1 py-0.5 outline-none w-[85%] focus:ring-2 focus:ring-gray-300"
+                        className="font-mono text-[13px] bg-white border border-gray-300 rounded px-1 py-0.5 outline-none w-[90%] focus:ring-2 focus:ring-gray-300"
                         value={renameValue}
                         autoFocus
                         onBlur={() => finishRenaming(tab.id)}
@@ -285,40 +292,69 @@ const Index: React.FC = () => {
                         onKeyDown={e => handleRenameKeyDown(e, tab.id)}
                         spellCheck={false}
                         onClick={e => e.stopPropagation()}
-                        style={{ height: 22 }}
+                        style={{ height: 20, fontSize: 13, marginRight: 2 }}
                       />
                     ) : (
                       <span
                         onDoubleClick={e => { e.stopPropagation(); handleTabDoubleClick(tab); }}
                         className="truncate select-none"
                         title={tab.name}
-                        style={{ display: "inline-block", maxWidth: "78%" }}
+                        style={{ display: "inline-block", maxWidth: "88%" }}
                       >
                         {tab.name}
                       </span>
                     )}
-                    {/* Duplicated (copy) and Close (X) icons vertical position */}
-                    {(tabs.length > 1 || true) && (
-                      <div className="absolute right-1 top-1.5 flex flex-col items-center gap-0 p-0 z-10" style={{height: 27}}>
-                        {/* Duplicate icon (copy) */}
+                    {/* Duplicate and Close icons: stacked, top right within tab */}
+                    <div className="absolute right-2 top-2 flex flex-col items-end gap-0 p-0 z-10" style={{ height: 29 }}>
+                      {/* Duplicate icon (copy), just below close */}
+                      <button
+                        tabIndex={-1}
+                        title="Duplicate tab"
+                        onClick={e => { e.stopPropagation(); handleDuplicateTab(tab.id); }}
+                        className="bg-gray-100 hover:bg-gray-200 rounded-full p-0 m-0 flex items-center justify-center mb-1"
+                        style={{
+                          width: 15,
+                          height: 15,
+                          lineHeight: 0,
+                          padding: 0,
+                        }}
+                        type="button"
+                      >
+                        {/* lucide-react "copy" icon, size 10 */}
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width={10}
+                          height={10}
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.05"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+                          <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path>
+                        </svg>
+                      </button>
+                      {/* Close icon, above duplicate */}
+                      {tabs.length > 1 && (
                         <button
                           tabIndex={-1}
-                          title="Duplicate tab"
-                          onClick={e => { e.stopPropagation(); handleDuplicateTab(tab.id); }}
-                          className="bg-gray-100 hover:bg-gray-200 rounded-full p-0 m-0 flex items-center justify-center mb-0.5"
+                          title="Close tab"
+                          onClick={e => { e.stopPropagation(); handleRemoveTab(tab.id); }}
+                          className="bg-gray-200 hover:bg-gray-300 rounded-full p-0 flex items-center justify-center"
                           style={{
-                            width: 16,
-                            height: 16,
+                            width: 15,
+                            height: 15,
                             lineHeight: 0,
                             padding: 0,
                           }}
                           type="button"
                         >
-                          {/* lucide-react "copy" icon, size 11 */}
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            width={11}
-                            height={11}
+                            width={10}
+                            height={10}
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
@@ -326,30 +362,12 @@ const Index: React.FC = () => {
                             strokeLinecap="round"
                             strokeLinejoin="round"
                           >
-                            <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
-                            <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path>
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
                           </svg>
                         </button>
-                        {/* Close icon, smaller and below duplicate */}
-                        {tabs.length > 1 && (
-                          <button
-                            tabIndex={-1}
-                            title="Close tab"
-                            onClick={e => { e.stopPropagation(); handleRemoveTab(tab.id); }}
-                            className="bg-gray-200 hover:bg-gray-300 rounded-full p-0 flex items-center justify-center"
-                            style={{
-                              width: 16,
-                              height: 16,
-                              lineHeight: 0,
-                              padding: 0,
-                            }}
-                            type="button"
-                          >
-                            <X size={11} strokeWidth={2.2} />
-                          </button>
-                        )}
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </button>
                 ))}
                 {/* + Add new tab button */}
