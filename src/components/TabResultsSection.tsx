@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import ResultTable from "@/components/ResultTable";
 import { ResultsActionsBar } from "@/components/ResultTable/ResultsActionsBar";
 import { ResultsStatsBar } from "@/components/ResultTable/ResultsStatsBar";
+import { toast } from "@/hooks/use-toast";
 
 // Minimum/Maximum result height
 const MIN_RESULTS_HEIGHT = 80;
@@ -75,9 +76,10 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
   const handleDownload = () => {
     const result = tab?.result;
     if (!result || !Array.isArray(result.rows) || result.rows.length === 0) {
-      if (window && window.toast) {
-        window.toast({ title: "No data", description: "No results to download." });
-      }
+      toast({
+        title: "No data",
+        description: "No results to download.",
+      });
       return;
     }
     const header = result.columns.map(val =>
