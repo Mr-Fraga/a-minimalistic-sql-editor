@@ -48,6 +48,7 @@ export function useQueryApi({ updateTab, DEFAULT_SQL }: {
         }
       } catch (error: any) {
         console.error("Query failed!", error);
+        // Also clear previous results on error!
         updateTab(tabId, { error: error.message, result: null });
         toast({
           title: "Query failed!",
