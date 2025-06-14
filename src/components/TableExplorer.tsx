@@ -14,6 +14,7 @@ import SchemaExplorer from "./SchemaExplorer";
 const rand = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
 function range(n: number) {
   return Array.from({ length: n }, (_, i) => i + 1);
+}
 function randInt(min: number, max: number): number {
   // Inclusive lower bound, inclusive upper bound.
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -132,7 +133,7 @@ const SCHEMA_DATA = [
           9000 + i,
           rand(["/","/login","/dashboard","/profile","/orders","/about","/products","/categories"]),
           randInt(1, 30),
-          `2024-04-${(randInt(1,27)).toString().padStart(2,"0")} 0${randInt(0,8)}:${rand(["05","15","22","38","42","57"])}:00`
+          `2024-04-${(randInt(1,27)).toString().padStart(2,"0\")} 0${randInt(0,8)}:${rand(["05","15","22","38","42","57"])}:00`
         ])
       },
       {
