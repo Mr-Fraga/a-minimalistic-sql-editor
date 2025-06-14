@@ -1,5 +1,5 @@
 
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useLocalStorage } from "../components/MainContentHooks";
 
 export type TabType = {
@@ -31,12 +31,17 @@ export function useTabsState() {
     "activeTabId",
     tabs[0]?.id
   );
-  const activeTab = tabs.find((tab) => tab.id === activeTabId);
+
+  // Always compute the *fresh* activeTab from latest tabs and activeTabId.
+  const activeTab = useMemo(() => {
+    return tabs.find((tab) => tab.id === activeTabId) ?? tabs[0];
+  }, [tabs, activeTabId]);
 
   // Tab operations
   const addTab = useCallback(() => {
     const newTab: TabType = { ...DEFAULT_TAB, id: generateId() };
-    setTabs([...tabs, newTab]);
+    const newTabs = [...tabs, newTab];
+    setTabs(newTabs);
     setActiveTabId(newTab.id);
   }, [tabs, setTabs, setActiveTabId]);
 
@@ -52,7 +57,8 @@ export function useTabsState() {
         newName = `${baseName} (copy ${copyIdx++})`;
       }
       const copy = { ...tabToCopy, id: generateId(), name: newName, isRunning: false };
-      setTabs([...tabs, copy]);
+      const newTabs = [...tabs, copy];
+      setTabs(newTabs);
       setActiveTabId(copy.id);
     },
     [tabs, setTabs, setActiveTabId]
