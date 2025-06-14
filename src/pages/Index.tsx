@@ -30,6 +30,7 @@ import {
   SidebarProvider,
   Sidebar,
 } from "@/components/ui/sidebar"; // use shadcn/ui sidebar
+import TableExplorer from "@/components/TableExplorer";
 
 import TabView from "@/components/TabView";
 import AccountSection from "@/components/AccountSection";
@@ -72,24 +73,22 @@ function useDebounce<T>(value: T, delay: number): T {
 const DEFAULT_SQL = `SELECT * FROM users LIMIT 10;`;
 
 const Index: React.FC = () => {
-  // The provider must wrap all components using the sidebar context
   return (
-    <SidebarProvider>
-      <div className="min-h-screen w-full flex flex-col">
-        {/* Top horizontal panel */}
-        <div className="w-full bg-white shadow-sm flex items-center" style={{ zIndex: 10, minHeight: "56px" }}>
-          {/* Example: Place AccountSection and any other top-panel components here */}
-          <div className="px-0 py-0 w-full flex items-center justify-end">
-            <AccountSection account="john@example.com" role="readonly" />
-          </div>
-        </div>
-        {/* Main content area */}
-        <div className="flex-1 w-full flex flex-row gap-0 bg-gray-50">
-          <Sidebar />
-          <PageContent />
+    <div className="min-h-screen w-full flex flex-col">
+      {/* Top horizontal panel */}
+      <div className="w-full bg-white shadow-sm flex items-center" style={{ zIndex: 10, minHeight: "56px" }}>
+        {/* Example: Place AccountSection and any other top-panel components here */}
+        <div className="px-0 py-0 w-full flex items-center justify-end">
+          <AccountSection account="john@example.com" role="readonly" />
         </div>
       </div>
-    </SidebarProvider>
+      {/* Main content area */}
+      <div className="flex-1 w-full flex flex-row gap-0 bg-gray-50">
+        {/* Sidebar with TableExplorer */}
+        <TableExplorer />
+        <PageContent />
+      </div>
+    </div>
   );
 };
 
