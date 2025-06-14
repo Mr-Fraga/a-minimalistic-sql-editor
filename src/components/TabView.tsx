@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import TabSqlEditorSection from "./TabSqlEditorSection";
 import TabResultsSection from "./TabResultsSection";
 import { SqlEditorImperativeHandle } from "@/components/SqlEditor";
@@ -43,6 +43,10 @@ const TabView: React.FC<TabViewProps> = ({
   onRunAll,
   onDownloadCsv,
 }) => {
+  // UI state for handle hover
+  const [isHandleHovered, setIsHandleHovered] = useState(false);
+  const [isHandleDragging, setIsHandleDragging] = useState(false);
+
   return (
     <ResizablePanelGroup direction="horizontal" className="flex h-full w-full min-h-0">
       {/* Main SQL/Results Section */}
@@ -52,12 +56,11 @@ const TabView: React.FC<TabViewProps> = ({
         style={{
           minWidth: 0,
           background: "#fff",
-          // Right padding/gap to visually separate from Table Explorer
-          paddingRight: "24px",
+          paddingRight: "36px", // WIDER right margin for separation
+          transition: "padding-right 0.18s",
         }}
       >
         <div className="flex flex-col min-h-0 h-full w-full">
-          {/* SQL Editor Section */}
           <div
             style={{
               flex: "1 1 0%",
@@ -76,7 +79,6 @@ const TabView: React.FC<TabViewProps> = ({
               onRunAll={onRunAll}
             />
           </div>
-          {/* Results Section */}
           <TabResultsSection
             tab={tab}
             resultsHeight={320}
@@ -85,17 +87,36 @@ const TabView: React.FC<TabViewProps> = ({
           />
         </div>
       </ResizablePanel>
-      {/* Drag handle for resizing/collapsing Table Explorer */}
-      <ResizableHandle withHandle />
+      {/* Custom ResizableHandle: only shows on hover or drag */}
+      <ResizableHandle
+        withHandle={isHandleHovered || isHandleDragging}
+        className={`transition-all duration-200 
+          ${isHandleHovered || isHandleDragging ? "bg-border" : "bg-transparent"}
+          hover:bg-border
+        `}
+        onMouseEnter={() => setIsHandleHovered(true)}
+        onMouseLeave={() => setIsHandleHovered(false)}
+        onPointerDown={() => setIsHandleDragging(true)}
+        onPointerUp={() => setIsHandleDragging(false)}
+        style={{
+          zIndex: 12, // always above explorer bg
+          width: isHandleHovered || isHandleDragging ? "16px" : "4px",
+          minWidth: 0,
+          cursor: "col-resize",
+          transition: "all 0.18s",
+          background: isHandleHovered || isHandleDragging ? "#e5e7eb" : "transparent",
+        }}
+      />
+      {/* Table Explorer, always collapsible down to small size */}
       <ResizablePanel
         defaultSize={23}
-        minSize={12}
+        minSize={0}
         maxSize={40}
         collapsible
-        collapsedSize={2}
+        collapsedSize={0}
         style={{
           background: "#fff",
-          minWidth: EXPLORER_MIN_WIDTH,
+          minWidth: 0,
           maxWidth: EXPLORER_MAX_WIDTH,
         }}
         className="h-full min-h-0 border-l border-gray-200 flex flex-col bg-white"

@@ -18,7 +18,7 @@ const Index: React.FC = () => {
           zIndex: 10,
           minHeight: "48px",
           maxHeight: "48px",
-          borderBottom: "1px solid #ececec",
+          // Border removed per instruction
         }}
       >
         <div className="flex-1 px-4" />
