@@ -37,8 +37,10 @@ interface TabResultsSectionProps {
 }
 
 const TabResultsSection: React.FC<TabResultsSectionProps> = ({
+  tab,          // <--- Add this prop for actual tab context
   resultsHeight,
   setResultsHeight,
+  onDownloadCsv,
 }) => {
   // Drag logic only for resizing
   const dragStartY = React.useRef<number | null>(null);
@@ -100,8 +102,8 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
     const blob = new Blob([csv], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
-    // For the demo, use "Tab" as tab name; replace with actual tab name in real usage
-    a.download = getDownloadFilename("Tab");
+    // Use the real tab name for the filename
+    a.download = getDownloadFilename(tab?.name || "Tab");
     a.href = url;
     document.body.appendChild(a);
     a.click();
