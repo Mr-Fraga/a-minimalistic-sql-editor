@@ -36,7 +36,8 @@ const SqlEditor: React.FC<SqlEditorProps> = ({
   onRun,
   isRunning,
 }) => {
-  const editorRef = useRef<CodeMirror | null>(null);
+  // Ref is not used but retained for possible future extensions.
+  const editorRef = useRef(null);
 
   return (
     <div className="w-full">
@@ -50,13 +51,7 @@ const SqlEditor: React.FC<SqlEditorProps> = ({
             sqlLint(),
             lintGutter(),
           ]}
-          theme={{
-            "&": {
-              backgroundColor: "white",
-              fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-              fontSize: "15px"
-            }
-          }}
+          theme="light"
           onChange={(v) => onChange(v)}
           basicSetup={{
             lineNumbers: true,
