@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import {
   Tooltip,
@@ -66,7 +67,7 @@ const AccountSection: React.FC<AccountSectionProps> = ({
   const [accountTooltipOpen, setAccountTooltipOpen] = React.useState(false);
 
   return (
-    <div className="flex items-center gap-4 bg-white text-black px-6 py-3 rounded-t-none shadow-none select-none relative">
+    <div className="flex items-center gap-4 bg-white text-black px-6 py-4 rounded-t-none shadow-none select-none relative">
       {/* Role Icon with tooltip and dropdown */}
       <TooltipProvider>
         <Tooltip delayDuration={200}>
@@ -156,3 +157,4 @@ const AccountSection: React.FC<AccountSectionProps> = ({
 };
 
 export default AccountSection;
+
