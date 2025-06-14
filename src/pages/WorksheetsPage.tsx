@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Table,
@@ -9,6 +10,17 @@ import {
 } from "@/components/ui/table";
 import { Folder, File, Trash, Copy } from "lucide-react";
 import DeleteFileModal from "@/components/DeleteFileModal";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 // Updated worksheet mock data with comment fields
 const worksheetData = [
@@ -127,12 +139,13 @@ const sortFields = [
   { key: "createdAt", label: "Created At" },
   { key: "updatedAt", label: "Updated At" },
   { key: "comment", label: "Comment" },
+  { key: "owner", label: "Owner" }
 ] as const;
 
 type SortField = typeof sortFields[number]["key"];
 
 const WorksheetsPage: React.FC = () => {
-  // Sorting state: { field, direction }
+  // Sorting state
   const [sort, setSort] = useState<{ field: SortField; direction: "asc" | "desc" }>({
     field: "name",
     direction: "asc",
@@ -141,13 +154,25 @@ const WorksheetsPage: React.FC = () => {
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
   // Worksheet data can now be mutated
   const [data, setData] = useState(initialWorksheetData);
+  // For delete modal
   const [modalState, setModalState] = useState<{
     open: boolean;
     fileName: string | null;
     parentFolder: string | undefined;
   }>({ open: false, fileName: null, parentFolder: undefined });
+
   // SEARCH state
   const [search, setSearch] = useState<string>("");
+
+  // COMMENT MODAL state
+  const [commentModal, setCommentModal] = useState<{
+    open: boolean;
+    rowKey: string | null;
+    currentComment: string;
+  }>({ open: false, rowKey: null, currentComment: "" });
+
+  // COMMENTS state: a map of key -> comment (so edits stay persistent in UI)
+  const [comments, setComments] = useState<{[key: string]: string}>({});
 
   // Handler to duplicate a file (either in a folder or root)
   const handleDuplicateFile = (
@@ -159,7 +184,6 @@ const WorksheetsPage: React.FC = () => {
         existingNames: string[],
         baseName: string
       ): string {
-        // Remove " (copy)" or " (copy N)" suffixes for base
         const copyPattern = /\s?\(copy(?: (\d+))?\)$/i;
         const rawBase =
           baseName.replace(copyPattern, "") || baseName;
@@ -181,7 +205,6 @@ const WorksheetsPage: React.FC = () => {
       }
 
       if (!parentFolder) {
-        // root files
         const rootFiles = prev.filter((item) => item.type === "query");
         const fileToCopy = rootFiles.find((f) => f.name === fileName);
         if (!fileToCopy) return prev;
@@ -193,7 +216,6 @@ const WorksheetsPage: React.FC = () => {
         newArr.splice(idx + 1, 0, clone);
         return newArr;
       } else {
-        // file is within a folder
         return prev.map((item) => {
           if (item.type !== "folder" || item.name !== parentFolder) return item;
           const fileToCopy = item.files.find((f: any) => f.name === fileName);
@@ -216,11 +238,9 @@ const WorksheetsPage: React.FC = () => {
   // To handle file deletion
   const handleDeleteFile = (parentFolder: string | undefined, fileName: string) => {
     setData(prev => {
-      // If it's a root file (no parent folder)
       if (!parentFolder) {
         return prev.filter(item => !(item.type === "query" && item.name === fileName));
       }
-      // For files inside folders
       return prev.map(item => {
         if (item.type !== "folder" || item.name !== parentFolder) return item;
         return {
@@ -234,6 +254,12 @@ const WorksheetsPage: React.FC = () => {
 
   // Flatten for current data
   let rows = flattenData(data, expandedFolders);
+
+  // Enhance: replace comment column values with state value for possible edits
+  rows = rows.map(row => ({
+    ...row,
+    comment: comments[row.key] !== undefined ? comments[row.key] : row.comment ?? "",
+  }));
 
   // Filter by search (match on name, comment, or parentFolder)
   if (search.trim()) {
@@ -277,32 +303,65 @@ const WorksheetsPage: React.FC = () => {
     }));
   };
 
+  // Handle double-click to edit comment
+  const handleRowDoubleClick = (row: typeof rows[number]) => {
+    setCommentModal({
+      open: true,
+      rowKey: row.key,
+      currentComment: row.comment || "",
+    });
+  };
+
+  const handleCommentChange = (val: string) => {
+    setCommentModal(cm => ({ ...cm, currentComment: val }));
+  };
+
+  const handleSaveComment = () => {
+    if (commentModal.rowKey) {
+      setComments(prev => ({
+        ...prev,
+        [commentModal.rowKey!]: commentModal.currentComment,
+      }));
+    }
+    setCommentModal({ open: false, rowKey: null, currentComment: "" });
+  };
+
   // Render
   return (
-    <div className="flex-1 w-full h-full bg-white p-0 px-8 md:px-16">
+    <div className="flex-1 w-full h-full bg-white p-0 px-10 md:px-20">
       <div className="w-full pt-12">
-        <h1 className="text-2xl font-bold mb-4 ml-0">Your queries</h1>
-        {/* Search bar */}
-        <div className="flex items-center gap-2 mb-4 max-w-lg">
-          <input
-            type="text"
-            placeholder="Search by name or comment..."
-            className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-200 outline-none text-base bg-gray-50"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            style={{ maxWidth: 420 }}
-          />
+        {/* Header row: title on left, search on right */}
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold mb-0">Your queries</h1>
+          <div className="w-full max-w-xs flex justify-end">
+            <Input
+              type="text"
+              placeholder="Search by name or comment..."
+              className="border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-200 outline-none text-base bg-gray-50"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{ maxWidth: 420 }}
+            />
+          </div>
         </div>
+        <TooltipProvider>
         <Table className="w-full">
           <TableHeader>
             <TableRow>
-              {sortFields.map((col) => (
+              {[
+                { key: "name", label: "Name" },
+                { key: "type", label: "Type" },
+                { key: "createdAt", label: "Created At" },
+                { key: "updatedAt", label: "Updated At" },
+                { key: "comment", label: "Comment" },
+                { key: "owner", label: "Owner" },
+              ].map((col) => (
                 <TableHead
                   key={col.key}
                   className="cursor-pointer select-none"
                   onClick={() =>
                     setSort((prev) => ({
-                      field: col.key,
+                      field: col.key as SortField,
                       direction:
                         prev.field === col.key && prev.direction === "asc"
                           ? "desc"
@@ -322,80 +381,95 @@ const WorksheetsPage: React.FC = () => {
           </TableHeader>
           <TableBody>
             {rows.map((row) => (
-              <TableRow
-                key={row.key}
-                className="hover:bg-gray-50 transition-colors cursor-pointer"
-                onClick={() => {
-                  if (row.type === "folder") toggleFolder(row.name);
-                }}
-              >
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    {row.type === "folder" ? (
-                      <Folder className="text-black" size={18} strokeWidth={2} />
-                    ) : (
-                      <File className="text-gray-500" size={18} strokeWidth={2} />
-                    )}
-                    <span
-                      className={
-                        row.type === "folder"
-                          ? "font-semibold"
-                          : row.parentFolder
-                          ? "ml-5"
-                          : ""
-                      }
-                    >
-                      {row.name}
-                    </span>
+              <Tooltip key={row.key}>
+                <TooltipTrigger asChild>
+                  <TableRow
+                    className="hover:bg-gray-50 transition-colors cursor-pointer"
+                    onClick={() => {
+                      if (row.type === "folder") toggleFolder(row.name);
+                    }}
+                    onDoubleClick={() => handleRowDoubleClick(row)}
+                  >
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {row.type === "folder" ? (
+                          <Folder className="text-black" size={18} strokeWidth={2} />
+                        ) : (
+                          <File className="text-gray-500" size={18} strokeWidth={2} />
+                        )}
+                        <span
+                          className={
+                            row.type === "folder"
+                              ? "font-semibold"
+                              : row.parentFolder
+                              ? "ml-5"
+                              : ""
+                          }
+                        >
+                          {row.name}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {row.type === "folder" ? "Folder" : "File"}
+                    </TableCell>
+                    <TableCell>
+                      {row.createdAt || "-"}
+                    </TableCell>
+                    <TableCell>
+                      {row.updatedAt || "-"}
+                    </TableCell>
+                    <TableCell>
+                      {row.comment || "-"}
+                    </TableCell>
+                    <TableCell>
+                      {/* Owner column (always "john.smith") */}
+                      john.smith
+                    </TableCell>
+                    <TableCell>
+                      {row.parentFolder ? row.parentFolder : row.type === "folder" ? "" : "-"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {row.type === "query" && (
+                        <div className="flex items-center justify-end gap-2">
+                          {/* Duplicate icon */}
+                          <button
+                            className="p-1 rounded hover:bg-blue-50"
+                            title="Duplicate file"
+                            onClick={e => {
+                              e.stopPropagation();
+                              handleDuplicateFile(row.parentFolder, row.name);
+                            }}
+                          >
+                            <Copy className="text-blue-500" size={18} strokeWidth={2} />
+                          </button>
+                          {/* Trash icon */}
+                          <button
+                            className="p-1 rounded hover:bg-red-50"
+                            title="Delete file"
+                            onClick={e => {
+                              e.stopPropagation();
+                              setModalState({ open: true, fileName: row.name, parentFolder: row.parentFolder });
+                            }}
+                          >
+                            <Trash className="text-red-500" size={18} strokeWidth={2} />
+                          </button>
+                        </div>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="max-w-xs">
+                  {row.comment || <span className="italic text-gray-400">(No comment)</span>}
+                  <div className="mt-1 text-xs text-blue-500 cursor-pointer underline" onClick={() => handleRowDoubleClick(row)}>
+                    Double click to edit
                   </div>
-                </TableCell>
-                <TableCell>
-                  {row.type === "folder" ? "Folder" : "File"}
-                </TableCell>
-                <TableCell>
-                  {row.createdAt || "-"}
-                </TableCell>
-                <TableCell>
-                  {row.updatedAt || "-"}
-                </TableCell>
-                <TableCell>
-                  {row.comment || "-"}
-                </TableCell>
-                <TableCell>
-                  {row.parentFolder ? row.parentFolder : row.type === "folder" ? "" : "-"}
-                </TableCell>
-                <TableCell className="text-right">
-                  {row.type === "query" && (
-                    <div className="flex items-center justify-end gap-2">
-                      {/* Duplicate icon */}
-                      <button
-                        className="p-1 rounded hover:bg-blue-50"
-                        title="Duplicate file"
-                        onClick={e => {
-                          e.stopPropagation();
-                          handleDuplicateFile(row.parentFolder, row.name);
-                        }}
-                      >
-                        <Copy className="text-blue-500" size={18} strokeWidth={2} />
-                      </button>
-                      {/* Trash icon */}
-                      <button
-                        className="p-1 rounded hover:bg-red-50"
-                        title="Delete file"
-                        onClick={e => {
-                          e.stopPropagation();
-                          setModalState({ open: true, fileName: row.name, parentFolder: row.parentFolder });
-                        }}
-                      >
-                        <Trash className="text-red-500" size={18} strokeWidth={2} />
-                      </button>
-                    </div>
-                  )}
-                </TableCell>
-              </TableRow>
+                </TooltipContent>
+              </Tooltip>
             ))}
           </TableBody>
         </Table>
+        </TooltipProvider>
       </div>
       {/* Delete confirmation modal */}
       <DeleteFileModal
@@ -408,8 +482,28 @@ const WorksheetsPage: React.FC = () => {
           }
         }}
       />
+      <Dialog open={commentModal.open} onOpenChange={open => !open && setCommentModal({ open: false, rowKey: null, currentComment: "" })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Comment</DialogTitle>
+            <DialogDescription>
+              Update the comment for this row.
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            value={commentModal.currentComment}
+            onChange={e => handleCommentChange(e.target.value)}
+            className="mb-4"
+            autoFocus
+          />
+          <DialogFooter>
+            <Button onClick={handleSaveComment}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
 export default WorksheetsPage;
+
