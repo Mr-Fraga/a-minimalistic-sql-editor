@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/resizable";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, X } from "lucide-react";
+import TabView, { TabType } from "@/components/TabView";
 
 const DEFAULT_SQL = "SELECT * FROM users;";
 
@@ -52,15 +53,6 @@ function formatSql(sql: string) {
     .replace(/\n{2,}/g, "\n")
     .trim();
 }
-
-type TabType = {
-  id: string;
-  name: string;
-  sql: string;
-  result: { columns: string[]; rows: Array<any[]> } | null;
-  error: string | null;
-  isRunning: boolean;
-};
 
 function newTabName(existing: TabType[]) {
   let i = 1;
@@ -210,7 +202,7 @@ const Index: React.FC = () => {
         <ResizableHandle className="bg-gray-200" />
         <ResizablePanel defaultSize={77} minSize={47}>
           <section className="flex-1 flex flex-col px-8 py-6 min-w-0 h-full">
-            {/* --- TABS --- */}
+            {/* --- TABS HEADER --- */}
             <div className="w-full border-b border-gray-200 flex items-center pr-0 mb-3">
               <div className="flex-1 flex">
                 {tabs.map((tab, i) => (
@@ -255,45 +247,19 @@ const Index: React.FC = () => {
                 </button>
               </div>
             </div>
-            {/* End tab header section */}
-
-            {/* Only render the editor and result for the currently selected tab */}
-            <div className="w-full flex-1 flex flex-col min-h-0 h-full">
-              {currentTab && (
-                <ResizablePanelGroup direction="vertical" className="flex-1 min-h-0 h-full">
-                  <ResizablePanel defaultSize={60} minSize={20} className="flex flex-col min-h-0">
-                    <ResizablePanelGroup direction="vertical" className="flex-1 min-h-0 h-full">
-                      <ResizablePanel defaultSize={75} minSize={40} maxSize={95} className="min-h-[80px]">
-                        <SqlEditor
-                          ref={el => { sqlEditorRefs.current[currentTab.id] = el; }}
-                          value={currentTab.sql}
-                          onChange={sql => handleSqlChange(currentTab.id, sql)}
-                          onFormat={() => handleFormat(currentTab.id)}
-                          onRun={() => handleRun(currentTab.id)}
-                          isRunning={currentTab.isRunning}
-                        />
-                      </ResizablePanel>
-                      {/* No handle for clean look, but easy to add if you wish */}
-                    </ResizablePanelGroup>
-                  </ResizablePanel>
-                  <ResizableHandle withHandle className="bg-gray-200" />
-                  <ResizablePanel defaultSize={40} minSize={20}>
-                    <div className="mt-6 flex flex-col min-h-0 h-full">
-                      <h2 className="font-bold text-md mb-2 font-mono tracking-tight select-none">Results</h2>
-                      <ResultTable result={currentTab.result || undefined} error={currentTab.error} />
-                      {currentTab.result && currentTab.result.rows.length > 0 && (
-                        <div className="flex w-full justify-start mt-2">
-                          <Button size="sm" className="font-mono" onClick={() => handleDownloadCsv(currentTab)}>
-                            Download as CSV
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </ResizablePanel>
-                </ResizablePanelGroup>
-              )}
-            </div>
-            {/* End tab content section */}
+            {/* --- TABS CONTENT: Only render current tab with TabView --- */}
+            {currentTab && (
+              <TabView
+                tab={currentTab}
+                sqlEditorRef={{
+                  current: sqlEditorRefs.current[currentTab.id],
+                }}
+                onSqlChange={sql => handleSqlChange(currentTab.id, sql)}
+                onFormat={() => handleFormat(currentTab.id)}
+                onRun={() => handleRun(currentTab.id)}
+                onDownloadCsv={() => handleDownloadCsv(currentTab)}
+              />
+            )}
           </section>
         </ResizablePanel>
       </ResizablePanelGroup>
