@@ -1,25 +1,26 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Plus } from "lucide-react";
+import React, { useState } from "react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, X } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import CommentEditModal from "@/components/CommentEditModal";
 
-// TabBar props separate from MainContent logic
-type TabType = {
+interface TabType {
   id: string;
   name: string;
   sql: string;
   result: { columns: string[]; rows: Array<any[]> } | null;
   error: string | null;
   isRunning: boolean;
-};
+  comment?: string;
+}
 
 interface TabBarProps {
   tabs: TabType[];
-  activeTabId: string;
+  activeTabId: string | null;
   setActiveTabId: (id: string) => void;
   addTab: () => void;
   closeTab: (id: string) => void;
-  renameTab: (id: string, newName: string) => void;
+  renameTab: (id: string, name: string) => void;
 }
 
 const TabBar: React.FC<TabBarProps> = ({
@@ -28,135 +29,113 @@ const TabBar: React.FC<TabBarProps> = ({
   setActiveTabId,
   addTab,
   closeTab,
-  renameTab
+  renameTab,
 }) => {
-  return (
-    <div className="flex items-center bg-white px-6 md:px-8 pr-2 transition-colors duration-100">
-      {tabs.map((tab, idx) => (
-        <TabHeader
-          key={tab.id}
-          id={tab.id}
-          name={tab.name}
-          isActive={tab.id === activeTabId}
-          onTabClick={() => setActiveTabId(tab.id)}
-          onTabClose={closeTab}
-          onTabRename={renameTab}
-          className={idx !== 0 ? "ml-2" : ""}
-        />
-      ))}
-      <Button variant="ghost" size="sm" onClick={addTab}>
-        <Plus className="w-4 h-4" />
-      </Button>
-      <div className="flex-1" />
-    </div>
-  );
-};
+  // Comment editing state per tab
+  const [commentModal, setCommentModal] = useState<{
+    open: boolean;
+    tabId: string | null;
+    currentComment: string;
+  }>({
+    open: false,
+    tabId: null,
+    currentComment: "",
+  });
 
-interface TabHeaderProps {
-  id: string;
-  name: string;
-  isActive: boolean;
-  onTabClick: () => void;
-  onTabClose: (id: string) => void;
-  onTabRename: (id: string, newName: string) => void;
-  className?: string;
-}
+  // Keep comments in Tab bar state for demo (adapt to store in main state if needed)
+  const [comments, setComments] = useState<{[tabId: string]: string}>({});
 
-const TabHeader: React.FC<TabHeaderProps> = ({
-  id,
-  name,
-  isActive,
-  onTabClick,
-  onTabClose,
-  onTabRename,
-  className = "",
-}) => {
-  const [isRenaming, setIsRenaming] = useState(false);
-  const [newName, setNewName] = useState(name);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (isRenaming && inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.select();
-    }
-  }, [isRenaming]);
-
-  useEffect(() => {
-    setNewName(name);
-  }, [name]);
-
-  const handleRename = () => {
-    if (newName.trim() !== "") {
-      onTabRename(id, newName);
-    }
-    setIsRenaming(false);
+  const handleTabDoubleClick = (tab: TabType) => {
+    setCommentModal({
+      open: true,
+      tabId: tab.id,
+      currentComment: comments[tab.id] ?? tab.comment ?? "",
+    });
   };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleRename();
-    } else if (e.key === "Escape") {
-      setNewName(name);
-      setIsRenaming(false);
+  const handleSaveComment = () => {
+    if (commentModal.tabId) {
+      setComments((prev) => ({
+        ...prev,
+        [commentModal.tabId!]: commentModal.currentComment,
+      }));
     }
+    setCommentModal({ open: false, tabId: null, currentComment: "" });
   };
 
   return (
-    <div
-      className={
-        `flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-gray-100 cursor-pointer select-none border ` +
-        `shadow-md ring-1 ring-gray-200 ` + // darker shadow & subtle gray contour
-        `${isActive ? "bg-gray-100 border-black" : "bg-white border-black"} ` +
-        className
-      }
-      style={{
-        borderBottom: isActive ? "2px solid black" : "2px solid black",
-        borderLeft: "1px solid black",
-        borderRight: "1px solid black",
-        borderTop: "1px solid black"
-      }}
-      onDoubleClick={() => setIsRenaming(true)}
-      onClick={onTabClick}
-    >
-      {isRenaming ? (
-        <Input
-          ref={inputRef}
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onBlur={handleRename}
-          className="text-sm font-din font-medium rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 border-none shadow-none outline-none bg-transparent w-24"
-        />
-      ) : (
-        <span className={`w-24 truncate font-din ${isActive ? "font-bold" : ""}`}>{name}</span>
-      )}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={(e) => {
-          e.stopPropagation();
-          onTabClose(id);
-        }}
-        className="ml-1 -mr-2"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="lucide lucide-x w-3 h-3"
+    <div className="w-full bg-white border-b px-2">
+      <TooltipProvider>
+        <Tabs
+          value={activeTabId || (tabs.length > 0 ? tabs[0].id : undefined)}
+          onValueChange={setActiveTabId}
         >
-          <path d="M18 6 6 18" />
-          <path d="M6 6 18 18" />
-        </svg>
-        <span className="sr-only">Close tab</span>
-      </Button>
+          <TabsList className="flex gap-1">
+            {tabs.map((tab) => (
+              <Tooltip key={tab.id} delayDuration={100}>
+                <TooltipTrigger asChild>
+                  <div
+                    className={
+                      "flex items-center gap-2 px-4 py-2 rounded-t-md cursor-pointer group " +
+                      (tab.id === activeTabId
+                        ? "bg-gray-100 border-b-2 border-blue-500"
+                        : "hover:bg-gray-50")
+                    }
+                    onDoubleClick={() => handleTabDoubleClick(tab)}
+                    tabIndex={0}
+                  >
+                    <TabsTrigger
+                      value={tab.id}
+                      onClick={() => setActiveTabId(tab.id)}
+                      className="flex items-center px-0 py-0 font-semibold bg-transparent"
+                      style={{ outline: "none", boxShadow: "none" }}
+                    >
+                      {tab.name}
+                    </TabsTrigger>
+                    <button
+                      className="ml-2 text-gray-500 hover:text-red-600"
+                      onClick={e => {
+                        e.stopPropagation();
+                        closeTab(tab.id);
+                      }}
+                      title="Close tab"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-xs">
+                  {comments[tab.id] ?? tab.comment ?? (
+                    <span className="italic text-gray-400">(No comment)</span>
+                  )}
+                  <div className="mt-1 text-xs text-blue-500 cursor-pointer underline" onClick={() => handleTabDoubleClick(tab)}>
+                    Double click to edit
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            ))}
+            {/* Add tab button */}
+            <button
+              onClick={addTab}
+              className="ml-4 rounded-full p-1 hover:bg-gray-100 text-blue-500"
+              title="Add Tab"
+            >
+              <Plus size={20} />
+            </button>
+          </TabsList>
+        </Tabs>
+      </TooltipProvider>
+      {/* Modal to edit comment */}
+      <CommentEditModal
+        open={commentModal.open}
+        value={commentModal.currentComment}
+        onChange={v =>
+          setCommentModal(modal => ({ ...modal, currentComment: v }))
+        }
+        onSave={handleSaveComment}
+        onClose={() =>
+          setCommentModal({ open: false, tabId: null, currentComment: "" })
+        }
+      />
     </div>
   );
 };

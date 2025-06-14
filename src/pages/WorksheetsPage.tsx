@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Table,
@@ -381,91 +380,60 @@ const WorksheetsPage: React.FC = () => {
           </TableHeader>
           <TableBody>
             {rows.map((row) => (
-              <Tooltip key={row.key}>
-                <TooltipTrigger asChild>
-                  <TableRow
-                    className="hover:bg-gray-50 transition-colors cursor-pointer"
-                    onClick={() => {
-                      if (row.type === "folder") toggleFolder(row.name);
-                    }}
-                    onDoubleClick={() => handleRowDoubleClick(row)}
-                  >
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {row.type === "folder" ? (
-                          <Folder className="text-black" size={18} strokeWidth={2} />
-                        ) : (
-                          <File className="text-gray-500" size={18} strokeWidth={2} />
-                        )}
-                        <span
-                          className={
-                            row.type === "folder"
-                              ? "font-semibold"
-                              : row.parentFolder
-                              ? "ml-5"
-                              : ""
-                          }
-                        >
-                          {row.name}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {row.type === "folder" ? "Folder" : "File"}
-                    </TableCell>
-                    <TableCell>
-                      {row.createdAt || "-"}
-                    </TableCell>
-                    <TableCell>
-                      {row.updatedAt || "-"}
-                    </TableCell>
-                    <TableCell>
-                      {row.comment || "-"}
-                    </TableCell>
-                    <TableCell>
-                      {/* Owner column (always "john.smith") */}
-                      john.smith
-                    </TableCell>
-                    <TableCell>
-                      {row.parentFolder ? row.parentFolder : row.type === "folder" ? "" : "-"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {row.type === "query" && (
-                        <div className="flex items-center justify-end gap-2">
-                          {/* Duplicate icon */}
-                          <button
-                            className="p-1 rounded hover:bg-blue-50"
-                            title="Duplicate file"
-                            onClick={e => {
-                              e.stopPropagation();
-                              handleDuplicateFile(row.parentFolder, row.name);
-                            }}
-                          >
-                            <Copy className="text-blue-500" size={18} strokeWidth={2} />
-                          </button>
-                          {/* Trash icon */}
-                          <button
-                            className="p-1 rounded hover:bg-red-50"
-                            title="Delete file"
-                            onClick={e => {
-                              e.stopPropagation();
-                              setModalState({ open: true, fileName: row.name, parentFolder: row.parentFolder });
-                            }}
-                          >
-                            <Trash className="text-red-500" size={18} strokeWidth={2} />
-                          </button>
-                        </div>
+              
+                
+                  
+                    
+                      {row.type === "folder" ? (
+                        
+                      ) : (
+                        
                       )}
-                    </TableCell>
-                  </TableRow>
-                </TooltipTrigger>
-                <TooltipContent side="right" className="max-w-xs">
-                  {row.comment || <span className="italic text-gray-400">(No comment)</span>}
-                  <div className="mt-1 text-xs text-blue-500 cursor-pointer underline" onClick={() => handleRowDoubleClick(row)}>
-                    Double click to edit
-                  </div>
-                </TooltipContent>
-              </Tooltip>
+                      
+                        {row.name}
+                      
+                    
+                  
+                
+                  {row.type === "folder" ? "Folder" : "File"}
+                
+                  {row.createdAt || "-"}
+                
+                  {row.updatedAt || "-"}
+                
+                  {row.comment || "-"}
+                
+                  {/* Owner column (always "john.smith") */}
+                  john.smith
+                
+                  {row.parentFolder ? row.parentFolder : row.type === "folder" ? "" : "-"}
+                
+                  {row.type === "query" && (
+                    
+                      {/* Duplicate icon */}
+                      
+                        
+                          
+                            handleDuplicateFile(row.parentFolder, row.name);
+                          }}
+                        >
+                          
+                        
+                      
+                      {/* Trash icon */}
+                      
+                        
+                          
+                            setModalState({ open: true, fileName: row.name, parentFolder: row.parentFolder });
+                          }}
+                        >
+                          
+                        
+                      
+                    
+                  )}
+                
+              
             ))}
           </TableBody>
         </Table>
@@ -482,28 +450,9 @@ const WorksheetsPage: React.FC = () => {
           }
         }}
       />
-      <Dialog open={commentModal.open} onOpenChange={open => !open && setCommentModal({ open: false, rowKey: null, currentComment: "" })}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Comment</DialogTitle>
-            <DialogDescription>
-              Update the comment for this row.
-            </DialogDescription>
-          </DialogHeader>
-          <Input
-            value={commentModal.currentComment}
-            onChange={e => handleCommentChange(e.target.value)}
-            className="mb-4"
-            autoFocus
-          />
-          <DialogFooter>
-            <Button onClick={handleSaveComment}>Save</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+      
+    
   );
 };
 
 export default WorksheetsPage;
-
