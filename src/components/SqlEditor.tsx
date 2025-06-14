@@ -80,7 +80,9 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
           selected = state.doc.sliceString(from, to);
         }
       }
-      console.log("[SqlEditor] handleRunButton: selected:", selected ? selected : value);
+      // Log values to verify
+      console.log("[SqlEditor] Run button: selected:", selected, " full value:", value);
+      // Selected is string, so ok to call onRun directly
       onRun(selected || undefined);
     };
 

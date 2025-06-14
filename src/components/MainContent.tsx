@@ -1,3 +1,4 @@
+
 import React, { useCallback } from "react";
 import { useTabsState } from "@/hooks/useTabsState";
 import { useQueryApi } from "@/hooks/useQueryApi";
@@ -36,12 +37,14 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
     [activeTab, updateTab]
   );
 
+  // Fix: type selection as string | undefined
   const onRun = useCallback(
     (selection?: string) => {
       if (!activeTab) return;
-      // DEBUG: log the SQL and TabID
+      // Log value for clarity
       console.log("[MainContent] onRun called. selection:", selection, "activeTabId:", activeTab.id);
-      runSql(selection || activeTab.sql, activeTab.id);
+      // Use selection if provided, otherwise activeTab.sql
+      runSql(selection !== undefined ? selection : activeTab.sql, activeTab.id);
     },
     [activeTab, runSql]
   );
