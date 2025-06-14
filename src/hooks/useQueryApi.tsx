@@ -30,14 +30,16 @@ export function useQueryApi({ updateTab, DEFAULT_SQL }: {
       try {
         if (USE_MOCK_QUERY) {
           await new Promise((res) => setTimeout(res, 350));
-          // Add log for debugging
           const normalized = normalizeSql(sql);
           const expected = normalizeSql(DEFAULT_SQL);
           console.log("[useQueryApi] Normalized input:", normalized, "Expected:", expected);
           if (normalized === expected) {
-            updateTab(tabId, { result: MOCK_RESULT, error: null });
+            // COMBINE all relevant state in a single call!
+            updateTab(tabId, { result: MOCK_RESULT, error: null, isRunning: false });
             console.log("[useQueryApi] set MOCK_RESULT for", tabId);
           } else {
+            // Set error and reset, but isRunning: false as well
+            updateTab(tabId, { error: "Only the default mock query is supported: SELECT * FROM users LIMIT 10;", result: null, isRunning: false });
             throw new Error("Only the default mock query is supported: SELECT * FROM users LIMIT 10;");
           }
         } else {
@@ -51,19 +53,16 @@ export function useQueryApi({ updateTab, DEFAULT_SQL }: {
             throw new Error(errorData.error || "Unknown error occurred");
           }
           const data = await response.json();
-          updateTab(tabId, { result: data, error: null });
+          updateTab(tabId, { result: data, error: null, isRunning: false });
         }
       } catch (error: any) {
         console.error("Query failed!", error);
-        // Also clear previous results on error!
-        updateTab(tabId, { error: error.message, result: null });
+        // Error already set, just toast
         toast({
           title: "Query failed!",
           description: error.message,
           variant: "destructive",
         });
-      } finally {
-        updateTab(tabId, { isRunning: false });
       }
     },
     [updateTab, DEFAULT_SQL]
