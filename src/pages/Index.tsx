@@ -10,16 +10,14 @@ const Index: React.FC = () => {
 
   return (
     <div className="min-h-screen h-screen w-full flex flex-col bg-white">
-      {/* Top horizontal panel */}
+      {/* Top slim horizontal panel */}
       <div
         className="w-full bg-white flex items-center"
-        style={{ zIndex: 10, minHeight: "56px" }}
+        style={{ zIndex: 10, minHeight: "48px", borderBottom: "1px solid #ececec" }}
       >
-        <div className="px-0 py-0 w-full flex items-center justify-end">
-          {/* Account bar */}
+        <div className="w-full flex items-center justify-end px-4">
           <SidebarProvider>
             <div className="flex-1 flex items-center justify-end">
-              {/* Use the AccountSection component as before */}
               <div>
                 <div className="flex gap-2 flex-row items-center">
                   <span className="text-xs font-mono text-gray-700">john@example.com</span>
@@ -30,7 +28,7 @@ const Index: React.FC = () => {
           </SidebarProvider>
         </div>
       </div>
-      {/* Main content area: just MainContent (TabView now handles TableExplorer inside) */}
+      {/* Main content area */}
       <div className="flex-1 flex flex-row w-full min-h-0 h-full bg-white">
         <MainContent sqlEditorRef={sqlEditorRef} />
       </div>

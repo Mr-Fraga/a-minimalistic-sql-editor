@@ -38,16 +38,46 @@ const TabView: React.FC<TabViewProps> = ({
 }) => {
   const [resultsHeight, setResultsHeight] = useState(DEFAULT_RESULTS_HEIGHT);
 
-  // State for explorer width on the left (you can make this adjustable in the future)
+  // State for explorer width on the right (sidebar)
   const [explorerOpen, setExplorerOpen] = useState(true);
 
   return (
-    // Main flex row: TableExplorer (left) | SQL panel (right)
+    // Main flex row: SQL panel (left) | TableExplorer (right)
     <div className="w-full flex-1 flex flex-row min-h-0 h-full bg-white">
-      {/* TableExplorer side-bar (left) */}
+      {/* Main SQL/Results vertical layout */}
+      <div className="flex-1 flex flex-col min-h-0 h-full">
+        {/* SQL Editor Section */}
+        <div
+          style={{
+            flex: "1 1 0%",
+            minHeight: 0,
+            height: `calc(100% - ${resultsHeight}px)`,
+            display: "flex",
+            flexDirection: "column",
+            background: "#fff",
+          }}
+        >
+          <TabSqlEditorSection
+            tab={tab}
+            sqlEditorRef={sqlEditorRef}
+            onSqlChange={onSqlChange}
+            onFormat={onFormat}
+            onRun={onRun}
+            onRunAll={onRunAll}
+          />
+        </div>
+        {/* Results Section */}
+        <TabResultsSection
+          tab={tab}
+          resultsHeight={resultsHeight}
+          setResultsHeight={setResultsHeight}
+          onDownloadCsv={onDownloadCsv}
+        />
+      </div>
+      {/* TableExplorer sidebar (right) */}
       {explorerOpen && (
         <div
-          className="h-full bg-white border-r flex flex-col"
+          className="h-full bg-white border-l flex flex-col"
           style={{
             minWidth: 240,
             maxWidth: 340,
@@ -56,7 +86,6 @@ const TabView: React.FC<TabViewProps> = ({
             paddingTop: 0,
           }}
         >
-          {/* TableExplorer: remove outer vertical padding/margin so it's flush with SQL section */}
           <TableExplorer
             onInsertSchemaTable={(schema, table) => {
               sqlEditorRef.current?.insertAtCursor(`${schema}.${table}`);
@@ -71,35 +100,6 @@ const TabView: React.FC<TabViewProps> = ({
           />
         </div>
       )}
-      {/* Main SQL/Results vertical layout */}
-      <div className="flex-1 flex flex-col min-h-0 h-full">
-        {/* SQL Editor Section */}
-        <div style={{
-          flex: "1 1 0%",
-          minHeight: 0,
-          height: `calc(100% - ${resultsHeight}px)`,
-          display: "flex",
-          flexDirection: "column",
-          background: "#fff",
-        }}>
-          <TabSqlEditorSection
-            tab={tab}
-            sqlEditorRef={sqlEditorRef}
-            onSqlChange={onSqlChange}
-            onFormat={onFormat}
-            onRun={onRun}
-            onRunAll={onRunAll}
-            // pass an optional prop if you want to custom-style the editor for padding, etc.
-          />
-        </div>
-        {/* Results Section */}
-        <TabResultsSection
-          tab={tab}
-          resultsHeight={resultsHeight}
-          setResultsHeight={setResultsHeight}
-          onDownloadCsv={onDownloadCsv}
-        />
-      </div>
     </div>
   );
 };

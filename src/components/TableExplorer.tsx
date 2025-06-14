@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from "react";
 import {
   Collapsible,
@@ -236,16 +237,20 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
   // Remove vertical margin and start with flush title for better alignment in TabView
   return (
     <div
-      className="h-full border-r bg-white min-w-[220px] flex flex-col"
-      style={{ marginTop: 0, paddingTop: 0, ...style }}
+      className="h-full border-l bg-white min-w-[220px] flex flex-col"
+      style={{
+        marginTop: 0,
+        paddingTop: "8px",
+        ...style
+      }}
     >
-      <h2 className="font-din font-bold text-base text-gray-800 mb-2 ml-4" style={{ letterSpacing: "0.04em" }}>
+      <h2 className="font-din font-bold text-base text-gray-800 mb-2 ml-4" style={{ letterSpacing: "0.04em", textTransform: "none" }}>
         Explorer
       </h2>
       <div className="mb-4 px-2">
-        <Input
+        <input
           placeholder="Search tables..."
-          className="h-8 text-sm px-2"
+          className="h-8 text-sm px-2 border rounded w-full"
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
