@@ -36,23 +36,27 @@ const TabView: React.FC<TabViewProps> = ({
 }) => {
   const [resultsHeight, setResultsHeight] = useState(DEFAULT_RESULTS_HEIGHT);
 
+  // Layout: vertical flex, always with results section at bottom, both panels flex/overflow/height set properly!
   return (
     <div className="w-full flex-1 flex flex-col min-h-0 h-full">
       {/* SQL Editor Section */}
-      <TabSqlEditorSection
-        tab={tab}
-        sqlEditorRef={sqlEditorRef}
-        onSqlChange={onSqlChange}
-        onFormat={onFormat}
-        onRun={onRun}
-        onRunAll={onRunAll}
-        style={{
-          flex: "1 1 0%",
-          height: `calc(100% - ${resultsHeight}px)`,
-        }}
-      />
-
-      {/* Results Section */}
+      <div style={{
+        flex: "1 1 0%",
+        minHeight: 0,
+        height: `calc(100% - ${resultsHeight}px)`,
+        display: "flex",
+        flexDirection: "column",
+      }}>
+        <TabSqlEditorSection
+          tab={tab}
+          sqlEditorRef={sqlEditorRef}
+          onSqlChange={onSqlChange}
+          onFormat={onFormat}
+          onRun={onRun}
+          onRunAll={onRunAll}
+        />
+      </div>
+      {/* Results Section ALWAYS RENDERED */}
       <TabResultsSection
         tab={tab}
         resultsHeight={resultsHeight}
@@ -64,5 +68,3 @@ const TabView: React.FC<TabViewProps> = ({
 };
 
 export default TabView;
-
-// Consider refactoring this further if it grows again in size.

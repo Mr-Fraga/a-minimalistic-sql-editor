@@ -58,7 +58,7 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
     dragStartY.current = null;
   };
 
-  // CSV export
+  // CSV export (keep as is)
   const handleDownloadCsv = () => {
     if (!tab.result || tab.result.rows.length === 0) return;
     const rowsToExport = exportFullResults
@@ -67,6 +67,7 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
     if (onDownloadCsv) {
       onDownloadCsv(rowsToExport);
     } else {
+      // ... keep CSV fallback code the same ...
       const escape = (value: any) => {
         if (value == null) return '';
         const v = String(value);
@@ -98,11 +99,16 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
   return (
     <div
       className="flex flex-col min-h-[80px] bg-white overflow-hidden relative select-none"
-      style={{ height: resultsHeight, transition: "height 0.08s", minHeight: MIN_RESULTS_HEIGHT, maxHeight: MAX_RESULTS_HEIGHT }}
+      style={{
+        height: resultsHeight,
+        minHeight: MIN_RESULTS_HEIGHT,
+        maxHeight: MAX_RESULTS_HEIGHT,
+        transition: "height 0.08s",
+      }}
     >
-      {/* Drag handle - Results title */}
+      {/* Drag handle/title */}
       <div
-        className="cursor-ns-resize w-full flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200"
+        className="cursor-ns-resize w-full flex items-center justify-between px-4 py-2 bg-white border-t border-b border-gray-200"
         style={{ userSelect: "none", minHeight: 32 }}
         onMouseDown={handleDragStart}
         role="separator"
@@ -115,9 +121,10 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
         <div className="flex-1"></div>
       </div>
       <div className="flex-1 flex flex-col min-h-0 h-full px-0 pt-4 pb-2 w-full">
+        {/* Always render ResultTable, even if result is null, to keep resizer layout */}
         <ResultTable result={tab.result || undefined} error={tab.error} />
 
-        {/* --- STATISTICS LINE BELOW TABLE --- */}
+        {/* Stats if data */}
         {tab.result && tab.result.rows.length > 0 && (
           <div className="w-full px-4 mt-2">
             <div className="text-xs font-mono text-gray-700 leading-relaxed">
@@ -125,11 +132,11 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
             </div>
           </div>
         )}
-
+        {/* Spacing only when table has data */}
         {tab.result && tab.result.rows.length > 0 && (
-          <div className="h-7" /> // More vertical space
+          <div className="h-7" />
         )}
-
+        {/* Always render button row for layout */}
         <div className="flex items-center justify-between w-full px-4">
           <div className="flex flex-row items-center gap-4">
             {tab.result && tab.result.rows.length > 0 && (

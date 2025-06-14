@@ -61,7 +61,7 @@ const Index: React.FC = () => {
   const sqlEditorRef = useRef<SqlEditorImperativeHandle | null>(null);
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-white">
+    <div className="min-h-screen h-screen w-full flex flex-col bg-white">
       {/* Top horizontal panel */}
       <div className="w-full bg-white shadow-sm flex items-center" style={{ zIndex: 10, minHeight: "56px" }}>
         <div className="px-0 py-0 w-full flex items-center justify-end">
@@ -69,7 +69,7 @@ const Index: React.FC = () => {
         </div>
       </div>
       {/* Main content area */}
-      <div className="flex-1 w-full flex flex-row gap-0 bg-white min-h-0 h-full">
+      <div className="flex-1 flex flex-row w-full min-h-0 h-full bg-white">
         {/* Sidebar with TableExplorer, passing callbacks */}
         <div className="h-full flex flex-col min-h-0">
           <TableExplorer
