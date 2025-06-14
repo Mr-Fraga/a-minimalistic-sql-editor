@@ -1,4 +1,3 @@
-
 import { useCallback, useMemo, useState } from "react";
 
 // Removed useLocalStorage import
@@ -12,7 +11,8 @@ export type TabType = {
   isRunning: boolean;
 };
 
-const DEFAULT_SQL = `SELECT * FROM users LIMIT 10;`;
+-const DEFAULT_SQL = `SELECT * FROM users LIMIT 10;`;
+const DEFAULT_SQL = ``;
 const DEFAULT_TAB: Omit<TabType, "id"> = {
   name: "New Tab",
   sql: DEFAULT_SQL,
