@@ -1,59 +1,25 @@
+
 import React, { useRef, useImperativeHandle, forwardRef } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { sql } from "@codemirror/lang-sql";
-import { linter, lintGutter } from "@codemirror/lint";
 import { toast } from "@/hooks/use-toast";
-import { Copy, Play, Settings2, Glasses } from "lucide-react";
+import { Play } from "lucide-react";
+import SqlEditorToolbar from "./sql/SqlEditorToolbar";
+import { simpleSqlFormat } from "./sql/SqlFormatter";
+import { useSqlLint } from "./sql/useSqlLint";
 
 interface SqlEditorProps {
   value: string;
   onChange: (sql: string) => void;
   onFormat: () => void;
   onRun: (statement?: string) => void;
-  onRunAll: () => void; // New: run all SQL statements
+  onRunAll: () => void;
   isRunning?: boolean;
 }
-
-const sqlLint = () =>
-  linter((view) => {
-    const text = view.state.doc.toString();
-    if (!text.trim().endsWith(";")) {
-      return [
-        {
-          from: text.length,
-          to: text.length,
-          message: "Statement should end with a semicolon",
-          severity: "warning",
-        },
-      ];
-    }
-    return [];
-  });
 
 export interface SqlEditorImperativeHandle {
   insertAtCursor: (toInsert: string) => void;
   getSelection: () => string;
-}
-
-function simpleSqlFormat(sql: string): string {
-  // Very simple formatter (for example only, not for production)
-  // Ensures uppercasing keywords and prettifies main clauses; users likely want something basic
-  if (!sql) return "";
-  // Basic SQL keywords
-  const keywords = ["select", "from", "where", "order by", "group by", "limit", "insert", "update", "delete", "values", "set"];
-  let formatted = sql;
-  keywords.forEach(kw => {
-    const regex = new RegExp(`\\b${kw}\\b`, "gi");
-    formatted = formatted.replace(regex, kw.toUpperCase());
-  });
-  // Add newlines before keywords except SELECT
-  formatted = formatted.replace(/\b(FROM|WHERE|ORDER BY|GROUP BY|LIMIT|INSERT|UPDATE|DELETE|VALUES|SET)\b/g, "\n$1");
-  // Remove multiple newlines
-  formatted = formatted.replace(/\n{2,}/g, "\n");
-  // Ensure trailing semicolon
-  formatted = formatted.trim();
-  if (!formatted.endsWith(";")) formatted += ";";
-  return formatted;
 }
 
 const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<SqlEditorProps>>(
@@ -69,7 +35,7 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
           const { from, to } = state.selection.main;
           view.dispatch({
             changes: { from, to, insert: toInsert },
-            selection: { anchor: from + toInsert.length }
+            selection: { anchor: from + toInsert.length },
           });
           view.focus();
         }
@@ -84,8 +50,10 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
           return state.doc.sliceString(from, to);
         }
         return "";
-      }
+      },
     }));
+
+    const sqlLint = useSqlLint();
 
     const handleCopy = async () => {
       try {
@@ -102,7 +70,6 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
       }
     };
 
-    // Play button: only run selected, not all
     const handleRunButton = () => {
       let selected = "";
       if (editorRef.current && typeof editorRef.current.view === "object") {
@@ -113,13 +80,10 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
           selected = state.doc.sliceString(from, to);
         }
       }
-      // LOG WHAT IS BEING SENT TO onRun
       console.log("[SqlEditor] handleRunButton: selected:", selected ? selected : value);
-      // Only run selected statement (or statement at cursor)
       onRun(selected || undefined);
     };
 
-    // "Double play": run ALL sql statements one-after-another
     const handleRunAllButton = () => {
       onRunAll();
     };
@@ -130,9 +94,8 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
         editorRef.current.view &&
         typeof editorRef.current.view.dispatch === "function"
       ) {
-        // Use codemirror search extension
         const { view } = editorRef.current;
-        import("@codemirror/search").then(mod => {
+        import("@codemirror/search").then((mod) => {
           if (mod && typeof mod.openSearchPanel === "function") {
             mod.openSearchPanel(view);
           }
@@ -141,7 +104,6 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
     };
 
     const handleFormatClick = () => {
-      // Use a client-side formatter
       const formattedSql = simpleSqlFormat(value || "");
       onChange(formattedSql);
       toast({
@@ -152,54 +114,17 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
 
     return (
       <div className="w-full">
-        {/* SQL Editor Title */}
         <h3 className="font-din font-bold text-base text-gray-800 mb-2 ml-4" style={{ letterSpacing: "0.04em" }}>
           SQL Editor
         </h3>
 
         <div className="rounded-md overflow-hidden border border-gray-200 shadow-sm bg-white relative">
-          {/* Copy button */}
-          <button
-            type="button"
-            className="absolute top-2 right-2 z-10 bg-white/90 rounded-md px-2 py-1 border border-gray-300 text-xs font-mono hover:bg-gray-50 flex items-center gap-1 shadow transition"
-            onClick={handleCopy}
-            tabIndex={-1}
-            title="Copy SQL to clipboard"
-            aria-label="Copy SQL to clipboard"
-            disabled={isRunning}
-          >
-            <Copy size={14} className="inline-block" />
-            Copy
-          </button>
-          {/* Format button */}
-          <button
-            className="absolute top-11 right-2 z-10 bg-white/90 rounded-md px-2 py-1 border border-gray-300 text-xs font-mono hover:bg-gray-50 flex items-center gap-1 shadow transition"
-            onClick={handleFormatClick}
-            tabIndex={-1}
-            title="Format SQL"
-            aria-label="Format SQL"
-            disabled={isRunning}
-            style={{ marginTop: 2 }}
-            type="button"
-          >
-            <Settings2 size={14} className="inline-block" />
-            Format
-          </button>
-          {/* Search button, below Format */}
-          <button
-            className="absolute top-20 right-2 z-10 bg-white/90 rounded-md px-2 py-1 border border-gray-300 text-xs font-mono hover:bg-gray-50 flex items-center gap-1 shadow transition"
-            onClick={handleSearchButton}
-            tabIndex={-1}
-            title="search"
-            aria-label="Search"
-            disabled={isRunning}
-            style={{ marginTop: 2 }}
-            type="button"
-          >
-            <Glasses size={14} className="inline-block" />
-            Search
-          </button>
-          {/* Resizable vertical textbox */}
+          <SqlEditorToolbar
+            onCopy={handleCopy}
+            onFormat={handleFormatClick}
+            onSearch={handleSearchButton}
+            isRunning={isRunning}
+          />
           <div
             className="resize-y overflow-auto min-h-[300px] max-h-[700px]"
             style={{ minHeight: 300, maxHeight: 700 }}
@@ -210,8 +135,8 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
               height="100%"
               extensions={[
                 sql(),
-                sqlLint(),
-                lintGutter(),
+                sqlLint,
+                // Do not duplicate lintGutter here—it's enabled in CodeMirror defaults and via lint extension
               ]}
               theme="light"
               onChange={(v) => onChange(v)}
@@ -219,16 +144,14 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
                 lineNumbers: true,
                 highlightActiveLine: true,
                 autocompletion: true,
-                foldGutter: true
+                foldGutter: true,
               }}
               editable={!isRunning}
               ref={editorRef}
             />
           </div>
         </div>
-        {/* Buttons below the resizable box */}
         <div className="flex gap-2 mt-2">
-          {/* Play (runs only selection or current) */}
           <button
             className="rounded-md px-4 py-1 bg-black text-white text-sm font-mono hover:bg-gray-900 transition flex items-center"
             onClick={handleRunButton}
@@ -239,7 +162,6 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
           >
             <Play size={16} />
           </button>
-          {/* Double play (run ALL statements) */}
           <button
             className="rounded-md px-4 py-1 bg-zinc-800 text-white text-sm font-mono hover:bg-zinc-900 transition flex items-center"
             onClick={handleRunAllButton}
@@ -256,5 +178,4 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
     );
   }
 );
-
 export default SqlEditor;
