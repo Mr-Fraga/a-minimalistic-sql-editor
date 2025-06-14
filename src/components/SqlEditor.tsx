@@ -3,7 +3,7 @@ import CodeMirror from "@uiw/react-codemirror";
 import { sql } from "@codemirror/lang-sql";
 import { linter, lintGutter } from "@codemirror/lint";
 import { toast } from "@/hooks/use-toast";
-import { Copy, Play, Format } from "lucide-react";
+import { Copy, Play, Settings2 } from "lucide-react";
 
 interface SqlEditorProps {
   value: string;
@@ -95,7 +95,7 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
             style={{marginTop: 2}}
             type="button"
           >
-            <Format size={14} className="inline-block" />
+            <Settings2 size={14} className="inline-block" />
           </button>
           {/* Resizable vertical textbox */}
           <div
