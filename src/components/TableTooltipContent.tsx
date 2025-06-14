@@ -1,5 +1,9 @@
-
 import React from "react";
+
+function isSensitiveTable(tableName: string): boolean {
+  const name = tableName.toLowerCase();
+  return name.includes("user") || name.includes("employee");
+}
 
 interface TableColumnHandlerProps {
   columns: string[];
@@ -54,8 +58,18 @@ const TableTooltipContent: React.FC<TableTooltipContentProps> = ({
       <span className="block text-xs text-gray-600 font-semibold mb-0.5">
         Owner:
       </span>
-      <span className="block text-xs text-gray-800 mb-2">
+      <span className="block text-xs text-gray-800 mb-1">
         {table.owner || "Unknown"}
+      </span>
+      {/* New metadata: Sensitive Data */}
+      <span className="block text-xs text-gray-600 font-semibold mb-0.5">
+        Sensitive Data:
+      </span>
+      <span
+        className={`inline-block text-xs font-semibold mb-2 transition
+          ${isSensitiveTable(table.name) ? "text-rose-600" : "text-green-700"}`}
+      >
+        {isSensitiveTable(table.name) ? "Yes" : "No"}
       </span>
     </div>
     <div className="text-xs text-gray-600 mb-1">Columns:</div>

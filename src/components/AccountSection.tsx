@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import {
   Tooltip,
@@ -43,11 +42,6 @@ const AccountSection: React.FC<AccountSectionProps> = ({
   const roleIconRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Get details for current role
-  const currentRoleObj =
-    ROLES.find((r) => r.key === currentRole) ?? ROLES[0];
-
-  // Handle outside click for dropdown
   React.useEffect(() => {
     if (!roleOpen) return;
     function onClick(e: MouseEvent) {
@@ -64,11 +58,15 @@ const AccountSection: React.FC<AccountSectionProps> = ({
     return () => window.removeEventListener("mousedown", onClick);
   }, [roleOpen]);
 
+  // Get details for current role
+  const currentRoleObj =
+    ROLES.find((r) => r.key === currentRole) ?? ROLES[0];
+
   // Tooltip state for account
   const [accountTooltipOpen, setAccountTooltipOpen] = React.useState(false);
 
   return (
-    <div className="flex items-center gap-4 bg-black text-white px-6 py-3 rounded-t-lg shadow-sm select-none relative">
+    <div className="flex items-center gap-4 bg-white text-black px-6 py-3 rounded-t-lg shadow-sm select-none relative">
       {/* Role Icon with tooltip and dropdown */}
       <TooltipProvider>
         <Tooltip delayDuration={200}>
@@ -80,7 +78,11 @@ const AccountSection: React.FC<AccountSectionProps> = ({
               onClick={() => setRoleOpen((o) => !o)}
               aria-label="Role"
             >
-              <currentRoleObj.Icon className="w-7 h-7 text-white" />
+              <div
+                className="w-9 h-9 rounded-full bg-white border border-black flex items-center justify-center"
+              >
+                <currentRoleObj.Icon className="w-6 h-6 text-black" />
+              </div>
             </div>
           </TooltipTrigger>
           <TooltipContent
@@ -131,7 +133,9 @@ const AccountSection: React.FC<AccountSectionProps> = ({
               onFocus={() => setAccountTooltipOpen(true)}
               onBlur={() => setAccountTooltipOpen(false)}
             >
-              <User className="w-7 h-7 text-white" />
+              <div className="w-9 h-9 rounded-full bg-white border border-black flex items-center justify-center">
+                <User className="w-6 h-6 text-black" />
+              </div>
             </div>
           </TooltipTrigger>
           <TooltipContent
