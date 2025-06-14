@@ -373,8 +373,8 @@ const PageContent: React.FC<PageContentProps> = ({ sqlEditorRef }) => {
         {/* Settings button has been removed */}
       </div>
 
-      {/* Tab View with horizontal padding */}
-      <div className="flex-1 flex flex-col px-6 md:px-8">
+      {/* Tab View with horizontal padding and top margin */}
+      <div className="flex-1 flex flex-col px-6 md:px-8 mt-4">
         {activeTab ? (
           <TabView
             tab={activeTab}
