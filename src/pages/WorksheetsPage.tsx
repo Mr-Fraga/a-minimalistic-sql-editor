@@ -10,46 +10,52 @@ import {
 import { Folder, File, Trash, Copy } from "lucide-react";
 import DeleteFileModal from "@/components/DeleteFileModal";
 
-// Mock folders/files data with dates
+// Updated worksheet mock data with only .sql files and accurate types
 const worksheetData = [
   {
     type: "folder",
-    name: "Finance Reports",
-    createdAt: "2024-01-10",
-    updatedAt: "2024-06-11",
+    name: "Finance",
+    createdAt: "2024-01-03",
+    updatedAt: "2024-06-10",
     files: [
       {
         type: "query",
-        name: "q1_profit_report.sql",
-        createdAt: "2024-02-01",
-        updatedAt: "2024-03-20",
+        name: "income_statement_2024.sql",
+        createdAt: "2024-01-12",
+        updatedAt: "2024-02-22",
       },
       {
         type: "query",
-        name: "monthly_expense_summary.sql",
-        createdAt: "2024-04-02",
-        updatedAt: "2024-04-30",
+        name: "accounts_payable_audit.sql",
+        createdAt: "2024-03-01",
+        updatedAt: "2024-05-08",
+      },
+      {
+        type: "query",
+        name: "cash_flow_monthly.sql",
+        createdAt: "2024-03-11",
+        updatedAt: "2024-06-01",
       },
     ],
   },
   {
     type: "folder",
     name: "HR",
-    createdAt: "2024-02-01",
-    updatedAt: "2024-05-21",
+    createdAt: "2024-02-15",
+    updatedAt: "2024-05-16",
     files: [
       {
         type: "query",
-        name: "employee_directory_query.sql",
-        createdAt: "2024-05-10",
-        updatedAt: "2024-05-28",
+        name: "employee_hires.sql",
+        createdAt: "2024-04-15",
+        updatedAt: "2024-05-15",
       },
     ],
   },
   {
     type: "query",
-    name: "annual_roadmap.sql",
-    createdAt: "2024-03-15",
+    name: "project_status_update.sql",
+    createdAt: "2024-04-14",
     updatedAt: "2024-06-13",
   },
 ];
@@ -57,42 +63,48 @@ const worksheetData = [
 const initialWorksheetData = [
   {
     type: "folder",
-    name: "Finance Reports",
-    createdAt: "2024-01-10",
-    updatedAt: "2024-06-11",
+    name: "Finance",
+    createdAt: "2024-01-03",
+    updatedAt: "2024-06-10",
     files: [
       {
         type: "query",
-        name: "q1_profit_report.sql",
-        createdAt: "2024-02-01",
-        updatedAt: "2024-03-20",
+        name: "income_statement_2024.sql",
+        createdAt: "2024-01-12",
+        updatedAt: "2024-02-22",
       },
       {
         type: "query",
-        name: "monthly_expense_summary.sql",
-        createdAt: "2024-04-02",
-        updatedAt: "2024-04-30",
+        name: "accounts_payable_audit.sql",
+        createdAt: "2024-03-01",
+        updatedAt: "2024-05-08",
+      },
+      {
+        type: "query",
+        name: "cash_flow_monthly.sql",
+        createdAt: "2024-03-11",
+        updatedAt: "2024-06-01",
       },
     ],
   },
   {
     type: "folder",
     name: "HR",
-    createdAt: "2024-02-01",
-    updatedAt: "2024-05-21",
+    createdAt: "2024-02-15",
+    updatedAt: "2024-05-16",
     files: [
       {
         type: "query",
-        name: "employee_directory_query.sql",
-        createdAt: "2024-05-10",
-        updatedAt: "2024-05-28",
+        name: "employee_hires.sql",
+        createdAt: "2024-04-15",
+        updatedAt: "2024-05-15",
       },
     ],
   },
   {
     type: "query",
-    name: "annual_roadmap.sql",
-    createdAt: "2024-03-15",
+    name: "project_status_update.sql",
+    createdAt: "2024-04-14",
     updatedAt: "2024-06-13",
   },
 ];
@@ -184,21 +196,18 @@ const WorksheetsPage: React.FC = () => {
         const copyPattern = /\s?\(copy(?: (\d+))?\)$/i;
         const rawBase =
           baseName.replace(copyPattern, "") || baseName;
-        let copyName = `${rawBase} (copy)`;
+        let copyName = `${rawBase} (copy).sql`;
         let i = 1;
-        // Ensure unique
         while (existingNames.includes(copyName)) {
-          copyName = `${rawBase} (copy ${++i})`;
+          copyName = `${rawBase} (copy ${++i}).sql`;
         }
         return copyName;
       }
 
-      // Helper to deep clone a file
       function cloneFileEntry(file: any, name: string) {
         return {
           ...file,
           name,
-          // Optionally: updatedAt can be updated to now or left as original
           updatedAt: new Date().toISOString().split("T")[0],
           createdAt: new Date().toISOString().split("T")[0],
         };
@@ -210,9 +219,7 @@ const WorksheetsPage: React.FC = () => {
         const fileToCopy = rootFiles.find((f) => f.name === fileName);
         if (!fileToCopy) return prev;
         const allNames = rootFiles.map((f) => f.name);
-        const newName = createCopyName(allNames, fileToCopy.name);
-
-        // Insert copy after original
+        const newName = createCopyName(allNames, fileToCopy.name.replace(/\.sql$/, ""));
         const idx = prev.findIndex((item) => item.type === "query" && item.name === fileName);
         const clone = cloneFileEntry(fileToCopy, newName);
         const newArr = [...prev];
@@ -222,13 +229,11 @@ const WorksheetsPage: React.FC = () => {
         // file is within a folder
         return prev.map((item) => {
           if (item.type !== "folder" || item.name !== parentFolder) return item;
-          // Find file in folder
           const fileToCopy = item.files.find((f: any) => f.name === fileName);
           if (!fileToCopy) return item;
           const existingNames = item.files.map((f: any) => f.name);
-          const newName = createCopyName(existingNames, fileToCopy.name);
+          const newName = createCopyName(existingNames, fileToCopy.name.replace(/\.sql$/, ""));
           const clone = cloneFileEntry(fileToCopy, newName);
-          // Insert copy after original
           const fileIdx = item.files.findIndex((f: any) => f.name === fileName);
           const newFiles = [...item.files];
           newFiles.splice(fileIdx + 1, 0, clone);
@@ -251,7 +256,6 @@ const WorksheetsPage: React.FC = () => {
       // For files inside folders
       return prev.map(item => {
         if (item.type !== "folder" || item.name !== parentFolder) return item;
-
         return {
           ...item,
           files: item.files.filter((f: any) => f.name !== fileName),
