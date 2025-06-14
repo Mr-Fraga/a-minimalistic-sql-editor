@@ -115,7 +115,7 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
         {/* Buttons below the resizable box */}
         <div className="flex gap-2 mt-2">
           <button
-            className="rounded px-4 py-1 bg-black text-white text-sm font-mono hover:bg-gray-900 transition"
+            className="rounded-lg px-4 py-1 bg-black text-white text-sm font-mono hover:bg-gray-900 transition"
             onClick={onRun}
             disabled={isRunning}
             type="button"
@@ -123,7 +123,7 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
             {isRunning ? "Running..." : "Run"}
           </button>
           <button
-            className="rounded px-4 py-1 bg-gray-900 text-white text-sm font-mono hover:bg-black/80 transition"
+            className="rounded-lg px-4 py-1 bg-gray-900 text-white text-sm font-mono hover:bg-black/80 transition"
             onClick={onFormat}
             disabled={isRunning}
             type="button"
