@@ -1,4 +1,10 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, {
+  useState,
+  useRef,
+  useCallback,
+  useEffect, // <-- ADD USE EFFECT
+} from "react";
+// Remove useDebounce, useLocalStorage, and react-hotkeys-hook imports
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
@@ -20,26 +26,52 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { Copy, Plus, Settings, ChevronDown } from "lucide-react";
-import { useDebounce } from "@/hooks/use-debounce";
-import { useLocalStorage } from "@/hooks/use-local-storage";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableFooter,
-  TableHead,
-  TableRow,
-  TableCell,
-} from "@/components/ui/table";
-import { useHotkeys } from "react-hotkeys-hook";
 
-import Sidebar from "@/components/Sidebar";
+// Remove these lines:
+// import { useDebounce } from "@/hooks/use-debounce";
+// import { useLocalStorage } from "@/hooks/use-local-storage";
+// import { useHotkeys } from "react-hotkeys-hook";
+// import Sidebar from "@/components/Sidebar";
+import {
+  Sidebar,
+} from "@/components/ui/sidebar"; // use shadcn/ui sidebar
+
 import TabView from "@/components/TabView";
 import AccountSection from "@/components/AccountSection";
 import { SqlEditorImperativeHandle } from "@/components/SqlEditor";
 import TableTooltipContent from "@/components/TableTooltipContent";
 
-const DEFAULT_SQL = `SELECT * FROM users LIMIT 10;`;
+// Add simple local implementations for useLocalStorage and useDebounce
+
+function useLocalStorage<T>(key: string, initialValue: T): [T, (val: T) => void] {
+  const [value, setValue] = useState<T>(() => {
+    if (typeof window === "undefined") return initialValue;
+    try {
+      const item = window.localStorage.getItem(key);
+      return item ? JSON.parse(item) : initialValue;
+    } catch {
+      return initialValue;
+    }
+  });
+  const setStoredValue = (val: T) => {
+    setValue(val);
+    try {
+      window.localStorage.setItem(key, JSON.stringify(val));
+    } catch {}
+  };
+  return [value, setStoredValue];
+}
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebounced(value);
+    }, delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debounced;
+}
 
 const Index: React.FC = () => {
   return (
@@ -292,25 +324,11 @@ const PageContent: React.FC = () => {
 
   // ========================= Hotkeys =========================
 
-  useHotkeys("ctrl+k, command+k", (e) => {
-    e.preventDefault();
-    setIsSettingsOpen((o) => !o);
-  });
-
-  useHotkeys("ctrl+enter, command+enter", (e) => {
-    e.preventDefault();
-    onRun();
-  });
-
-  useHotkeys("ctrl+shift+enter, command+shift+enter", (e) => {
-    e.preventDefault();
-    onRunAll();
-  });
-
-  useHotkeys("ctrl+alt+f, command+alt+f", (e) => {
-    e.preventDefault();
-    onFormat();
-  });
+  // REMOVE below: hotkey hooks since react-hotkeys-hook doesn't exist
+  // useHotkeys("ctrl+k, command+k", (e) => { ... });
+  // useHotkeys("ctrl+enter, command+enter", (e) => { ... });
+  // useHotkeys("ctrl+shift+enter, command+shift+enter", (e) => { ... });
+  // useHotkeys("ctrl+alt+f, command+alt+f", (e) => { ... });
 
   // ========================= Render =========================
 
