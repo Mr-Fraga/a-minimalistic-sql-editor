@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Tooltip,
@@ -43,32 +42,65 @@ const AccountSection: React.FC<AccountSectionProps> = ({
 }) => {
   // Local role state for demonstration (since there's no backend)
   const [role, setRole] = React.useState(initialRole);
-  // Tooltip state for account info
+  // Tooltip state for account info (supports keyboard focus)
   const [accountTooltipOpen, setAccountTooltipOpen] = React.useState(false);
-  // Dropdown state for role selection (open on hover)
+  // Dropdown state for role selection (open on click/focus)
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
 
   // Find role label
   const roleLabel =
     ROLES.find((r) => r.key === role)?.label ?? ROLES[0].label;
 
-  // On hover/focus, open dropdown menu
+  // Open/close on click or keyboard interaction
   const handleDropdownOpenChange = (open: boolean) => setDropdownOpen(open);
+
+  // Only open tooltip if dropdown is closed
+  const handleTooltipOpenChange = (open: boolean) => {
+    if (!dropdownOpen) setAccountTooltipOpen(open);
+  };
+
+  // Handle click to toggle dropdown and tooltip
+  const handleAvatarClick = (e: React.MouseEvent | React.KeyboardEvent) => {
+    if (!dropdownOpen) {
+      setDropdownOpen(true);
+      setAccountTooltipOpen(true);
+    } else {
+      setDropdownOpen(false);
+      setAccountTooltipOpen(false);
+    }
+  };
+
+  // Support keyboard activation (enter/space)
+  const handleAvatarKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === " " || e.key === "Enter") {
+      e.preventDefault();
+      handleAvatarClick(e);
+    }
+  };
+
+  // Close both on blur (e.g. tabbing away), while keeping dropdown/tooltip synced
+  const handleAvatarBlur = () => {
+    setDropdownOpen(false);
+    setAccountTooltipOpen(false);
+  };
 
   return (
     <div className="flex items-center gap-4 bg-white text-black px-6 py-5 rounded-t-none shadow-none select-none relative">
       <TooltipProvider>
         <DropdownMenu open={dropdownOpen} onOpenChange={handleDropdownOpenChange}>
-          <Tooltip open={accountTooltipOpen && !dropdownOpen} onOpenChange={setAccountTooltipOpen} delayDuration={200}>
+          <Tooltip
+            open={accountTooltipOpen && !dropdownOpen}
+            onOpenChange={handleTooltipOpenChange}
+            delayDuration={200}
+          >
             <DropdownMenuTrigger asChild>
               <div
                 className="flex items-center justify-center cursor-pointer"
                 tabIndex={0}
                 aria-label="View account details"
-                onMouseEnter={() => { setAccountTooltipOpen(true); setDropdownOpen(true); }}
-                onMouseLeave={() => { setAccountTooltipOpen(false); setDropdownOpen(false); }}
-                onFocus={() => { setAccountTooltipOpen(true); setDropdownOpen(true); }}
-                onBlur={() => { setAccountTooltipOpen(false); setDropdownOpen(false); }}
+                onClick={handleAvatarClick}
+                onKeyDown={handleAvatarKeyDown}
+                onBlur={handleAvatarBlur}
               >
                 <Avatar className="h-12 w-12 border-2 border-black shadow bg-white">
                   <AvatarFallback className="bg-white text-black font-bold text-xl flex items-center justify-center">
@@ -103,7 +135,9 @@ const AccountSection: React.FC<AccountSectionProps> = ({
               <DropdownMenuItem
                 key={r.key}
                 onSelect={() => setRole(r.key)}
-                className={`py-2 px-3 text-sm cursor-pointer ${role === r.key ? "bg-gray-100 font-bold" : ""}`}
+                className={`py-2 px-3 text-sm cursor-pointer ${
+                  role === r.key ? "bg-gray-100 font-bold" : ""
+                }`}
                 aria-checked={role === r.key}
                 role="menuitemradio"
               >
@@ -118,4 +152,3 @@ const AccountSection: React.FC<AccountSectionProps> = ({
 };
 
 export default AccountSection;
-
