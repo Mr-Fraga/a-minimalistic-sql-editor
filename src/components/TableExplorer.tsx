@@ -245,14 +245,15 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
       }}
     >
       {/* Title uses 'Explorer' in sentence case, styled for tab view consistency */}
-      <h2 className="font-din font-bold text-base text-gray-800 mb-2 ml-4" style={{ letterSpacing: "0.04em", textTransform: "none" }}>
+      {/* Match font with SQL Editor (remove font-mono if SQL Editor doesn't use it) */}
+      <h2 className="font-bold text-base text-gray-800 mb-2 ml-4" style={{ letterSpacing: "0.04em", textTransform: "none" }}>
         Explorer
       </h2>
       {/* Search Input */}
       <div className="mb-4 px-2">
         <input
           placeholder="Search tables..."
-          className="h-8 text-sm px-2 border rounded w-full"
+          className="h-8 text-sm px-3 border rounded-lg w-full bg-white focus:outline-none focus:ring-2 focus:ring-primary" // Use rounded-lg for rounded rectangle
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
@@ -266,6 +267,7 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
         {filteredSchemas.map((schema) => (
           <li key={schema.schema}>
             <SchemaExplorer
+              // Use consistent font class for schema and tables
               schemaName={schema.schema}
               tables={schema.tables}
               open={openSchemas[schema.schema]}
