@@ -65,6 +65,12 @@ const MOCK_RESULT = {
   ]
 };
 
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "@/components/ui/resizable";
+
 const Index: React.FC = () => {
   // SQL Editor ref (shared so TableExplorer can write to editor)
   const sqlEditorRef = useRef<SqlEditorImperativeHandle | null>(null);
@@ -83,31 +89,16 @@ const Index: React.FC = () => {
           <AccountSection account="john@example.com" role="readonly" />
         </div>
       </div>
-      {/* Main content area */}
+      {/* Main content area with draggable/collapsible sidebar */}
       <div className="flex-1 flex flex-row w-full min-h-0 h-full bg-white">
-        {/* Collapsible Sidebar with TableExplorer */}
-        <div className="h-full flex flex-col min-h-0">
-          {/* Collapse/expand button */}
-          <button
-            className="absolute z-20 bg-white border border-black rounded-full shadow-md w-6 h-6 flex items-center justify-center mt-5 ml-[202px] transition-opacity hover:bg-gray-100"
-            style={{ left: sidebarOpen ? undefined : 0, top: 70 }}
-            onClick={() => setSidebarOpen((o) => !o)}
-            aria-label={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
-            tabIndex={0}
+        <ResizablePanelGroup direction="horizontal" className="w-full h-full">
+          <ResizablePanel
+            defaultSize={18}
+            minSize={10}
+            maxSize={35}
+            collapsible
+            className="min-w-[60px]"
           >
-            <span className="flex items-center justify-center">
-              {sidebarOpen ? (
-                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="black">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 5l5 5-5 5"/>
-                </svg>
-              ) : (
-                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="black">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 5l-5 5 5 5"/>
-                </svg>
-              )}
-            </span>
-          </button>
-          {sidebarOpen && (
             <TableExplorer
               onInsertSchemaTable={(schema, table) => {
                 if (sqlEditorRef.current) {
@@ -120,11 +111,14 @@ const Index: React.FC = () => {
                 }
               }}
             />
-          )}
-        </div>
-        <div className="flex-1 min-h-0 flex flex-col h-full">
-          <PageContent sqlEditorRef={sqlEditorRef} />
-        </div>
+          </ResizablePanel>
+          <ResizableHandle withHandle />
+          <ResizablePanel minSize={30} defaultSize={82}>
+            <div className="flex-1 min-h-0 flex flex-col h-full">
+              <PageContent sqlEditorRef={sqlEditorRef} />
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
     </div>
   );
