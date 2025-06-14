@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import ResultTable from "@/components/ResultTable";
 import { Button } from "@/components/ui/button";
@@ -108,8 +109,8 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
     >
       {/* Drag handle/title */}
       <div
-        className="cursor-ns-resize w-full flex items-center justify-between px-4 py-2 bg-white border-t border-b border-gray-200"
-        style={{ userSelect: "none", minHeight: 32 }}
+        className="cursor-ns-resize w-full flex items-center justify-between px-4 py-2 bg-white"
+        style={{ userSelect: "none", minHeight: 32, border: 0 }}
         onMouseDown={handleDragStart}
         role="separator"
         aria-label="Drag to resize results"

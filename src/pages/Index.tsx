@@ -56,6 +56,15 @@ function useDebounce<T>(value: T, delay: number): T {
 // Add this DEFAULT_SQL definition just before the Index component
 const DEFAULT_SQL = `SELECT * FROM users LIMIT 10;`;
 
+const MOCK_RESULT = {
+  columns: ["id", "name", "email"],
+  rows: [
+    [1, "Alice", "alice@email.com"],
+    [2, "Bob", "bob@email.com"],
+    [3, "Charlie", "charlie@email.com"],
+  ]
+};
+
 const Index: React.FC = () => {
   // SQL Editor ref (shared so TableExplorer can write to editor)
   const sqlEditorRef = useRef<SqlEditorImperativeHandle | null>(null);
@@ -183,25 +192,34 @@ const PageContent: React.FC<PageContentProps> = ({ sqlEditorRef }) => {
   // Default to the local backend URL
   const apiUrl = "http://localhost:8000";
 
+  // Add a flag to use mock responses for queries
+  const USE_MOCK_QUERY = true;
+
   const runSql = useCallback(
     async (sql: string, tabId: string) => {
       updateTab(tabId, { isRunning: true, error: null, result: null });
       try {
-        const response = await fetch(`${apiUrl}/query`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ sql }),
-        });
+        if (USE_MOCK_QUERY) {
+          // Simulate latency
+          await new Promise((res) => setTimeout(res, 350));
+          updateTab(tabId, { result: MOCK_RESULT, error: null });
+        } else {
+          const response = await fetch(`${apiUrl}/query`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ sql }),
+          });
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Unknown error occurred");
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Unknown error occurred");
+          }
+
+          const data = await response.json();
+          updateTab(tabId, { result: data, error: null });
         }
-
-        const data = await response.json();
-        updateTab(tabId, { result: data, error: null });
       } catch (error: any) {
         console.error("Query failed!", error);
         updateTab(tabId, { error: error.message, result: null });
@@ -326,7 +344,7 @@ const PageContent: React.FC<PageContentProps> = ({ sqlEditorRef }) => {
   return (
     <div className="flex-1 flex flex-col h-full">
       {/* Tabs */}
-      <div className="flex items-center bg-gray-100 border-b px-2">
+      <div className="flex items-center bg-white border-b border-black px-2 transition-colors duration-100">
         {tabs.map((tab) => (
           <Tab
             key={tab.id}
@@ -416,9 +434,15 @@ const Tab: React.FC<TabProps> = ({
 
   return (
     <div
-      className={`flex items-center px-3 py-2 rounded-t-md text-sm font-medium transition-colors hover:bg-gray-200 cursor-pointer select-none ${
-        isActive ? "bg-gray-50 border-b-2 border-primary" : "bg-gray-100"
+      className={`flex items-center px-3 py-2 rounded-t-md text-sm font-medium transition-colors hover:bg-gray-100 cursor-pointer select-none border ${
+        isActive ? "bg-white border-b-0 border-black" : "bg-white border-b-0 border-black"
       }`}
+      style={{
+        borderBottom: isActive ? "2px solid black" : "2px solid black",
+        borderLeft: "1px solid black",
+        borderRight: "1px solid black",
+        borderTop: "1px solid black"
+      }}
     >
       {isRenaming ? (
         <Input
