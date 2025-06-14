@@ -1,3 +1,4 @@
+
 import React, { useRef } from "react";
 import AccountSection from "@/components/AccountSection";
 import TableExplorer from "@/components/TableExplorer";
@@ -87,11 +88,10 @@ const Index: React.FC = () => {
       {/* Top bar */}
       <header className="w-full flex justify-end items-center border-b border-gray-200 p-0 px-8 py-0 bg-black">
         <div className="flex items-center gap-4 ml-auto py-3">
-          {/* Reordered: Role left, Account right */}
           <AccountSection account="john_smith" role="readonly" />
         </div>
       </header>
-      {/* Make outer group horizontal, and the editor/results within vertical */}
+      {/* Outer horizontal resize between sidebar and main */}
       <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0 w-full">
         {/* Sidebar */}
         <ResizablePanel defaultSize={23} minSize={16} maxSize={40}>
@@ -108,16 +108,24 @@ const Index: React.FC = () => {
           <section className="flex-1 flex flex-col px-8 py-6 min-w-0 h-full">
             <h1 className="font-bold text-xl mb-4 font-mono tracking-tight select-none">SQL Editor</h1>
             <div className="flex-1 flex flex-col min-h-0 h-full">
+              {/* Vertically divide SQL editor vs Results */}
               <ResizablePanelGroup direction="vertical" className="flex-1 min-h-0 h-full">
-                <ResizablePanel defaultSize={60} minSize={20}>
-                  <SqlEditor
-                    ref={sqlEditorRef}
-                    value={sql}
-                    onChange={setSql}
-                    onFormat={handleFormat}
-                    onRun={handleRun}
-                    isRunning={isRunning}
-                  />
+                <ResizablePanel defaultSize={60} minSize={20} className="flex flex-col min-h-0">
+                  {/* ADD vertical resizing for the text editor within its panel */}
+                  <ResizablePanelGroup direction="vertical" className="flex-1 min-h-0 h-full">
+                    <ResizablePanel defaultSize={75} minSize={40} maxSize={95} className="min-h-[80px]">
+                      {/* Only SqlEditor component, so CodeMirror area is resizable independently */}
+                      <SqlEditor
+                        ref={sqlEditorRef}
+                        value={sql}
+                        onChange={setSql}
+                        onFormat={handleFormat}
+                        onRun={handleRun}
+                        isRunning={isRunning}
+                      />
+                    </ResizablePanel>
+                    {/* No handle for clean look, but easy to add if you wish */}
+                  </ResizablePanelGroup>
                 </ResizablePanel>
                 <ResizableHandle withHandle className="bg-gray-200" />
                 <ResizablePanel defaultSize={40} minSize={20}>
