@@ -1,30 +1,20 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Download, Copy, ToggleLeft, ToggleRight } from "lucide-react";
+import { Download, ToggleLeft, ToggleRight } from "lucide-react";
 
 interface ResultsActionsBarProps {
-  onCopy: () => void;
   onDownload: () => void;
   toggled: boolean;
   onToggle: () => void;
 }
 
 export const ResultsActionsBar: React.FC<ResultsActionsBarProps> = ({
-  onCopy,
   onDownload,
   toggled,
   onToggle,
 }) => (
   <div className="flex gap-2 items-center px-4 pt-3 pb-4 justify-end">
-    <Button
-      variant="default"
-      size="sm"
-      className="bg-black hover:bg-black/90 text-white border-none"
-      onClick={onCopy}
-    >
-      <Copy size={16} className="mr-1" /> Copy
-    </Button>
     <Button
       variant="default"
       size="sm"
@@ -45,7 +35,7 @@ export const ResultsActionsBar: React.FC<ResultsActionsBarProps> = ({
         </>
       ) : (
         <>
-          <ToggleLeft size={16} className="mr-1" /> Toggled Off
+          <ToggleLeft size={16} className="mr-1" /> Export all results
         </>
       )}
     </Button>

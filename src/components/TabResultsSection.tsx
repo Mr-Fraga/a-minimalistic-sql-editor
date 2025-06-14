@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import ResultTable from "@/components/ResultTable";
 import { ResultsActionsBar } from "@/components/ResultTable/ResultsActionsBar";
@@ -60,13 +61,6 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
   // Demo toggle state
   const [toggled, setToggled] = useState(false);
 
-  // Copy handler for demo – copies the whole table as TSV
-  const handleCopy = () => {
-    const header = MOCK_RESULT.columns.join("\t");
-    const rows = MOCK_RESULT.rows.map(r => r.join("\t")).join("\n");
-    navigator.clipboard.writeText([header, rows].join("\n"));
-  };
-
   // Download as CSV handler for demo
   const handleDownload = () => {
     const header = MOCK_RESULT.columns.join(",");
@@ -126,7 +120,6 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
 
       {/* Actions at the very bottom */}
       <ResultsActionsBar
-        onCopy={handleCopy}
         onDownload={handleDownload}
         toggled={toggled}
         onToggle={() => setToggled(t => !t)}
