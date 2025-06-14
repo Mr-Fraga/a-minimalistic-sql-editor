@@ -1,4 +1,3 @@
-
 import React, { useCallback } from "react";
 import { useTabsState } from "@/hooks/useTabsState";
 import { useQueryApi } from "@/hooks/useQueryApi";
@@ -57,6 +56,8 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
     });
   }, [activeTab, formatSql, onSqlChange]);
 
+  const role = "readonly"; // You can replace this with real role if available.
+
   return (
     <div className="flex-1 flex flex-col h-full">
       <TabBar
@@ -78,6 +79,7 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
             onRun={onRun}
             onRunAll={onRunAll}
             onDownloadCsv={onDownloadCsv}
+            role={role}
           />
         ) : (
           <div className="flex-1 flex items-center justify-center">

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import TabSqlEditorSection from "./TabSqlEditorSection";
 import TabResultsSection from "./TabResultsSection";
@@ -27,6 +26,7 @@ interface TabViewProps {
   onRun: (selection?: string) => void;
   onRunAll: () => void;
   onDownloadCsv?: (rowsToExport?: Array<any[]>) => void;
+  role: string;
 }
 
 // Explorer sidebar width
@@ -42,6 +42,7 @@ const TabView: React.FC<TabViewProps> = ({
   onRun,
   onRunAll,
   onDownloadCsv,
+  role,
 }) => {
   // UI state for handle hover
   const [isHandleHovered, setIsHandleHovered] = useState(false);
@@ -133,6 +134,7 @@ const TabView: React.FC<TabViewProps> = ({
             paddingTop: 0,
             height: "100%",
           }}
+          role={role}
         />
       </ResizablePanel>
     </ResizablePanelGroup>
