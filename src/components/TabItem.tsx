@@ -90,7 +90,7 @@ const TabItem: React.FC<TabItemProps> = ({
             borderColor: isActive ? "#d1d5db" : "#e5e7eb",
             paddingRight: "2.0rem",
             paddingLeft: "0.9rem",
-            borderRadius: "0.85rem 0.85rem 0px 0px",
+            borderRadius: "0.85rem", // UPDATED: fully rounded rectangle
             position: "relative",
             zIndex: isActive ? 20 : undefined,
             transition: "background 0.15s, border 0.15s",
