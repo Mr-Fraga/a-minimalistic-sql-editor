@@ -373,22 +373,24 @@ const PageContent: React.FC<PageContentProps> = ({ sqlEditorRef }) => {
         {/* Settings button has been removed */}
       </div>
 
-      {/* Tab View */}
-      {activeTab ? (
-        <TabView
-          tab={activeTab}
-          sqlEditorRef={sqlEditorRef}
-          onSqlChange={onSqlChange}
-          onFormat={onFormat}
-          onRun={onRun}
-          onRunAll={onRunAll}
-          onDownloadCsv={onDownloadCsv}
-        />
-      ) : (
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-gray-500">No tab selected.</p>
-        </div>
-      )}
+      {/* Tab View with horizontal padding */}
+      <div className="flex-1 flex flex-col px-6 md:px-8">
+        {activeTab ? (
+          <TabView
+            tab={activeTab}
+            sqlEditorRef={sqlEditorRef}
+            onSqlChange={onSqlChange}
+            onFormat={onFormat}
+            onRun={onRun}
+            onRunAll={onRunAll}
+            onDownloadCsv={onDownloadCsv}
+          />
+        ) : (
+          <div className="flex-1 flex items-center justify-center">
+            <p className="text-gray-500">No tab selected.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
