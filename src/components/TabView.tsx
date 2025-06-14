@@ -31,6 +31,7 @@ const TabView: React.FC<TabViewProps> = ({
   onDownloadCsv,
 }) => (
   <div className="w-full flex-1 flex flex-col min-h-0 h-full">
+    {/* SQL Editor Section */}
     <div className="flex-1 flex flex-col min-h-0 h-full">
       <div className="flex flex-col min-h-0 h-full">
         <div className="min-h-[80px] flex-1">
@@ -43,18 +44,22 @@ const TabView: React.FC<TabViewProps> = ({
             isRunning={tab.isRunning}
           />
         </div>
-        <div className="mt-6 flex flex-col min-h-0 h-full">
-          <h2 className="font-bold text-md mb-2 font-mono tracking-tight select-none">Results</h2>
-          <ResultTable result={tab.result || undefined} error={tab.error} />
-          {tab.result && tab.result.rows.length > 0 && (
-            <div className="flex w-full justify-start mt-2">
-              <Button size="sm" className="font-mono" onClick={onDownloadCsv}>
-                Download as CSV
-              </Button>
-            </div>
-          )}
-        </div>
       </div>
+    </div>
+    {/* Always render Results section below editor */}
+    <div className="mt-6 flex flex-col min-h-0">
+      <h2 className="font-bold text-md mb-2 font-mono tracking-tight select-none">
+        Results
+      </h2>
+      <ResultTable result={tab.result || undefined} error={tab.error} />
+      {/* Download button, only if there are rows */}
+      {tab.result && tab.result.rows.length > 0 && (
+        <div className="flex w-full justify-start mt-2">
+          <Button size="sm" className="font-mono" onClick={onDownloadCsv}>
+            Download as CSV
+          </Button>
+        </div>
+      )}
     </div>
   </div>
 );
