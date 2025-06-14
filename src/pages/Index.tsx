@@ -28,6 +28,16 @@ const Index: React.FC = () => {
         {/* AccountSection on the right */}
         <AccountSection account="john@example.com" role="readonly" />
       </div>
+      {/* White panel spacer between account bar and tab bar */}
+      <div
+        className="w-full bg-white"
+        style={{
+          minHeight: "18px",
+          maxHeight: "18px",
+          boxShadow: "0 2px 6px 0 rgba(0,0,0,0.03)",
+          borderBottom: "1px solid #e5e7eb",
+        }}
+      />
       {/* Main content area */}
       <div className="flex-1 flex flex-row w-full min-h-0 h-full bg-white">
         <MainContent sqlEditorRef={sqlEditorRef} />
@@ -37,3 +47,4 @@ const Index: React.FC = () => {
 };
 
 export default Index;
+
