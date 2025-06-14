@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   Tooltip,
@@ -12,6 +13,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { toast } from "@/hooks/use-toast";
 
 // Optional: in a real app, this would come from user profile props
 const MOCK_NAME = "John Smith";
@@ -84,6 +86,16 @@ const AccountSection: React.FC<AccountSectionProps> = ({
     setAccountTooltipOpen(false);
   };
 
+  // Handle role change - update state and show toast
+  const handleRoleChange = (newRole: string) => {
+    setRole(newRole);
+    const label = ROLES.find((r) => r.key === newRole)?.label || newRole;
+    toast({
+      title: "Role changed",
+      description: `Your role has been set to "${label}".`,
+    });
+  };
+
   return (
     <div className="flex items-center gap-4 bg-white text-black px-6 py-5 rounded-t-none shadow-none select-none relative">
       <TooltipProvider>
@@ -134,7 +146,7 @@ const AccountSection: React.FC<AccountSectionProps> = ({
             {ROLES.map((r) => (
               <DropdownMenuItem
                 key={r.key}
-                onSelect={() => setRole(r.key)}
+                onSelect={() => handleRoleChange(r.key)}
                 className={`py-2 px-3 text-sm cursor-pointer ${
                   role === r.key ? "bg-gray-100 font-bold" : ""
                 }`}
