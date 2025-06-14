@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import ResultTable from "@/components/ResultTable";
 import { Button } from "@/components/ui/button";
@@ -33,6 +32,7 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
   const dragStartHeight = useRef<number>(resultsHeight);
 
   // Drag handlers for resizing results section
+  // Only changes are for correct drag logic and className (ensure white background)
   const handleDragStart = (e: React.MouseEvent) => {
     dragStartY.current = e.clientY;
     dragStartHeight.current = resultsHeight;
