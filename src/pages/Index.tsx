@@ -2,7 +2,7 @@ import React, {
   useState,
   useRef,
   useCallback,
-  useEffect, // <-- ADD USE EFFECT
+  useEffect,
 } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -27,6 +27,7 @@ import { Separator } from "@/components/ui/separator";
 import { Copy, Plus, Settings, ChevronDown } from "lucide-react";
 
 import {
+  SidebarProvider,
   Sidebar,
 } from "@/components/ui/sidebar"; // use shadcn/ui sidebar
 
@@ -71,21 +72,24 @@ function useDebounce<T>(value: T, delay: number): T {
 const DEFAULT_SQL = `SELECT * FROM users LIMIT 10;`;
 
 const Index: React.FC = () => {
+  // The provider must wrap all components using the sidebar context
   return (
-    <div className="min-h-screen w-full flex flex-col">
-      {/* Top horizontal panel */}
-      <div className="w-full bg-white shadow-sm flex items-center" style={{ zIndex: 10, minHeight: "56px" }}>
-        {/* Example: Place AccountSection and any other top-panel components here */}
-        <div className="px-0 py-0 w-full flex items-center justify-end">
-          <AccountSection account="john@example.com" role="readonly" />
+    <SidebarProvider>
+      <div className="min-h-screen w-full flex flex-col">
+        {/* Top horizontal panel */}
+        <div className="w-full bg-white shadow-sm flex items-center" style={{ zIndex: 10, minHeight: "56px" }}>
+          {/* Example: Place AccountSection and any other top-panel components here */}
+          <div className="px-0 py-0 w-full flex items-center justify-end">
+            <AccountSection account="john@example.com" role="readonly" />
+          </div>
+        </div>
+        {/* Main content area */}
+        <div className="flex-1 w-full flex flex-row gap-0 bg-gray-50">
+          <Sidebar />
+          <PageContent />
         </div>
       </div>
-      {/* Main content area */}
-      <div className="flex-1 w-full flex flex-row gap-0 bg-gray-50">
-        <Sidebar />
-        <PageContent />
-      </div>
-    </div>
+    </SidebarProvider>
   );
 };
 
@@ -126,7 +130,8 @@ const PageContent: React.FC = () => {
 
   // Settings
   const [settings, setSettings] = useLocalStorage("settings", {
-    apiUrl: process.env.API_URL || "http://localhost:8000",
+    // Remove process.env, just use the default value
+    apiUrl: "http://localhost:8000",
     autoFormat: true,
   });
 
