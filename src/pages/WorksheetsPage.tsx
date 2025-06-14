@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Table,
@@ -423,7 +422,7 @@ const WorksheetsPage: React.FC = () => {
                       onClick={() => toggleFolder(row.name)}
                       title={expandedFolders[row.name] ? "Collapse folder" : "Expand folder"}
                     >
-                      <Folder size={16} className="text-yellow-500" />
+                      <Folder size={16} className="text-black" />
                       <span className="font-semibold">{row.name}</span>
                       <span className="ml-1 text-xs text-gray-400">
                         {expandedFolders[row.name] ? "▾" : "▸"}
