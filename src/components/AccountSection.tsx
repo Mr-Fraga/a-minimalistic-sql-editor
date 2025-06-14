@@ -23,12 +23,12 @@ const ROLES = [
     label: "Readonly",
   },
   {
-    key: "admin",
-    label: "Admin",
-  },
-  {
     key: "sensitive",
     label: "Sensitive",
+  },
+  {
+    key: "admin",
+    label: "Admin",
   },
 ];
 
