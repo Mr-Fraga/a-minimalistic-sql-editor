@@ -96,19 +96,23 @@ const TabView: React.FC<TabViewProps> = ({
         <ResultTable result={tab.result || undefined} error={tab.error} />
         {/* Controls below results */}
         <div className="flex items-center justify-between w-full mt-2">
-          {/* Bottom-left: Export toggle */}
+          {/* Bottom-left: Export toggle (only render if results exist) */}
           <div className="flex items-center gap-2">
-            <Switch
-              checked={exportFullResults}
-              onCheckedChange={(v: boolean) => setExportFullResults(v)}
-              id="export-full-results-toggle"
-            />
-            <label
-              htmlFor="export-full-results-toggle"
-              className="text-xs font-mono select-none text-gray-600"
-            >
-              Export full results
-            </label>
+            {tab.result && tab.result.rows.length > 0 && (
+              <>
+                <Switch
+                  checked={exportFullResults}
+                  onCheckedChange={(v: boolean) => setExportFullResults(v)}
+                  id="export-full-results-toggle"
+                />
+                <label
+                  htmlFor="export-full-results-toggle"
+                  className="text-xs font-mono select-none text-gray-600"
+                >
+                  Export full results
+                </label>
+              </>
+            )}
           </div>
           {/* Bottom-right: Download button, only if there are rows */}
           {tab.result && tab.result.rows.length > 0 && (
@@ -128,4 +132,3 @@ const TabView: React.FC<TabViewProps> = ({
 };
 
 export default TabView;
-
