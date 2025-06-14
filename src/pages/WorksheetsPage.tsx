@@ -300,7 +300,7 @@ const WorksheetsPage: React.FC = () => {
 
   // Render
   return (
-    <div className="flex-1 w-full h-full bg-white p-0">
+    <div className="flex-1 w-full h-full bg-white p-0 px-6 md:px-8">
       <div className="w-full pt-12">
         <h1 className="text-2xl font-bold mb-6 ml-0">Your queries</h1>
         <Table className="w-full">
