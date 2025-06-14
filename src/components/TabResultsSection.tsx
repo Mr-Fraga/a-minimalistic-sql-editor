@@ -142,10 +142,10 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
               <>
                 <Button
                   size="sm"
-                  className="font-mono bg-black text-white hover:bg-gray-800 rounded-full px-4 min-w-[112px] flex items-center justify-center text-[0.92rem]"
+                  className="font-mono bg-black text-white hover:bg-gray-800 rounded-full px-4 min-w-[42px] flex items-center justify-center text-[0.92rem]"
                   style={{
                     height: "1.4rem",
-                    minWidth: "112px",
+                    minWidth: "42px",
                     fontSize: "0.92rem",
                     padding: "0 1rem",
                     borderRadius: "1.1rem",
@@ -155,7 +155,6 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
                   variant="default"
                 >
                   <Download size={14} className="mr-2" />
-                  Download
                 </Button>
                 <Switch
                   checked={exportFullResults}

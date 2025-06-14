@@ -11,7 +11,7 @@ const AccountAndExplorerContainer: React.FC = () => {
   const [role, setRole] = React.useState<string>(DEFAULT_ROLE);
 
   return (
-    <div className="flex flex-col min-h-0 w-full h-full">
+    <div className="flex flex-col min-h-0 w-full h-full" key={role}>
       {/* Account top bar */}
       <AccountSection
         account={DEFAULT_EMAIL}
@@ -19,7 +19,7 @@ const AccountAndExplorerContainer: React.FC = () => {
         onRoleChange={setRole}
       />
       {/* Table explorer below */}
-      <div className="flex-1 w-full h-full">
+      <div className="flex-1 w-full h-full" key={role}>
         <TableExplorer role={role} />
       </div>
     </div>
