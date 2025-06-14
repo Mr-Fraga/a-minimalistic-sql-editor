@@ -26,9 +26,17 @@ const Index: React.FC = () => {
           <AccountSection account="john@example.com" role="readonly" />
         </div>
       </div>
-      {/* Main content area: Sidebar (resizable) and MainContent */}
+      {/* Main content area: MainContent (left) and TableExplorer (right) */}
       <div className="flex-1 flex flex-row w-full min-h-0 h-full bg-white">
         <ResizablePanelGroup direction="horizontal" className="w-full h-full">
+          {/* Main content on the left */}
+          <ResizablePanel minSize={30} defaultSize={82}>
+            <div className="flex-1 min-h-0 flex flex-col h-full">
+              <MainContent sqlEditorRef={sqlEditorRef} />
+            </div>
+          </ResizablePanel>
+          <ResizableHandle withHandle={false} />
+          {/* TableExplorer now on the right, fully collapsible */}
           <ResizablePanel
             defaultSize={18}
             minSize={0}
@@ -49,12 +57,6 @@ const Index: React.FC = () => {
               }}
             />
           </ResizablePanel>
-          <ResizableHandle withHandle={false} />
-          <ResizablePanel minSize={30} defaultSize={82}>
-            <div className="flex-1 min-h-0 flex flex-col h-full">
-              <MainContent sqlEditorRef={sqlEditorRef} />
-            </div>
-          </ResizablePanel>
         </ResizablePanelGroup>
       </div>
     </div>
@@ -62,4 +64,3 @@ const Index: React.FC = () => {
 };
 
 export default Index;
-
