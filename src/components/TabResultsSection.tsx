@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import ResultTable from "@/components/ResultTable";
 import { ResultsActionsBar } from "@/components/ResultTable/ResultsActionsBar";
@@ -93,8 +92,8 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
       className="flex flex-col min-h-[80px] bg-white overflow-hidden relative select-none"
       style={{
         height: resultsHeight,
-        minHeight: MIN_RESULTS_HEIGHT,
-        maxHeight: MAX_RESULTS_HEIGHT,
+        minHeight: 80,
+        maxHeight: 600,
         transition: "height 0.08s",
       }}
     >
@@ -112,20 +111,25 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
         </h2>
         <div className="flex-1"></div>
       </div>
-      {/* Actions bar */}
+
+      {/* Results Table FIRST */}
+      <div className="flex-1 flex flex-col min-h-0 h-full px-0 pt-4 pb-2 w-full">
+        <ResultTable result={MOCK_RESULT} />
+      </div>
+
+      {/* Statistics below the table */}
+      <ResultsStatsBar
+        numRows={MOCK_RESULT.rows.length}
+        numColumns={MOCK_RESULT.columns.length}
+        elapsedMs={64}
+      />
+
+      {/* Actions at the very bottom */}
       <ResultsActionsBar
         onCopy={handleCopy}
         onDownload={handleDownload}
         toggled={toggled}
         onToggle={() => setToggled(t => !t)}
-      />
-      <div className="flex-1 flex flex-col min-h-0 h-full px-0 pt-4 pb-2 w-full">
-        <ResultTable result={MOCK_RESULT} />
-      </div>
-      <ResultsStatsBar
-        numRows={MOCK_RESULT.rows.length}
-        numColumns={MOCK_RESULT.columns.length}
-        elapsedMs={64}
       />
     </div>
   );

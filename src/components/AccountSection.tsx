@@ -90,8 +90,8 @@ const AccountSection: React.FC<AccountSectionProps> = ({
             onKeyDown={handleAvatarKeyDown}
             onBlur={handleAvatarBlur}
           >
-            <Avatar className="h-12 w-12 border-2 border-gray-300 shadow bg-gray-200">
-              <AvatarFallback className="bg-gray-200 text-black font-bold text-xl flex items-center justify-center">
+            <Avatar className="h-12 w-12 border-2 border-gray-200 shadow bg-gray-200">
+              <AvatarFallback className="bg-gray-200 text-black font-bold text-xl flex items-center justify-center border-2 border-gray-200">
                 J
               </AvatarFallback>
             </Avatar>
