@@ -1,5 +1,5 @@
 
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { useTabsState } from "@/hooks/useTabsState";
 import { useQueryApi } from "@/hooks/useQueryApi";
 import { useCsvExport } from "@/hooks/useCsvExport";
@@ -10,6 +10,8 @@ import TabBar from "@/components/TabBar";
 interface MainContentProps {
   sqlEditorRef: React.RefObject<SqlEditorImperativeHandle | null>;
 }
+
+const DEFAULT_RESULTS_HEIGHT = 320;
 
 const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
   const {
@@ -29,6 +31,23 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
   const { runSql, formatSql } = useQueryApi({ updateTab, DEFAULT_SQL });
   const { onDownloadCsv } = useCsvExport(activeTab);
 
+  const [resultsHeights, setResultsHeights] = useState<{ [tabId: string]: number }>({});
+
+  // Ensure resultsHeight is always available for current tab
+  const resultsHeight =
+    (activeTab && resultsHeights[activeTab.id]) || DEFAULT_RESULTS_HEIGHT;
+
+  const setResultsHeight = useCallback(
+    (h: number) => {
+      if (!activeTab) return;
+      setResultsHeights((prev) => ({
+        ...prev,
+        [activeTab.id]: h,
+      }));
+    },
+    [activeTab]
+  );
+
   const onSqlChange = useCallback(
     (sql: string) => {
       if (!activeTab) return;
@@ -37,13 +56,10 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
     [activeTab, updateTab]
   );
 
-  // Fix: type selection as string | undefined
   const onRun = useCallback(
     (selection?: string) => {
       if (!activeTab) return;
-      // Log value for clarity
       console.log("[MainContent] onRun called. selection:", selection, "activeTabId:", activeTab.id);
-      // Use selection if provided, otherwise activeTab.sql
       runSql(selection !== undefined ? selection : activeTab.sql, activeTab.id);
     },
     [activeTab, runSql]
@@ -61,7 +77,7 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
     });
   }, [activeTab, formatSql, onSqlChange]);
 
-  const role = "readonly"; // You can replace this with real role if available.
+  const role = "readonly";
 
   return (
     <div className="flex-1 flex flex-col h-full">
@@ -85,6 +101,8 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
             onRunAll={onRunAll}
             onDownloadCsv={onDownloadCsv}
             role={role}
+            resultsHeight={resultsHeight}
+            setResultsHeight={setResultsHeight}
           />
         ) : (
           <div className="flex-1 flex items-center justify-center">

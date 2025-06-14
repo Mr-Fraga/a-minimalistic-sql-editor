@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import TabSqlEditorSection from "./TabSqlEditorSection";
 import TabResultsSection from "./TabResultsSection";
@@ -27,9 +28,10 @@ interface TabViewProps {
   onRunAll: () => void;
   onDownloadCsv?: (rowsToExport?: Array<any[]>) => void;
   role: string;
+  resultsHeight: number;                  // NEW
+  setResultsHeight: (h: number) => void;  // NEW
 }
 
-// Explorer sidebar width
 const EXPLORER_MIN_WIDTH = 180;
 const EXPLORER_MAX_WIDTH = 350;
 const EXPLORER_DEFAULT_WIDTH = 264;
@@ -43,8 +45,9 @@ const TabView: React.FC<TabViewProps> = ({
   onRunAll,
   onDownloadCsv,
   role,
+  resultsHeight,
+  setResultsHeight,
 }) => {
-  // UI state for handle hover
   const [isHandleHovered, setIsHandleHovered] = useState(false);
   const [isHandleDragging, setIsHandleDragging] = useState(false);
 
@@ -82,8 +85,8 @@ const TabView: React.FC<TabViewProps> = ({
           </div>
           <TabResultsSection
             tab={tab}
-            resultsHeight={320}
-            setResultsHeight={() => {}}
+            resultsHeight={resultsHeight}
+            setResultsHeight={setResultsHeight}
             onDownloadCsv={onDownloadCsv}
           />
         </div>
@@ -108,7 +111,6 @@ const TabView: React.FC<TabViewProps> = ({
           background: isHandleHovered || isHandleDragging ? "#e5e7eb" : "transparent",
         }}
       />
-      {/* Table Explorer, always collapsible down to small size */}
       <ResizablePanel
         defaultSize={23}
         minSize={0}
