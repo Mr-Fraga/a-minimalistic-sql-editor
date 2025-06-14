@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from "react";
 import {
   Collapsible,
@@ -240,13 +239,16 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
       className="h-full border-l bg-white min-w-[220px] flex flex-col"
       style={{
         marginTop: 0,
-        paddingTop: "8px",
+        paddingTop: 8,
+        height: "100%",
         ...style
       }}
     >
+      {/* Title uses 'Explorer' in sentence case, styled for tab view consistency */}
       <h2 className="font-din font-bold text-base text-gray-800 mb-2 ml-4" style={{ letterSpacing: "0.04em", textTransform: "none" }}>
         Explorer
       </h2>
+      {/* Search Input */}
       <div className="mb-4 px-2">
         <input
           placeholder="Search tables..."
@@ -255,9 +257,11 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
           onChange={e => setSearch(e.target.value)}
         />
       </div>
+      {/* No tables found message */}
       {filteredSchemas.length === 0 && (
         <div className="text-xs text-gray-400 px-2">No tables found</div>
       )}
+      {/* Schema List */}
       <ul className="space-y-2 flex-1 overflow-y-auto px-2">
         {filteredSchemas.map((schema) => (
           <li key={schema.schema}>
