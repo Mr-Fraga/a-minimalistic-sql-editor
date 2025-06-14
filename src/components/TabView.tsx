@@ -148,10 +148,18 @@ const TabView: React.FC<TabViewProps> = ({
         <div className="flex-1 flex flex-col min-h-0 h-full px-0 pt-4 pb-2 w-full">
           <ResultTable result={tab.result || undefined} error={tab.error} />
           <div className="flex items-center justify-between w-full mt-2 px-4">
-            {/* Export toggle only shows if results exist */}
-            <div className="flex items-center gap-2">
+            {/* Download button and toggler should sit together, in a row */}
+            <div className="flex flex-row items-center gap-2">
               {tab.result && tab.result.rows.length > 0 && (
                 <>
+                  <Button
+                    size="sm"
+                    className="font-mono bg-black text-white hover:bg-gray-800"
+                    onClick={handleDownloadCsv}
+                    variant="default"
+                  >
+                    <Download size={16} />
+                  </Button>
                   <Switch
                     checked={exportFullResults}
                     onCheckedChange={(v: boolean) => setExportFullResults(v)}
@@ -166,17 +174,8 @@ const TabView: React.FC<TabViewProps> = ({
                 </>
               )}
             </div>
-            {/* Download button only if there are rows */}
-            {tab.result && tab.result.rows.length > 0 && (
-              <Button
-                size="sm"
-                className="font-mono"
-                onClick={handleDownloadCsv}
-                variant="outline"
-              >
-                <Download size={16} />
-              </Button>
-            )}
+            {/* Spacer div, or add-ons if needed in the future */}
+            <div />
           </div>
         </div>
       </div>
