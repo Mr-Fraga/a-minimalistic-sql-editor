@@ -343,7 +343,7 @@ const WorksheetsPage: React.FC = () => {
                   <div className="flex items-center gap-2">
                     {row.type === "folder" ? (
                       <Folder
-                        className="text-yellow-600"
+                        className="text-black"
                         size={18}
                         strokeWidth={2}
                       />
