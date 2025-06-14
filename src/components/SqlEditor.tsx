@@ -1,4 +1,3 @@
-
 import React, { useRef, useImperativeHandle, forwardRef } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { sql } from "@codemirror/lang-sql";
@@ -145,10 +144,9 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
             <Settings2 size={14} className="inline-block" />
             Format
           </button>
-
           {/* Search button, below Format */}
           <button
-            className="absolute top-[54px] right-2 z-10 bg-white/90 rounded-md px-2 py-1 border border-gray-300 text-xs font-mono hover:bg-gray-50 flex items-center gap-1 shadow transition"
+            className="absolute top-20 right-2 z-10 bg-white/90 rounded-md px-2 py-1 border border-gray-300 text-xs font-mono hover:bg-gray-50 flex items-center gap-1 shadow transition"
             onClick={handleSearchButton}
             tabIndex={-1}
             title="search"
@@ -206,4 +204,3 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
 );
 
 export default SqlEditor;
-
