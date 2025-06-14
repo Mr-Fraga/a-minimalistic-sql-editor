@@ -111,7 +111,7 @@ const TabView: React.FC<TabViewProps> = ({
 
   return (
     <div className="w-full flex-1 flex flex-col min-h-0 h-full">
-      {/* SQL Editor Section; fill the rest minus resultsHeight */}
+      {/* SQL Editor Section */}
       <div
         className="flex flex-col min-h-0"
         style={{
@@ -130,7 +130,7 @@ const TabView: React.FC<TabViewProps> = ({
           isRunning={tab.isRunning}
         />
       </div>
-      {/* Results Section - draggable by title */}
+      {/* Results Section */}
       <div
         className="flex flex-col min-h-[80px] bg-white overflow-hidden relative select-none"
         style={{ height: resultsHeight, transition: "height 0.08s" }}
@@ -169,35 +169,43 @@ const TabView: React.FC<TabViewProps> = ({
           )}
 
           <div className="flex items-center justify-between w-full px-4">
-            {/* Download button and toggler side by side, same height and aligned */}
-            <div className="flex flex-row items-center gap-3">
+            <div className="flex flex-row items-center gap-2">
               {tab.result && tab.result.rows.length > 0 && (
                 <>
+                  {/* Download Button, now smaller and wider */}
                   <Button
                     size="sm"
-                    className="font-mono bg-black text-white hover:bg-gray-800 h-9 flex items-center"
-                    style={{ height: "2.25rem", minWidth: "2.25rem", padding: 0, borderRadius: "9999px", display: "flex", alignItems: "center", justifyContent: "center" }}
+                    className="font-mono bg-black text-white hover:bg-gray-800 rounded-full px-5 h-8 min-w-[110px] flex items-center justify-center"
+                    style={{
+                      height: "2rem",
+                      minWidth: "110px",
+                      fontSize: "0.95rem",
+                      padding: "0 1.1rem",
+                      borderRadius: "1.2rem",
+                    }}
                     onClick={handleDownloadCsv}
                     variant="default"
                   >
-                    <Download size={16} />
+                    <Download size={16} className="mr-2" />
+                    Download
                   </Button>
+                  {/* Toggle, now matching height & proper alignment */}
                   <Switch
                     checked={exportFullResults}
                     onCheckedChange={(v: boolean) => setExportFullResults(v)}
                     id="export-full-results-toggle"
-                    className="h-9"
+                    className="h-8 w-14"
                   />
                   <label
                     htmlFor="export-full-results-toggle"
                     className="text-xs font-mono select-none text-gray-600 ml-1"
+                    style={{ lineHeight: "2rem" }}
                   >
                     Export full results
                   </label>
                 </>
               )}
             </div>
-            {/* Spacer div, or add-ons if needed in the future */}
             <div />
           </div>
         </div>
