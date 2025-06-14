@@ -235,7 +235,7 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
     <div
       className="h-full border-r px-4 py-5 min-w-[220px] bg-white"
     >
-      <h2 className="font-bold font-din text-gray-800 text-base mb-2 uppercase tracking-wider">
+      <h2 className="font-din font-bold text-base text-gray-800 mb-2 ml-4" style={{ letterSpacing: "0.04em" }}>
         Explorer
       </h2>
       <div className="mb-4">

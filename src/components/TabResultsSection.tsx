@@ -109,14 +109,14 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
     >
       {/* Drag handle/title */}
       <div
-        className="cursor-ns-resize w-full flex items-center justify-between px-4 py-2 bg-white"
+        className="cursor-ns-resize w-full flex items-center justify-between px-0 py-2 bg-white"
         style={{ userSelect: "none", minHeight: 32, border: 0 }}
         onMouseDown={handleDragStart}
         role="separator"
         aria-label="Drag to resize results"
         tabIndex={0}
       >
-        <h2 className="font-bold text-md font-mono font-din tracking-tight select-none">
+        <h2 className="font-din font-bold text-base text-gray-800 ml-4" style={{ letterSpacing: "0.04em" }}>
           Results
         </h2>
         <div className="flex-1"></div>

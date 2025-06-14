@@ -151,7 +151,9 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
     return (
       <div className="w-full">
         {/* SQL Editor Title */}
-        <h3 className="font-semibold text-lg mb-2 text-gray-900">SQL Editor</h3>
+        <h3 className="font-din font-bold text-base text-gray-800 mb-2 ml-4" style={{ letterSpacing: "0.04em" }}>
+          SQL Editor
+        </h3>
 
         <div className="rounded-md overflow-hidden border border-gray-200 shadow-sm bg-white relative">
           {/* Copy button */}
