@@ -71,7 +71,10 @@ const TabBar: React.FC<TabBarProps> = ({
     }
     setEditTabId(null);
   };
-  const handleTabNameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, tabId: string) => {
+  const handleTabNameKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    tabId: string
+  ) => {
     if (e.key === "Enter") {
       (e.target as HTMLInputElement).blur();
     } else if (e.key === "Escape") {
@@ -98,13 +101,15 @@ const TabBar: React.FC<TabBarProps> = ({
   };
 
   return (
-    <div className="w-full bg-white select-none" style={{ border: "none", boxShadow: "none", paddingLeft: "2rem" }}>
+    <div
+      className="w-full bg-white select-none"
+      style={{ border: "none", boxShadow: "none", paddingLeft: "2rem" }}
+    >
       <TooltipProvider>
         <Tabs
           value={activeTabId || (tabs.length > 0 ? tabs[0].id : undefined)}
           onValueChange={setActiveTabId}
         >
-          {/* Remove horizontal lines via border/boxShadow, left-aligned, no wrapping */}
           <TabsList
             className="flex flex-row items-center bg-white p-0 gap-0 justify-start w-auto min-w-0"
             style={{
@@ -145,7 +150,9 @@ const TabBar: React.FC<TabBarProps> = ({
                         style={{
                           outline: "none",
                           marginBottom: "0px",
-                          borderBottom: isActive ? "2.5px solid #d1d5db" : "2.5px solid transparent",
+                          borderBottom: isActive
+                            ? "2.5px solid #d1d5db"
+                            : "2.5px solid transparent",
                           gap: ".5rem",
                           minWidth: "96px",
                           maxHeight: "42px",
@@ -164,7 +171,6 @@ const TabBar: React.FC<TabBarProps> = ({
                           display: "flex",
                         }}
                       >
-                        {/* Tab name or input if renaming */}
                         {editTabId === tab.id ? (
                           <input
                             autoFocus
@@ -178,7 +184,10 @@ const TabBar: React.FC<TabBarProps> = ({
                             onClick={e => e.stopPropagation()}
                           />
                         ) : (
-                          <span className="truncate max-w-[110px]" title={tab.name}>
+                          <span
+                            className="truncate max-w-[110px]"
+                            title={tab.name}
+                          >
                             {tab.name}
                           </span>
                         )}
@@ -200,7 +209,7 @@ const TabBar: React.FC<TabBarProps> = ({
                             outline: "none",
                             lineHeight: 0,
                             marginLeft: ".18rem",
-                            marginRight: ".18rem"
+                            marginRight: ".18rem",
                           }}
                         >
                           <Copy size={16} />
@@ -222,7 +231,7 @@ const TabBar: React.FC<TabBarProps> = ({
                             border: "none",
                             outline: "none",
                             lineHeight: 0,
-                            marginLeft: ".2rem"
+                            marginLeft: ".2rem",
                           }}
                         >
                           <X size={16} />
@@ -230,16 +239,18 @@ const TabBar: React.FC<TabBarProps> = ({
                       </TabsTrigger>
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-xs">
+                  {/* TooltipContent is now clickable for comment modal */}
+                  <TooltipContent
+                    side="bottom"
+                    className="max-w-xs cursor-pointer"
+                    onClick={() => openCommentModal(tab)}
+                  >
                     {comments[tab.id] ?? tab.comment ?? (
-                      <span className="italic text-gray-400">(No comment)</span>
+                      <span className="italic text-gray-400">
+                        (No comment)
+                      </span>
                     )}
-                    <div
-                      className="mt-1 text-xs text-blue-500 cursor-pointer underline"
-                      onDoubleClick={() => openCommentModal(tab)}
-                    >
-                      Double click to edit comment
-                    </div>
+                    {/* REMOVED: Double click to edit comment text */}
                   </TooltipContent>
                 </Tooltip>
               );
@@ -279,4 +290,3 @@ const TabBar: React.FC<TabBarProps> = ({
 };
 
 export default TabBar;
-
