@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -74,10 +73,12 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				}
 			},
+			// Set much more rounded corners for all "lg", "md", "sm"
 			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				lg: '1.5rem',
+				md: '1rem',
+				sm: '0.75rem',
+				// You can optionally use 'full' for even more rounded e.g. '9999px'
 			},
 			keyframes: {
 				'accordion-down': {
