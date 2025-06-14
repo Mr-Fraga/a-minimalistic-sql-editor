@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import ResultTable from "@/components/ResultTable";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -27,6 +27,11 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
   setResultsHeight,
   onDownloadCsv
 }) => {
+  // DEBUG
+  useEffect(() => {
+    console.log("[TabResultsSection] tab.result:", tab.result, "tab.error:", tab.error);
+  }, [tab.result, tab.error]);
+
   const [exportFullResults, setExportFullResults] = useState(false);
   const dragStartY = useRef<number | null>(null);
   const dragStartHeight = useRef<number>(resultsHeight);

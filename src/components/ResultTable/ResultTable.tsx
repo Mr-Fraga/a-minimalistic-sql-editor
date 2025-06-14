@@ -18,6 +18,11 @@ const ResultTable: React.FC<ResultTableProps & { onDownloadCsv?: () => void }> =
   error,
   onDownloadCsv,
 }) => {
+  // DEBUG
+  useEffect(() => {
+    console.log("[ResultTable] props.result:", result, "props.error:", error);
+  }, [result, error]);
+
   const [filters, setFilters] = useState<string[]>([]);
   // Track which filter popover is open per column
   const [filterOpen, setFilterOpen] = useState<boolean[]>([]);
