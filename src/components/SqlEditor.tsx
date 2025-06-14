@@ -3,6 +3,8 @@ import React, { useRef } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { sql } from "@codemirror/lang-sql";
 import { linter, lintGutter } from "@codemirror/lint";
+import { toast } from "@/hooks/use-toast";
+import { Copy } from "lucide-react";
 
 interface SqlEditorProps {
   value: string;
@@ -14,7 +16,6 @@ interface SqlEditorProps {
 
 const sqlLint = () =>
   linter((view) => {
-    // Very simple example: highlight missing semicolon as warning.
     const text = view.state.doc.toString();
     if (!text.trim().endsWith(";")) {
       return [
@@ -36,12 +37,38 @@ const SqlEditor: React.FC<SqlEditorProps> = ({
   onRun,
   isRunning,
 }) => {
-  // Ref is not used but retained for possible future extensions.
-  const editorRef = useRef(null);
+  const editorRef = useRef<any>(null);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast({
+        title: "Copied SQL!",
+        description: "The SQL code was copied to your clipboard.",
+      });
+    } catch (e) {
+      toast({
+        title: "Copy failed",
+        description: "Could not copy the SQL code.",
+      });
+    }
+  };
 
   return (
     <div className="w-full">
-      <div className="rounded-lg overflow-hidden border border-gray-200 shadow-sm bg-white">
+      <div className="rounded-lg overflow-hidden border border-gray-200 shadow-sm bg-white relative">
+        <button
+          type="button"
+          className="absolute top-2 right-2 z-10 bg-white/90 rounded px-2 py-1 border border-gray-300 text-xs font-mono hover:bg-gray-50 flex items-center gap-1 shadow transition"
+          onClick={handleCopy}
+          tabIndex={-1}
+          title="Copy SQL to clipboard"
+          aria-label="Copy SQL to clipboard"
+          disabled={isRunning}
+        >
+          <Copy size={14} className="inline-block" />
+          Copy
+        </button>
         <CodeMirror
           value={value}
           minHeight="120px"

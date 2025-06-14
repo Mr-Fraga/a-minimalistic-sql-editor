@@ -1,16 +1,6 @@
 
 import React from "react";
 
-// For demo: static rows based on "select * from users"
-const DATA_MOCK = {
-  columns: ["id", "name", "email", "created_at"],
-  rows: [
-    [1, "Alice", "alice@email.com", "2023-01-01"],
-    [2, "Bob", "bob@email.com", "2023-02-01"],
-    [3, "Cathy", "cathy@email.com", "2023-03-11"],
-  ],
-};
-
 interface ResultTableProps {
   result?: {
     columns: string[];
@@ -19,7 +9,33 @@ interface ResultTableProps {
   error?: string | null;
 }
 
+function toCSV(columns: string[], rows: Array<any[]>): string {
+  const escape = (val: any) =>
+    typeof val === "string"
+      ? `"${val.replace(/"/g, '""')}"`
+      : val == null
+      ? ""
+      : val;
+  const lines = [columns.map(escape).join(",")];
+  for (const row of rows) {
+    lines.push(row.map(escape).join(","));
+  }
+  return lines.join("\r\n");
+}
+
 const ResultTable: React.FC<ResultTableProps> = ({ result, error }) => {
+  const handleDownload = () => {
+    if (!result) return;
+    const csv = toCSV(result.columns, result.rows);
+    const blob = new Blob([csv], { type: "text/csv" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "results.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (error)
     return (
       <div className="rounded bg-red-50 border border-red-200 text-red-700 p-4 font-mono mt-2">
@@ -34,6 +50,14 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, error }) => {
 
   return (
     <div className="w-full overflow-x-auto border border-gray-200 rounded bg-white mt-2">
+      <div className="flex justify-end px-2 pt-2">
+        <button
+          className="text-xs font-mono bg-gray-900 text-white px-3 py-1 rounded hover:bg-black/80 transition"
+          onClick={handleDownload}
+        >
+          Download CSV
+        </button>
+      </div>
       <table className="min-w-full text-xs font-mono text-black">
         <thead>
           <tr className="border-b border-gray-200 bg-gray-50">
