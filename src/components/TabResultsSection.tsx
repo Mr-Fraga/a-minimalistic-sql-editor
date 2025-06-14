@@ -4,28 +4,7 @@ import ResultTable from "@/components/ResultTable";
 import { ResultsActionsBar } from "@/components/ResultTable/ResultsActionsBar";
 import { ResultsStatsBar } from "@/components/ResultTable/ResultsStatsBar";
 
-// Always use MOCK_RESULT for demonstration
-const MOCK_RESULT = {
-  columns: ["id", "name", "email"],
-  rows: [
-    [1, "Alice", "alice@email.com"],
-    [2, "Bob", "bob@email.com"],
-    [3, "Charlie", "charlie@email.com"],
-    [4, "Diana", "diana@email.com"],
-    [5, "Eve", "eve@email.com"],
-    [6, "Frank", "frank@email.com"],
-    [7, "Grace", "grace@email.com"],
-    [8, "Heidi", "heidi@email.com"],
-    [9, "Ivan", "ivan@email.com"],
-    [10, "Judy", "judy@email.com"],
-    [11, "Karl", "karl@email.com"],
-    [12, "Louis", "louis@email.com"],
-    [13, "Mallory", "mallory@email.com"],
-    [14, "Niaj", "niaj@email.com"],
-    [15, "Olivia", "olivia@email.com"],
-  ],
-};
-
+// Minimum/Maximum result height
 const MIN_RESULTS_HEIGHT = 80;
 const MAX_RESULTS_HEIGHT = 600;
 
@@ -37,7 +16,7 @@ interface TabResultsSectionProps {
 }
 
 const TabResultsSection: React.FC<TabResultsSectionProps> = ({
-  tab,          // <--- Add this prop for actual tab context
+  tab,
   resultsHeight,
   setResultsHeight,
   onDownloadCsv,
@@ -72,7 +51,7 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
     dragStartY.current = null;
   };
 
-  // Demo toggle state
+  // Demo toggle state (not used for data)
   const [toggled, setToggled] = useState(false);
 
   // Helper to create filename with tab name and timestamp
@@ -92,17 +71,25 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
     return `${sanitize(tabName)}_${timestamp}.csv`;
   }
 
-  // Download as CSV handler for demo
+  // Download as CSV handler for demo - use tab.result not mock
   const handleDownload = () => {
-    const header = MOCK_RESULT.columns.join(",");
-    const rows = MOCK_RESULT.rows.map(r =>
+    const result = tab?.result;
+    if (!result || !Array.isArray(result.rows) || result.rows.length === 0) {
+      if (window && window.toast) {
+        window.toast({ title: "No data", description: "No results to download." });
+      }
+      return;
+    }
+    const header = result.columns.map(val =>
+      typeof val === "string" ? `"${val.replace(/"/g, '""')}"` : val
+    ).join(",");
+    const rows = result.rows.map(r =>
       r.map(val => (typeof val === "string" ? `"${val.replace(/"/g, '""')}"` : val)).join(",")
     );
     const csv = [header, ...rows].join("\r\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
-    // Use the real tab name for the filename
     a.download = getDownloadFilename(tab?.name || "Tab");
     a.href = url;
     document.body.appendChild(a);
@@ -112,6 +99,10 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
       document.body.removeChild(a);
     }, 100);
   };
+
+  // Use tab.result for stats
+  const numRows = tab?.result?.rows?.length || 0;
+  const numColumns = tab?.result?.columns?.length || 0;
 
   return (
     <div
@@ -138,9 +129,9 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
         <div className="flex-1"></div>
       </div>
 
-      {/* Results Table FIRST */}
+      {/* Results Table */}
       <div className="flex-1 flex flex-col min-h-0 h-full px-0 pt-4 pb-2 w-full">
-        <ResultTable result={MOCK_RESULT} />
+        <ResultTable result={tab.result} error={tab.error} />
       </div>
 
       {/* Bottom bar: buttons left, stats right */}
@@ -154,9 +145,9 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
         {/* Stats right */}
         <div className="flex flex-1 items-center justify-end">
           <ResultsStatsBar
-            numRows={MOCK_RESULT.rows.length}
-            numColumns={MOCK_RESULT.columns.length}
-            elapsedMs={64}
+            numRows={numRows}
+            numColumns={numColumns}
+            elapsedMs={tab?.result?.elapsedMs ?? undefined}
           />
         </div>
       </div>
