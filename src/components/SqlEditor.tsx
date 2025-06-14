@@ -1,10 +1,9 @@
-
 import React, { useRef, useImperativeHandle, forwardRef } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { sql } from "@codemirror/lang-sql";
 import { linter, lintGutter } from "@codemirror/lint";
 import { toast } from "@/hooks/use-toast";
-import { Copy, Play } from "lucide-react";
+import { Copy, Play, Format } from "lucide-react";
 
 interface SqlEditorProps {
   value: string;
@@ -87,7 +86,7 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
           </button>
           {/* Format SQL button, below copy button */}
           <button
-            className="absolute top-11 right-2 z-10 bg-gray-900 text-white text-xs font-mono rounded-md px-2 py-1 border border-gray-800 hover:bg-black/80 shadow transition"
+            className="absolute top-11 right-2 z-10 bg-white/90 rounded-md px-2 py-1 border border-gray-300 text-xs font-mono hover:bg-gray-50 flex items-center gap-1 shadow transition"
             onClick={onFormat}
             tabIndex={-1}
             title="Format SQL"
@@ -96,7 +95,7 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
             style={{marginTop: 2}}
             type="button"
           >
-            Format SQL
+            <Format size={14} className="inline-block" />
           </button>
           {/* Resizable vertical textbox */}
           <div
