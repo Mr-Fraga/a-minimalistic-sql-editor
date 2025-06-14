@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import SqlEditor, { SqlEditorImperativeHandle } from "@/components/SqlEditor";
 import ResultTable from "@/components/ResultTable";
@@ -127,12 +126,12 @@ const TabView: React.FC<TabViewProps> = ({
       </div>
       {/* Results Section - draggable by title */}
       <div
-        className="flex flex-col min-h-[80px] bg-white border-t border-gray-200 overflow-hidden relative select-none"
+        className="flex flex-col min-h-[80px] bg-white overflow-hidden relative select-none"
         style={{ height: resultsHeight, transition: "height 0.08s" }}
       >
         {/* Drag handle - Results title */}
         <div
-          className="cursor-ns-resize w-full flex items-center justify-between bg-gray-50 border-b border-gray-200 px-4 py-2"
+          className="cursor-ns-resize w-full flex items-center justify-between px-4 py-2 bg-white"
           style={{
             userSelect: "none",
           }}
@@ -186,4 +185,3 @@ const TabView: React.FC<TabViewProps> = ({
 };
 
 export default TabView;
-
