@@ -4,7 +4,6 @@ import React, {
   useCallback,
   useEffect, // <-- ADD USE EFFECT
 } from "react";
-// Remove useDebounce, useLocalStorage, and react-hotkeys-hook imports
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
@@ -27,11 +26,6 @@ import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { Copy, Plus, Settings, ChevronDown } from "lucide-react";
 
-// Remove these lines:
-// import { useDebounce } from "@/hooks/use-debounce";
-// import { useLocalStorage } from "@/hooks/use-local-storage";
-// import { useHotkeys } from "react-hotkeys-hook";
-// import Sidebar from "@/components/Sidebar";
 import {
   Sidebar,
 } from "@/components/ui/sidebar"; // use shadcn/ui sidebar
@@ -72,6 +66,9 @@ function useDebounce<T>(value: T, delay: number): T {
   }, [value, delay]);
   return debounced;
 }
+
+// Add this DEFAULT_SQL definition just before the Index component
+const DEFAULT_SQL = `SELECT * FROM users LIMIT 10;`;
 
 const Index: React.FC = () => {
   return (
@@ -323,12 +320,6 @@ const PageContent: React.FC = () => {
   );
 
   // ========================= Hotkeys =========================
-
-  // REMOVE below: hotkey hooks since react-hotkeys-hook doesn't exist
-  // useHotkeys("ctrl+k, command+k", (e) => { ... });
-  // useHotkeys("ctrl+enter, command+enter", (e) => { ... });
-  // useHotkeys("ctrl+shift+enter, command+shift+enter", (e) => { ... });
-  // useHotkeys("ctrl+alt+f, command+alt+f", (e) => { ... });
 
   // ========================= Render =========================
 
