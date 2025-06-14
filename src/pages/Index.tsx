@@ -169,7 +169,8 @@ const Index: React.FC = () => {
       tab.id === id ? { ...tab, sql: formatSql(tab.sql) } : tab
     ));
   };
-  const handleRun = (id: string) => {
+  // Update handleRun to receive statement?
+  const handleRun = (id: string, statement?: string) => {
     setTabs(prev =>
       prev.map(tab =>
         tab.id === id ? { ...tab, isRunning: true } : tab
@@ -179,7 +180,9 @@ const Index: React.FC = () => {
       setTabs(prev =>
         prev.map(tab => {
           if (tab.id !== id) return tab;
-          const res = fakeRunQuery(tab.sql);
+          // Use the selected statement if provided, otherwise the tab.sql
+          const sqlToExecute = (statement && statement.trim() ? statement : tab.sql);
+          const res = fakeRunQuery(sqlToExecute);
           if ("error" in res) {
             return { ...tab, result: null, error: res.error, isRunning: false };
           } else {
@@ -424,7 +427,7 @@ const Index: React.FC = () => {
                 sqlEditorRef={sqlEditorRefs.current[currentTab.id]}
                 onSqlChange={sql => handleSqlChange(currentTab.id, sql)}
                 onFormat={() => handleFormat(currentTab.id)}
-                onRun={() => handleRun(currentTab.id)}
+                onRun={(selection) => handleRun(currentTab.id, selection)}
                 onDownloadCsv={() => handleDownloadCsv(currentTab)}
               />
             )}

@@ -1,3 +1,4 @@
+
 import React, { useRef, useImperativeHandle, forwardRef } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { sql } from "@codemirror/lang-sql";
@@ -9,7 +10,7 @@ interface SqlEditorProps {
   value: string;
   onChange: (sql: string) => void;
   onFormat: () => void;
-  onRun: () => void;
+  onRun: (statement?: string) => void;
   isRunning?: boolean;
 }
 
@@ -31,6 +32,7 @@ const sqlLint = () =>
 
 export interface SqlEditorImperativeHandle {
   insertAtCursor: (toInsert: string) => void;
+  getSelection: () => string;
 }
 
 const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<SqlEditorProps>>(
@@ -50,6 +52,17 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
           });
           view.focus();
         }
+      },
+      getSelection: () => {
+        if (editorRef.current && typeof editorRef.current.view === "object") {
+          const view = editorRef.current.view;
+          if (!view) return "";
+          const { state } = view;
+          const { from, to } = state.selection.main;
+          if (from === to) return "";
+          return state.doc.sliceString(from, to);
+        }
+        return "";
       }
     }));
 
@@ -66,6 +79,20 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
           description: "Could not copy the SQL code.",
         });
       }
+    };
+
+    const handleRunButton = () => {
+      let selected = "";
+      if (editorRef.current && typeof editorRef.current.view === "object") {
+        const view = editorRef.current.view;
+        const { state } = view;
+        const { from, to } = state.selection.main;
+        if (from !== to) {
+          selected = state.doc.sliceString(from, to);
+        }
+      }
+      // If there's a selection, run only that; otherwise run all.
+      onRun(selected || undefined);
     };
 
     return (
@@ -92,10 +119,11 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
             title="Format SQL"
             aria-label="Format SQL"
             disabled={isRunning}
-            style={{marginTop: 2}}
+            style={{ marginTop: 2 }}
             type="button"
           >
             <Settings2 size={14} className="inline-block" />
+            Format
           </button>
           {/* Resizable vertical textbox */}
           <div
@@ -127,8 +155,8 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
         {/* Buttons below the resizable box */}
         <div className="flex gap-2 mt-2">
           <button
-            className="rounded-md px-4 py-1 bg-black text-white text-sm font-mono hover:bg-gray-900 transition"
-            onClick={onRun}
+            className="rounded-md px-4 py-1 bg-black text-white text-sm font-mono hover:bg-gray-900 transition flex items-center"
+            onClick={handleRunButton}
             disabled={isRunning}
             type="button"
             aria-label="Run"
