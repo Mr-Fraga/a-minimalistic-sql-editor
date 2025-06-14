@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 
 const Index: React.FC = () => {
   const sqlEditorRef = useRef<SqlEditorImperativeHandle | null>(null);
-
   // Add state for active tab
   const [activeTab, setActiveTab] = useState<"sql" | "worksheets">("sql");
 
@@ -28,9 +27,10 @@ const Index: React.FC = () => {
           <Button
             variant="ghost"
             className={
-              activeTab === "sql"
+              (activeTab === "sql"
                 ? "text-black font-bold"
-                : "text-gray-600 font-semibold"
+                : "text-gray-600 font-semibold") +
+              " text-2xl px-6 py-2"
             }
             onClick={() => setActiveTab("sql")}
             aria-pressed={activeTab === "sql"}
@@ -40,9 +40,10 @@ const Index: React.FC = () => {
           <Button
             variant="ghost"
             className={
-              activeTab === "worksheets"
+              (activeTab === "worksheets"
                 ? "text-black font-bold"
-                : "text-gray-600 font-semibold"
+                : "text-gray-600 font-semibold") +
+              " text-2xl px-6 py-2"
             }
             onClick={() => setActiveTab("worksheets")}
             aria-pressed={activeTab === "worksheets"}
@@ -72,3 +73,4 @@ const Index: React.FC = () => {
 };
 
 export default Index;
+
