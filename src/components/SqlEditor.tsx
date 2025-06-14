@@ -1,9 +1,10 @@
+
 import React, { useRef, useImperativeHandle, forwardRef } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { sql } from "@codemirror/lang-sql";
 import { linter, lintGutter } from "@codemirror/lint";
 import { toast } from "@/hooks/use-toast";
-import { Copy, Play, Settings2, Glass } from "lucide-react";
+import { Copy, Play, Settings2, Glasses } from "lucide-react";
 
 interface SqlEditorProps {
   value: string;
@@ -156,7 +157,7 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
             style={{ marginTop: 2 }}
             type="button"
           >
-            <Glass size={14} className="inline-block" />
+            <Glasses size={14} className="inline-block" />
             Search
           </button>
           {/* Resizable vertical textbox */}
@@ -205,3 +206,4 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
 );
 
 export default SqlEditor;
+
