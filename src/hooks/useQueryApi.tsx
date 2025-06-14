@@ -1,4 +1,3 @@
-
 import { useCallback } from "react";
 import { toast } from "@/hooks/use-toast";
 import { TabType } from "./useTabsState";
@@ -20,16 +19,24 @@ export function useQueryApi({ updateTab, DEFAULT_SQL }: {
   const apiUrl = "http://localhost:8000";
   const USE_MOCK_QUERY = true;
 
+  function normalizeSql(sql: string) {
+    // Remove extra whitespace, lowercase, and remove trailing semicolons
+    return sql.trim().replace(/\s+/g, " ").replace(/;$/, "").toLowerCase();
+  }
+
   const runSql = useCallback(
     async (sql: string, tabId: string) => {
       updateTab(tabId, { isRunning: true, error: null, result: null });
       try {
         if (USE_MOCK_QUERY) {
           await new Promise((res) => setTimeout(res, 350));
-          if (
-            sql.trim().replace(/\s+/g, " ") === DEFAULT_SQL.trim().replace(/\s+/g, " ")
-          ) {
+          // Add log for debugging
+          const normalized = normalizeSql(sql);
+          const expected = normalizeSql(DEFAULT_SQL);
+          console.log("[useQueryApi] Normalized input:", normalized, "Expected:", expected);
+          if (normalized === expected) {
             updateTab(tabId, { result: MOCK_RESULT, error: null });
+            console.log("[useQueryApi] set MOCK_RESULT for", tabId);
           } else {
             throw new Error("Only the default mock query is supported: SELECT * FROM users LIMIT 10;");
           }
