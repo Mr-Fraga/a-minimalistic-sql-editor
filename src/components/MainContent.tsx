@@ -24,10 +24,11 @@ const MOCK_RESULT = {
     [3, "Charlie", "charlie@email.com"],
   ]
 };
+// Make result null for new tabs so results table is empty until a query is run
 const DEFAULT_TAB: Omit<TabType, "id"> = {
   name: "New Tab",
   sql: DEFAULT_SQL,
-  result: MOCK_RESULT,
+  result: null,
   error: null,
   isRunning: false,
 };
