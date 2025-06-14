@@ -40,7 +40,6 @@ function fakeRunQuery(sql: string): { columns: string[]; rows: Array<any[]> } | 
   };
 }
 
-// minimal "formatter" for pretty SQL (only indent SELECT * FROM ...)
 function formatSql(sql: string) {
   return sql
     .replace(/\bSELECT\b/i, "SELECT")
@@ -92,38 +91,46 @@ const Index: React.FC = () => {
           <AccountSection account="john_smith" role="readonly" />
         </div>
       </header>
-      <main className="flex-1 flex min-h-0 border-t border-gray-200">
-        <aside className="w-[230px] bg-gray-50 border-r border-gray-200 flex-shrink-0 min-h-0">
-          <TableExplorer
-            onInsertSchemaTable={handleInsertSchemaTable}
-            onInsertColumn={handleInsertColumn}
-          />
-        </aside>
-        <section className="flex-1 flex flex-col px-8 py-6 min-w-0">
-          <h1 className="font-bold text-xl mb-4 font-mono tracking-tight select-none">SQL Editor</h1>
-          <div className="flex-1 flex flex-col min-h-0">
-            <ResizablePanelGroup direction="vertical" className="flex-1 min-h-0">
-              <ResizablePanel defaultSize={60} minSize={20}>
-                <SqlEditor
-                  ref={sqlEditorRef}
-                  value={sql}
-                  onChange={setSql}
-                  onFormat={handleFormat}
-                  onRun={handleRun}
-                  isRunning={isRunning}
-                />
-              </ResizablePanel>
-              <ResizableHandle withHandle className="bg-gray-200" />
-              <ResizablePanel defaultSize={40} minSize={20}>
-                <div className="mt-6 flex flex-col min-h-0 h-full">
-                  <h2 className="font-bold text-md mb-2 font-mono tracking-tight select-none">Results</h2>
-                  <ResultTable result={result || undefined} error={error} />
-                </div>
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          </div>
-        </section>
-      </main>
+      {/* Make outer group horizontal, and the editor/results within vertical */}
+      <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0 w-full">
+        {/* Sidebar */}
+        <ResizablePanel defaultSize={23} minSize={16} maxSize={40}>
+          <aside className="w-full h-full bg-gray-50 border-r border-gray-200 flex-shrink-0 min-h-0">
+            <TableExplorer
+              onInsertSchemaTable={handleInsertSchemaTable}
+              onInsertColumn={handleInsertColumn}
+            />
+          </aside>
+        </ResizablePanel>
+        <ResizableHandle className="bg-gray-200" />
+        {/* Main area with editor/results, now vertically resizable */}
+        <ResizablePanel defaultSize={77} minSize={47}>
+          <section className="flex-1 flex flex-col px-8 py-6 min-w-0 h-full">
+            <h1 className="font-bold text-xl mb-4 font-mono tracking-tight select-none">SQL Editor</h1>
+            <div className="flex-1 flex flex-col min-h-0 h-full">
+              <ResizablePanelGroup direction="vertical" className="flex-1 min-h-0 h-full">
+                <ResizablePanel defaultSize={60} minSize={20}>
+                  <SqlEditor
+                    ref={sqlEditorRef}
+                    value={sql}
+                    onChange={setSql}
+                    onFormat={handleFormat}
+                    onRun={handleRun}
+                    isRunning={isRunning}
+                  />
+                </ResizablePanel>
+                <ResizableHandle withHandle className="bg-gray-200" />
+                <ResizablePanel defaultSize={40} minSize={20}>
+                  <div className="mt-6 flex flex-col min-h-0 h-full">
+                    <h2 className="font-bold text-md mb-2 font-mono tracking-tight select-none">Results</h2>
+                    <ResultTable result={result || undefined} error={error} />
+                  </div>
+                </ResizablePanel>
+              </ResizablePanelGroup>
+            </div>
+          </section>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 };
