@@ -1,12 +1,16 @@
 
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { SqlEditorImperativeHandle } from "@/components/SqlEditor";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import MainContent from "@/components/MainContent";
 import AccountSection from "@/components/AccountSection";
+import { Button } from "@/components/ui/button";
 
 const Index: React.FC = () => {
   const sqlEditorRef = useRef<SqlEditorImperativeHandle | null>(null);
+
+  // Add state for active tab
+  const [activeTab, setActiveTab] = useState<"sql" | "worksheets">("sql");
 
   return (
     <div className="min-h-screen h-screen w-full flex flex-col bg-white">
@@ -21,8 +25,30 @@ const Index: React.FC = () => {
       >
         {/* Titles: SQL and Worksheets */}
         <div className="flex flex-row items-center gap-6 pl-6 md:pl-8">
-          <span className="text-xl font-bold text-gray-900 tracking-tight select-none">SQL</span>
-          <span className="text-md font-semibold text-gray-600 select-none">Worksheets</span>
+          <Button
+            variant="ghost"
+            className={
+              activeTab === "sql"
+                ? "text-black font-bold"
+                : "text-gray-600 font-semibold"
+            }
+            onClick={() => setActiveTab("sql")}
+            aria-pressed={activeTab === "sql"}
+          >
+            SQL
+          </Button>
+          <Button
+            variant="ghost"
+            className={
+              activeTab === "worksheets"
+                ? "text-black font-bold"
+                : "text-gray-600 font-semibold"
+            }
+            onClick={() => setActiveTab("worksheets")}
+            aria-pressed={activeTab === "worksheets"}
+          >
+            Worksheets
+          </Button>
         </div>
         <div className="flex-1 px-4" />
         {/* AccountSection on the right */}
@@ -46,4 +72,3 @@ const Index: React.FC = () => {
 };
 
 export default Index;
-
