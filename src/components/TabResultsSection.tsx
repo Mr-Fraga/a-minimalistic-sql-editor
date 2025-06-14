@@ -106,6 +106,17 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
   const numRows = tab?.result?.rows?.length || 0;
   const numColumns = tab?.result?.columns?.length || 0;
 
+  // Determine error to show in table: Only if error present *and* data present
+  let resultTableError = null;
+  if (
+    tab?.error &&
+    tab?.result &&
+    Array.isArray(tab.result.rows) &&
+    tab.result.rows.length > 0
+  ) {
+    resultTableError = tab.error;
+  }
+
   return (
     <div
       className="flex flex-col min-h-[80px] bg-white overflow-hidden relative select-none"
@@ -133,7 +144,7 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
 
       {/* Results Table */}
       <div className="flex-1 flex flex-col min-h-0 h-full px-0 pt-4 pb-2 w-full">
-        <ResultTable result={tab.result} error={tab.error} />
+        <ResultTable result={tab.result} error={resultTableError} />
       </div>
 
       {/* Bottom bar: buttons left, stats right */}
@@ -158,4 +169,3 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
 };
 
 export default TabResultsSection;
-
