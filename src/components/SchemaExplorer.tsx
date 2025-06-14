@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Collapsible,
@@ -39,7 +38,7 @@ const SchemaExplorer: React.FC<SchemaExplorerProps> = ({
         ) : (
           <ChevronRight className="w-4 h-4 text-gray-500" />
         )}
-        <span className="font-din text-gray-700 text-base font-bold">
+        <span className="text-gray-700 text-base font-bold">
           {schemaName}
           <span className="ml-2 text-xs text-gray-400 font-normal">
             ({tables.length})
@@ -53,7 +52,7 @@ const SchemaExplorer: React.FC<SchemaExplorerProps> = ({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
-                    className="font-din text-left text-sm w-full px-2 py-1 rounded hover:bg-black hover:text-white transition"
+                    className="text-left text-sm w-full px-2 py-1 rounded hover:bg-black hover:text-white transition"
                     onClick={() => onInsertSchemaTable?.(schemaName, table.name)}
                     type="button"
                   >
@@ -76,4 +75,3 @@ const SchemaExplorer: React.FC<SchemaExplorerProps> = ({
   );
 };
 export default SchemaExplorer;
-
