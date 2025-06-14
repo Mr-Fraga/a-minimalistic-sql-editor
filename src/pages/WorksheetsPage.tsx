@@ -7,7 +7,7 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import { Folder, File, Trash } from "lucide-react";
+import { Folder, File, Trash, Copy } from "lucide-react";
 import DeleteFileModal from "@/components/DeleteFileModal";
 
 // Mock folders/files data with dates
@@ -170,6 +170,77 @@ const WorksheetsPage: React.FC = () => {
     parentFolder: string | undefined;
   }>({ open: false, fileName: null, parentFolder: undefined });
 
+  // Handler to duplicate a file (either in a folder or root)
+  const handleDuplicateFile = (
+    parentFolder: string | undefined,
+    fileName: string
+  ) => {
+    setData((prev) => {
+      function createCopyName(
+        existingNames: string[],
+        baseName: string
+      ): string {
+        // Remove " (copy)" or " (copy N)" suffixes for base
+        const copyPattern = /\s?\(copy(?: (\d+))?\)$/i;
+        const rawBase =
+          baseName.replace(copyPattern, "") || baseName;
+        let copyName = `${rawBase} (copy)`;
+        let i = 1;
+        // Ensure unique
+        while (existingNames.includes(copyName)) {
+          copyName = `${rawBase} (copy ${++i})`;
+        }
+        return copyName;
+      }
+
+      // Helper to deep clone a file
+      function cloneFileEntry(file: any, name: string) {
+        return {
+          ...file,
+          name,
+          // Optionally: updatedAt can be updated to now or left as original
+          updatedAt: new Date().toISOString().split("T")[0],
+          createdAt: new Date().toISOString().split("T")[0],
+        };
+      }
+
+      if (!parentFolder) {
+        // root files
+        const rootFiles = prev.filter((item) => item.type === "file");
+        const fileToCopy = rootFiles.find((f) => f.name === fileName);
+        if (!fileToCopy) return prev;
+        const allNames = rootFiles.map((f) => f.name);
+        const newName = createCopyName(allNames, fileToCopy.name);
+
+        // Insert copy after original
+        const idx = prev.findIndex((item) => item.type === "file" && item.name === fileName);
+        const clone = cloneFileEntry(fileToCopy, newName);
+        const newArr = [...prev];
+        newArr.splice(idx + 1, 0, clone);
+        return newArr;
+      } else {
+        // file is within a folder
+        return prev.map((item) => {
+          if (item.type !== "folder" || item.name !== parentFolder) return item;
+          // Find file in folder
+          const fileToCopy = item.files.find((f: any) => f.name === fileName);
+          if (!fileToCopy) return item;
+          const existingNames = item.files.map((f: any) => f.name);
+          const newName = createCopyName(existingNames, fileToCopy.name);
+          const clone = cloneFileEntry(fileToCopy, newName);
+          // Insert copy after original
+          const fileIdx = item.files.findIndex((f: any) => f.name === fileName);
+          const newFiles = [...item.files];
+          newFiles.splice(fileIdx + 1, 0, clone);
+          return {
+            ...item,
+            files: newFiles,
+          };
+        });
+      }
+    });
+  };
+
   // To handle file deletion
   const handleDeleteFile = (parentFolder: string | undefined, fileName: string) => {
     setData(prev => {
@@ -302,16 +373,30 @@ const WorksheetsPage: React.FC = () => {
                 </TableCell>
                 <TableCell className="text-right">
                   {row.type === "file" && (
-                    <button
-                      className="p-1 rounded hover:bg-red-50"
-                      title="Delete file"
-                      onClick={e => {
-                        e.stopPropagation();
-                        setModalState({ open: true, fileName: row.name, parentFolder: row.parentFolder });
-                      }}
-                    >
-                      <Trash className="text-red-500" size={18} strokeWidth={2} />
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      {/* Duplicate icon */}
+                      <button
+                        className="p-1 rounded hover:bg-blue-50"
+                        title="Duplicate file"
+                        onClick={e => {
+                          e.stopPropagation();
+                          handleDuplicateFile(row.parentFolder, row.name);
+                        }}
+                      >
+                        <Copy className="text-blue-500" size={18} strokeWidth={2} />
+                      </button>
+                      {/* Trash icon */}
+                      <button
+                        className="p-1 rounded hover:bg-red-50"
+                        title="Delete file"
+                        onClick={e => {
+                          e.stopPropagation();
+                          setModalState({ open: true, fileName: row.name, parentFolder: row.parentFolder });
+                        }}
+                      >
+                        <Trash className="text-red-500" size={18} strokeWidth={2} />
+                      </button>
+                    </div>
                   )}
                 </TableCell>
               </TableRow>
