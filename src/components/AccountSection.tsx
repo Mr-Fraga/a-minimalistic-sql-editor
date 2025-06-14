@@ -1,21 +1,12 @@
 
 import React, { useState, useRef } from "react";
 import {
-  Select,
-  SelectGroup,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-  SelectLabel,
-} from "@/components/ui/select";
-import { User, UserRound, Shield, ShieldCheck } from "lucide-react";
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { User, UserRound, Shield, ShieldCheck } from "lucide-react";
 
 // Optional: in a real app, this would come from user profile props
 const MOCK_NAME = "John Smith";
@@ -73,17 +64,19 @@ const AccountSection: React.FC<AccountSectionProps> = ({
     return () => window.removeEventListener("mousedown", onClick);
   }, [roleOpen]);
 
+  // Tooltip state for account
+  const [accountTooltipOpen, setAccountTooltipOpen] = React.useState(false);
+
   return (
     <div className="flex items-center gap-4 bg-black text-white px-6 py-3 rounded-t-lg shadow-sm select-none relative">
       {/* Role Icon with tooltip and dropdown */}
       <TooltipProvider>
-        <Tooltip>
+        <Tooltip delayDuration={200}>
           <TooltipTrigger asChild>
             <div
               ref={roleIconRef}
               className="flex items-center justify-center cursor-pointer border-none focus:outline-none relative"
               tabIndex={0}
-              onMouseEnter={() => setRoleOpen(false)}
               onClick={() => setRoleOpen((o) => !o)}
               aria-label="Role"
             >
@@ -127,11 +120,16 @@ const AccountSection: React.FC<AccountSectionProps> = ({
       )}
       {/* Account icon with tooltip */}
       <TooltipProvider>
-        <Tooltip>
+        <Tooltip open={accountTooltipOpen} onOpenChange={setAccountTooltipOpen} delayDuration={200}>
           <TooltipTrigger asChild>
             <div
               className="ml-1 flex items-center justify-center cursor-pointer"
               tabIndex={0}
+              aria-label="View account details"
+              onMouseEnter={() => setAccountTooltipOpen(true)}
+              onMouseLeave={() => setAccountTooltipOpen(false)}
+              onFocus={() => setAccountTooltipOpen(true)}
+              onBlur={() => setAccountTooltipOpen(false)}
             >
               <User className="w-7 h-7 text-white" />
             </div>
@@ -152,4 +150,3 @@ const AccountSection: React.FC<AccountSectionProps> = ({
 };
 
 export default AccountSection;
-
