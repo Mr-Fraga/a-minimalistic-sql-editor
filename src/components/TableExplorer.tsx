@@ -184,12 +184,20 @@ interface TableExplorerProps {
   onInsertSchemaTable?: (schema: string, table: string) => void;
   onInsertColumn?: (col: string) => void;
   style?: React.CSSProperties;
+  role: string; // Add a role prop
+}
+
+// Helper to detect sensitive table
+function isSensitiveTable(tableName: string): boolean {
+  const name = tableName.toLowerCase();
+  return name.includes("user") || name.includes("employee");
 }
 
 const TableExplorer: React.FC<TableExplorerProps> = ({
   onInsertSchemaTable,
   onInsertColumn,
   style = {},
+  role,
 }) => {
   const [search, setSearch] = useState("");
   const [openSchemas, setOpenSchemas] = useState<Record<string, boolean>>({});
@@ -207,14 +215,28 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
   }, []);
 
   const filteredSchemas = useMemo(() => {
-    if (!search.trim()) return SCHEMA_DATA;
+    const filterTables = (tables: any[]) =>
+      tables.filter((t) => {
+        if (!role || role === "sensitive") return true;
+        return !isSensitiveTable(t.name);
+      });
+
+    if (!search.trim()) {
+      return SCHEMA_DATA.map(schema => ({
+        ...schema,
+        tables: filterTables(schema.tables),
+      })).filter(schema => schema.tables.length > 0);
+    }
+    // With search, still filter based on sensitive access
     return SCHEMA_DATA.map((schema) => ({
       ...schema,
-      tables: schema.tables.filter((t) =>
-        t.name.toLowerCase().includes(search.trim().toLowerCase())
+      tables: filterTables(
+        schema.tables.filter((t) =>
+          t.name.toLowerCase().includes(search.trim().toLowerCase())
+        )
       ),
     })).filter((schema) => schema.tables.length > 0);
-  }, [search]);
+  }, [search, role]);
 
   const toggleSchema = (schema: string) => {
     setOpenSchemas((prev) => ({

@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   DropdownMenu,
@@ -15,6 +14,7 @@ const MOCK_NAME = "John Smith";
 interface AccountSectionProps {
   account: string; // This is email
   role: string;    // Should match one of: "readonly", "admin", "sensitive"
+  onRoleChange?: (newRole: string) => void;
 }
 
 const ROLES = [
@@ -35,10 +35,15 @@ const ROLES = [
 const AccountSection: React.FC<AccountSectionProps> = ({
   account,
   role: initialRole,
+  onRoleChange,
 }) => {
-  // Local role state for demonstration (since there's no backend)
+  // Local role state for demonstration (if no onRoleChange passed)
   const [role, setRole] = React.useState(initialRole);
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    setRole(initialRole);
+  }, [initialRole]);
 
   // Find role label
   const roleLabel = ROLES.find((r) => r.key === role)?.label ?? ROLES[0].label;
@@ -56,7 +61,6 @@ const AccountSection: React.FC<AccountSectionProps> = ({
     }
   };
 
-  // Close dropdown on blur for good UX
   const handleAvatarBlur = () => {
     setDropdownOpen(false);
   };
@@ -69,7 +73,8 @@ const AccountSection: React.FC<AccountSectionProps> = ({
       title: "Role changed",
       description: `Your role has been set to "${label}".`,
     });
-    setDropdownOpen(false); // Ensure dropdown closes so it can be opened again
+    setDropdownOpen(false);
+    if (onRoleChange) onRoleChange(newRole);
   };
 
   return (
@@ -126,4 +131,3 @@ const AccountSection: React.FC<AccountSectionProps> = ({
 };
 
 export default AccountSection;
-
