@@ -215,11 +215,14 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
   }, []);
 
   const filteredSchemas = useMemo(() => {
-    const filterTables = (tables: any[]) =>
-      tables.filter((t) => {
-        if (!role || role === "sensitive") return true;
-        return !isSensitiveTable(t.name);
-      });
+    const filterTables = (tables: any[]) => {
+      if (role === "sensitive") {
+        // Only show sensitive tables
+        return tables.filter((t) => isSensitiveTable(t.name));
+      }
+      // For other roles, only show non-sensitive tables
+      return tables.filter((t) => !isSensitiveTable(t.name));
+    };
 
     if (!search.trim()) {
       return SCHEMA_DATA.map(schema => ({
