@@ -69,22 +69,26 @@ const Index: React.FC = () => {
         </div>
       </div>
       {/* Main content area */}
-      <div className="flex-1 w-full flex flex-row gap-0 bg-white">
+      <div className="flex-1 w-full flex flex-row gap-0 bg-white min-h-0 h-full">
         {/* Sidebar with TableExplorer, passing callbacks */}
-        <TableExplorer
-          onInsertSchemaTable={(schema, table) => {
-            if (sqlEditorRef.current) {
-              // Insert schema.table at cursor
-              sqlEditorRef.current.insertAtCursor(`${schema}.${table}`);
-            }
-          }}
-          onInsertColumn={(col) => {
-            if (sqlEditorRef.current) {
-              sqlEditorRef.current.insertAtCursor(col);
-            }
-          }}
-        />
-        <PageContent sqlEditorRef={sqlEditorRef} />
+        <div className="h-full flex flex-col min-h-0">
+          <TableExplorer
+            onInsertSchemaTable={(schema, table) => {
+              if (sqlEditorRef.current) {
+                // Insert schema.table at cursor
+                sqlEditorRef.current.insertAtCursor(`${schema}.${table}`);
+              }
+            }}
+            onInsertColumn={(col) => {
+              if (sqlEditorRef.current) {
+                sqlEditorRef.current.insertAtCursor(col);
+              }
+            }}
+          />
+        </div>
+        <div className="flex-1 min-h-0 flex flex-col h-full">
+          <PageContent sqlEditorRef={sqlEditorRef} />
+        </div>
       </div>
     </div>
   );

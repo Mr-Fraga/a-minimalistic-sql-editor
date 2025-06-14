@@ -32,7 +32,6 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
   const dragStartHeight = useRef<number>(resultsHeight);
 
   // Drag handlers for resizing results section
-  // Only changes are for correct drag logic and className (ensure white background)
   const handleDragStart = (e: React.MouseEvent) => {
     dragStartY.current = e.clientY;
     dragStartHeight.current = resultsHeight;
@@ -99,12 +98,12 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
   return (
     <div
       className="flex flex-col min-h-[80px] bg-white overflow-hidden relative select-none"
-      style={{ height: resultsHeight, transition: "height 0.08s" }}
+      style={{ height: resultsHeight, transition: "height 0.08s", minHeight: MIN_RESULTS_HEIGHT, maxHeight: MAX_RESULTS_HEIGHT }}
     >
       {/* Drag handle - Results title */}
       <div
-        className="cursor-ns-resize w-full flex items-center justify-between px-4 py-2 bg-white"
-        style={{ userSelect: "none" }}
+        className="cursor-ns-resize w-full flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200"
+        style={{ userSelect: "none", minHeight: 32 }}
         onMouseDown={handleDragStart}
         role="separator"
         aria-label="Drag to resize results"
@@ -127,7 +126,6 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
           </div>
         )}
 
-        {/* Increased spacing between statistics and buttons */}
         {tab.result && tab.result.rows.length > 0 && (
           <div className="h-7" /> // More vertical space
         )}
@@ -136,7 +134,6 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
           <div className="flex flex-row items-center gap-4">
             {tab.result && tab.result.rows.length > 0 && (
               <>
-                {/* Download Button and Toggle: reduced height, wide, aligned */}
                 <Button
                   size="sm"
                   className="font-mono bg-black text-white hover:bg-gray-800 rounded-full px-4 min-w-[112px] flex items-center justify-center text-[0.92rem]"
