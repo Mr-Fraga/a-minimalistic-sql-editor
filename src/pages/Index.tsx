@@ -73,8 +73,24 @@ const Index: React.FC = () => {
   ]);
   const [activeTab, setActiveTab] = React.useState("tab-1");
 
-  // Keep refs per tab for insertAtCursor support
-  const sqlEditorRefs = useRef<Record<string, SqlEditorImperativeHandle | null>>({});
+  // Instead of using an object with a getter, maintain a ref per tab:
+  const sqlEditorRefs = useRef<Record<string, React.RefObject<SqlEditorImperativeHandle>>>(Object.create(null));
+
+  // Whenever the active tab changes or a new tab is created, ensure a ref exists:
+  React.useEffect(() => {
+    // Ensure every tab has its own ref
+    tabs.forEach(tab => {
+      if (!sqlEditorRefs.current[tab.id]) {
+        sqlEditorRefs.current[tab.id] = React.createRef<SqlEditorImperativeHandle>();
+      }
+    });
+    // Remove ref for deleted tabs
+    Object.keys(sqlEditorRefs.current).forEach(id => {
+      if (!tabs.find(tab => tab.id === id)) {
+        delete sqlEditorRefs.current[id];
+      }
+    });
+  }, [tabs]);
 
   // NEW: Track which tab is being renamed (by id), and input value.
   const [renamingTabId, setRenamingTabId] = React.useState<string | null>(null);
@@ -385,13 +401,8 @@ const Index: React.FC = () => {
             {currentTab && (
               <TabView
                 tab={currentTab}
-                // Ensure the correct ref prop is used for imperative handle!
-                sqlEditorRef={{
-                  get current() { 
-                    // getter to always provide up-to-date ref 
-                    return sqlEditorRefs.current[currentTab.id];
-                  }
-                }}
+                // Pass the real ref for this tab
+                sqlEditorRef={sqlEditorRefs.current[currentTab.id]}
                 onSqlChange={sql => handleSqlChange(currentTab.id, sql)}
                 onFormat={() => handleFormat(currentTab.id)}
                 onRun={() => handleRun(currentTab.id)}
