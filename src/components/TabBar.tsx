@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, X } from "lucide-react";
@@ -69,16 +70,22 @@ const TabBar: React.FC<TabBarProps> = ({
           value={activeTabId || (tabs.length > 0 ? tabs[0].id : undefined)}
           onValueChange={setActiveTabId}
         >
-          <TabsList className="flex gap-1">
+          {/* 
+            Change TabsList to be left-aligned (no justify-center, etc),
+            and remove bg-muted (causing unwanted gray).
+            Remove gap between tabs if any, and use white background with proper left alignment.
+          */}
+          <TabsList className="flex items-end bg-white shadow-none border-none p-0 rounded-none">
             {tabs.map((tab) => (
               <Tooltip key={tab.id} delayDuration={100}>
                 <TooltipTrigger asChild>
+                  {/* 
+                    Tab wrapper: left-align, no centering. 
+                    Restore rounded and white tab rectangle.
+                  */}
                   <div
                     className={
-                      "flex items-center gap-2 px-4 py-2 rounded-t-md cursor-pointer group " +
-                      (tab.id === activeTabId
-                        ? "bg-gray-100 border-b-2 border-blue-500"
-                        : "hover:bg-gray-50")
+                      "flex items-center gap-2 mx-0 px-0 py-0 rounded-none cursor-pointer group"
                     }
                     onDoubleClick={() => handleTabDoubleClick(tab)}
                     tabIndex={0}
@@ -86,13 +93,24 @@ const TabBar: React.FC<TabBarProps> = ({
                     <TabsTrigger
                       value={tab.id}
                       onClick={() => setActiveTabId(tab.id)}
-                      className="flex items-center px-0 py-0 font-semibold bg-transparent"
-                      style={{ outline: "none", boxShadow: "none" }}
+                      className={
+                        "flex items-center px-4 py-2 font-semibold transition-none rounded-lg bg-white border border-gray-200 mr-1 shadow-sm " +
+                        (tab.id === activeTabId
+                          ? "border-b-white border-b-2 z-10 text-black"
+                          : "text-gray-700 hover:bg-gray-50")
+                      }
+                      style={{
+                        outline: "none",
+                        boxShadow: "none",
+                        borderBottom: tab.id === activeTabId ? "2px solid #fff" : undefined,
+                        background: "#fff",
+                        marginBottom: "0px",
+                      }}
                     >
                       {tab.name}
                     </TabsTrigger>
                     <button
-                      className="ml-2 text-gray-500 hover:text-red-600"
+                      className="ml-1 text-gray-400 hover:text-red-600"
                       onClick={e => {
                         e.stopPropagation();
                         closeTab(tab.id);
@@ -116,7 +134,7 @@ const TabBar: React.FC<TabBarProps> = ({
             {/* Add tab button */}
             <button
               onClick={addTab}
-              className="ml-4 rounded-full p-1 hover:bg-gray-100 text-blue-500"
+              className="ml-2 rounded-full p-1 hover:bg-gray-100 text-blue-500"
               title="Add Tab"
             >
               <Plus size={20} />
@@ -141,3 +159,4 @@ const TabBar: React.FC<TabBarProps> = ({
 };
 
 export default TabBar;
+
