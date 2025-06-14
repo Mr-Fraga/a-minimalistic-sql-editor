@@ -1,3 +1,4 @@
+
 import React, { useRef, useImperativeHandle, forwardRef } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { sql } from "@codemirror/lang-sql";
@@ -84,27 +85,34 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
             <Copy size={14} className="inline-block" />
             Copy
           </button>
-          <CodeMirror
-            value={value}
-            minHeight="120px"
-            height="180px"
-            extensions={[
-              sql(),
-              sqlLint(),
-              lintGutter(),
-            ]}
-            theme="light"
-            onChange={(v) => onChange(v)}
-            basicSetup={{
-              lineNumbers: true,
-              highlightActiveLine: true,
-              autocompletion: true,
-              foldGutter: true
-            }}
-            editable={!isRunning}
-            ref={editorRef}
-          />
+          {/* Resizable vertical textbox */}
+          <div
+            className="resize-y overflow-auto min-h-[120px] max-h-[500px]"
+            style={{ minHeight: 120, maxHeight: 500 }}
+          >
+            <CodeMirror
+              value={value}
+              minHeight="120px"
+              height="100%"
+              extensions={[
+                sql(),
+                sqlLint(),
+                lintGutter(),
+              ]}
+              theme="light"
+              onChange={(v) => onChange(v)}
+              basicSetup={{
+                lineNumbers: true,
+                highlightActiveLine: true,
+                autocompletion: true,
+                foldGutter: true
+              }}
+              editable={!isRunning}
+              ref={editorRef}
+            />
+          </div>
         </div>
+        {/* Buttons below the resizable box */}
         <div className="flex gap-2 mt-2">
           <button
             className="rounded px-4 py-1 bg-black text-white text-sm font-mono hover:bg-gray-900 transition"
