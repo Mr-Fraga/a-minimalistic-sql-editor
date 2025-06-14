@@ -43,7 +43,7 @@ const TabBar: React.FC<TabBarProps> = ({
   });
 
   // Keep comments in Tab bar state for demo (adapt to store in main state if needed)
-  const [comments, setComments] = useState<{[tabId: string]: string}>({});
+  const [comments, setComments] = useState<{ [tabId: string]: string }>({});
 
   const handleTabDoubleClick = (tab: TabType) => {
     setCommentModal({
@@ -63,19 +63,25 @@ const TabBar: React.FC<TabBarProps> = ({
   };
 
   return (
-    <div className="w-full bg-white px-2"> {/* removed border-b to get rid of horizontal line */}
+    <div className="w-full bg-white pl-6 md:pl-8"> {/* left-align, match SQL title, no border or shadow */}
       <TooltipProvider>
         <Tabs
           value={activeTabId || (tabs.length > 0 ? tabs[0].id : undefined)}
           onValueChange={setActiveTabId}
         >
-          <TabsList className="flex items-center bg-white shadow-none border-none p-0 rounded-none">
+          <TabsList
+            className="flex items-center bg-white p-0 rounded-none border-none shadow-none gap-0 justify-start w-auto min-w-0"
+            style={{
+              margin: 0,
+              boxShadow: "none",
+              border: "none",
+            }}
+          >
             {tabs.map((tab) => (
               <Tooltip key={tab.id} delayDuration={100}>
                 <TooltipTrigger asChild>
-                  {/* Tab wrapper: left-aligned, no extra margin/padding */}
                   <div
-                    className="flex items-stretch mr-1"
+                    className="mr-1"
                     style={{ cursor: "pointer" }}
                     onDoubleClick={() => handleTabDoubleClick(tab)}
                     tabIndex={0}
@@ -84,9 +90,9 @@ const TabBar: React.FC<TabBarProps> = ({
                       value={tab.id}
                       onClick={() => setActiveTabId(tab.id)}
                       className={
-                        "flex items-center px-4 py-2 font-semibold rounded-lg bg-white border border-gray-200 text-sm shadow-sm transition-none select-none focus-visible:ring-0 focus:ring-0 focus:outline-none " +
+                        "flex items-center px-4 py-2 font-semibold rounded-lg bg-white border border-gray-200 text-sm shadow text-black transition-none select-none focus-visible:ring-0 focus:ring-0 focus:outline-none " +
                         (tab.id === activeTabId
-                          ? "z-10 text-black"
+                          ? "z-10 " // keep active on top
                           : "text-gray-700 hover:bg-gray-50")
                       }
                       style={{
@@ -94,9 +100,14 @@ const TabBar: React.FC<TabBarProps> = ({
                         marginBottom: "0px",
                         borderBottom: "none",
                         gap: ".5rem",
+                        boxShadow: "0 1px 2.5px 0 rgb(60 60 60 / 0.02)",
+                        alignItems: "center",
+                        minWidth: "80px", // for stability
                       }}
                     >
-                      <span className="truncate max-w-[120px]" title={tab.name}>{tab.name}</span>
+                      <span className="truncate max-w-[120px]" title={tab.name}>
+                        {tab.name}
+                      </span>
                       <button
                         className="ml-2 text-gray-400 hover:text-red-600 p-0 flex items-center"
                         onClick={e => {
@@ -106,13 +117,13 @@ const TabBar: React.FC<TabBarProps> = ({
                         title="Close tab"
                         tabIndex={-1}
                         style={{
-                          // keeps the close icon inside the pill, right-aligned
                           display: "flex",
                           alignItems: "center",
                           background: "transparent",
                           border: "none",
                           outline: "none",
                           lineHeight: 0,
+                          marginLeft: ".25rem"
                         }}
                       >
                         <X size={16} />
@@ -124,7 +135,10 @@ const TabBar: React.FC<TabBarProps> = ({
                   {comments[tab.id] ?? tab.comment ?? (
                     <span className="italic text-gray-400">(No comment)</span>
                   )}
-                  <div className="mt-1 text-xs text-blue-500 cursor-pointer underline" onClick={() => handleTabDoubleClick(tab)}>
+                  <div
+                    className="mt-1 text-xs text-blue-500 cursor-pointer underline"
+                    onClick={() => handleTabDoubleClick(tab)}
+                  >
                     Double click to edit
                   </div>
                 </TooltipContent>
