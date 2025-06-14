@@ -15,7 +15,7 @@ const DEFAULT_SQL = ``;
 const DEFAULT_TAB: Omit<TabType, "id"> = {
   name: "New Tab",
   sql: DEFAULT_SQL,
-  result: null,
+  result: { columns: [], rows: [] }, // NEW: always empty dataset for new tab
   error: null,
   isRunning: false,
 };
