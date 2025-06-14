@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import TabSqlEditorSection from "./TabSqlEditorSection";
 import TabResultsSection from "./TabResultsSection";
@@ -23,7 +22,8 @@ interface TabViewProps {
   onDownloadCsv?: (rowsToExport?: Array<any[]>) => void;
 }
 
-const DEFAULT_RESULTS_HEIGHT = 220;
+// Make results appear higher: set default height larger
+const DEFAULT_RESULTS_HEIGHT = 320;
 
 const TabView: React.FC<TabViewProps> = ({
   tab,

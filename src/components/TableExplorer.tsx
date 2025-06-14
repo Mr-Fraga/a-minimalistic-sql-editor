@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from "react";
 import {
   Collapsible,
@@ -235,7 +234,6 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
   return (
     <div
       className="h-full border-r px-4 py-5 min-w-[220px] bg-white"
-      style={{ borderRight: "2px solid black" }}
     >
       <h2 className="font-bold text-gray-800 text-base mb-2 uppercase tracking-wider">
         Schemas & Tables
