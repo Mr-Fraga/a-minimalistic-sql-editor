@@ -1,8 +1,10 @@
+
 import React, { useRef } from "react";
 import AccountSection from "@/components/AccountSection";
 import TableExplorer from "@/components/TableExplorer";
 import SqlEditor, { SqlEditorImperativeHandle } from "@/components/SqlEditor";
 import ResultTable from "@/components/ResultTable";
+import { Button } from "@/components/ui/button";
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -82,10 +84,35 @@ const Index: React.FC = () => {
     }, 500);
   };
 
+  // CSV Handler
+  function escapeCsv(value: any): string {
+    if (value == null) return '';
+    const v = String(value);
+    if (/["\n,]/.test(v)) return `"${v.replace(/"/g, '""')}"`;
+    return v;
+  }
+  const handleDownloadCsv = () => {
+    if (!result || !result.rows.length) return;
+    const header = result.columns.map(escapeCsv).join(",");
+    const rowsCsv = result.rows.map(row => row.map(escapeCsv).join(","));
+    const csv = [header, ...rowsCsv].join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "results.csv";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    }, 100);
+  };
+
   return (
     <div className="min-h-screen bg-white text-black flex flex-col">
       {/* Top bar */}
-      <header className="w-full flex justify-end items-center border-b border-gray-200 p-0 px-8 py-0 bg-black">
+      <header className="w-full flex justify-end items-center p-0 px-8 py-0 bg-black">
         <div className="flex items-center gap-4 ml-auto py-3">
           <AccountSection account="john_smith" role="readonly" />
         </div>
@@ -133,6 +160,14 @@ const Index: React.FC = () => {
                   <div className="mt-6 flex flex-col min-h-0 h-full">
                     <h2 className="font-bold text-md mb-2 font-mono tracking-tight select-none">Results</h2>
                     <ResultTable result={result || undefined} error={error} />
+                    {/* Download as CSV below the table, left bottom */}
+                    {result && result.rows.length > 0 && (
+                      <div className="flex w-full justify-start mt-2">
+                        <Button size="sm" className="font-mono" onClick={handleDownloadCsv}>
+                          Download as CSV
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </ResizablePanel>
               </ResizablePanelGroup>
@@ -145,3 +180,4 @@ const Index: React.FC = () => {
 };
 
 export default Index;
+

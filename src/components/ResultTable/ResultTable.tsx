@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { TableHeader } from "./TableHeader";
@@ -14,7 +13,11 @@ interface ResultTableProps {
   error?: string | null;
 }
 
-const ResultTable: React.FC<ResultTableProps> = ({ result, error }) => {
+const ResultTable: React.FC<ResultTableProps & { onDownloadCsv?: () => void }> = ({
+  result,
+  error,
+  onDownloadCsv,
+}) => {
   const [filters, setFilters] = useState<string[]>([]);
   // Track which filter popover is open per column
   const [filterOpen, setFilterOpen] = useState<boolean[]>([]);
@@ -211,6 +214,8 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, error }) => {
     return () => window.removeEventListener("keydown", onKeydown);
   }, [selection, result, filteredRows]);
 
+  // Don't render the Download as CSV button here anymore
+
   if (error)
     return (
       <div className="rounded bg-red-50 border border-red-200 text-red-700 p-4 font-mono mt-2">
@@ -248,17 +253,8 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, error }) => {
           handleCopy={handleCopy}
         />
       </table>
-      {/* Download as CSV Button (left bottom) */}
-      {filteredRows.length > 0 && (
-        <div className="flex w-full justify-start items-end mt-2">
-          <Button size="sm" className="font-mono" onClick={handleDownloadCsv}>
-            Download as CSV
-          </Button>
-        </div>
-      )}
     </div>
   );
 };
 
 export default ResultTable;
-
