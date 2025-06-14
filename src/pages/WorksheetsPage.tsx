@@ -10,31 +10,35 @@ import {
 import { Folder, File, Trash, Copy } from "lucide-react";
 import DeleteFileModal from "@/components/DeleteFileModal";
 
-// Updated worksheet mock data with only .sql files and accurate types
+// Updated worksheet mock data with comment fields
 const worksheetData = [
   {
     type: "folder",
     name: "Finance",
     createdAt: "2024-01-03",
     updatedAt: "2024-06-10",
+    comment: "Quarterly finance queries",
     files: [
       {
         type: "query",
         name: "income_statement_2024.sql",
         createdAt: "2024-01-12",
         updatedAt: "2024-02-22",
+        comment: "Latest income statement script",
       },
       {
         type: "query",
         name: "accounts_payable_audit.sql",
         createdAt: "2024-03-01",
         updatedAt: "2024-05-08",
+        comment: "Audit for payables",
       },
       {
         type: "query",
         name: "cash_flow_monthly.sql",
         createdAt: "2024-03-11",
         updatedAt: "2024-06-01",
+        comment: "Monthly cash flow",
       },
     ],
   },
@@ -43,12 +47,14 @@ const worksheetData = [
     name: "HR",
     createdAt: "2024-02-15",
     updatedAt: "2024-05-16",
+    comment: "HR queries",
     files: [
       {
         type: "query",
         name: "employee_hires.sql",
         createdAt: "2024-04-15",
         updatedAt: "2024-05-15",
+        comment: "Employee hiring report",
       },
     ],
   },
@@ -57,57 +63,11 @@ const worksheetData = [
     name: "project_status_update.sql",
     createdAt: "2024-04-14",
     updatedAt: "2024-06-13",
+    comment: "Status report for all projects",
   },
 ];
 
-const initialWorksheetData = [
-  {
-    type: "folder",
-    name: "Finance",
-    createdAt: "2024-01-03",
-    updatedAt: "2024-06-10",
-    files: [
-      {
-        type: "query",
-        name: "income_statement_2024.sql",
-        createdAt: "2024-01-12",
-        updatedAt: "2024-02-22",
-      },
-      {
-        type: "query",
-        name: "accounts_payable_audit.sql",
-        createdAt: "2024-03-01",
-        updatedAt: "2024-05-08",
-      },
-      {
-        type: "query",
-        name: "cash_flow_monthly.sql",
-        createdAt: "2024-03-11",
-        updatedAt: "2024-06-01",
-      },
-    ],
-  },
-  {
-    type: "folder",
-    name: "HR",
-    createdAt: "2024-02-15",
-    updatedAt: "2024-05-16",
-    files: [
-      {
-        type: "query",
-        name: "employee_hires.sql",
-        createdAt: "2024-04-15",
-        updatedAt: "2024-05-15",
-      },
-    ],
-  },
-  {
-    type: "query",
-    name: "project_status_update.sql",
-    createdAt: "2024-04-14",
-    updatedAt: "2024-06-13",
-  },
-];
+const initialWorksheetData = worksheetData;
 
 // Flatten the data for easier table mapping
 function flattenData(
@@ -121,6 +81,7 @@ function flattenData(
     parentFolder?: string;
     createdAt: string;
     updatedAt: string;
+    comment?: string;
   }> = [];
   for (const item of data) {
     if (item.type === "folder") {
@@ -130,6 +91,7 @@ function flattenData(
         name: item.name,
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
+        comment: item.comment,
       });
       if (expandedFolders[item.name]) {
         for (const file of item.files) {
@@ -140,6 +102,7 @@ function flattenData(
             parentFolder: item.name,
             createdAt: file.createdAt,
             updatedAt: file.updatedAt,
+            comment: file.comment,
           });
         }
       }
@@ -150,6 +113,7 @@ function flattenData(
         name: item.name,
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
+        comment: item.comment,
       });
     }
   }
@@ -162,6 +126,7 @@ const sortFields = [
   { key: "type", label: "Type" },
   { key: "createdAt", label: "Created At" },
   { key: "updatedAt", label: "Updated At" },
+  { key: "comment", label: "Comment" },
 ] as const;
 
 type SortField = typeof sortFields[number]["key"];
@@ -181,6 +146,8 @@ const WorksheetsPage: React.FC = () => {
     fileName: string | null;
     parentFolder: string | undefined;
   }>({ open: false, fileName: null, parentFolder: undefined });
+  // SEARCH state
+  const [search, setSearch] = useState<string>("");
 
   // Handler to duplicate a file (either in a folder or root)
   const handleDuplicateFile = (
@@ -268,24 +235,36 @@ const WorksheetsPage: React.FC = () => {
   // Flatten for current data
   let rows = flattenData(data, expandedFolders);
 
+  // Filter by search (match on name, comment, or parentFolder)
+  if (search.trim()) {
+    const s = search.trim().toLowerCase();
+    rows = rows.filter(
+      row =>
+        row.name.toLowerCase().includes(s) ||
+        (row.comment && row.comment.toLowerCase().includes(s)) ||
+        (row.parentFolder && row.parentFolder.toLowerCase().includes(s))
+    );
+  }
+
   // Sorting the flattened data
   rows = [...rows].sort((a, b) => {
     const multiplier = sort.direction === "asc" ? 1 : -1;
     if (sort.field === "name") {
-      // Always prioritize folders above their children
       if (a.type === "folder" && b.parentFolder === a.name) return -1;
       if (b.type === "folder" && a.parentFolder === b.name) return 1;
-      // Sort folders and files alphabetically
       return a.name.localeCompare(b.name) * multiplier;
     } else if (sort.field === "type") {
       if (a.type !== b.type) return (a.type === "folder" ? -1 : 1) * multiplier;
       return a.name.localeCompare(b.name) * multiplier;
     } else if (sort.field === "createdAt" || sort.field === "updatedAt") {
-      // For date sorting; empty folders go up or down based on direction
       const aVal = a[sort.field] || "";
       const bVal = b[sort.field] || "";
       if (!aVal) return 1;
       if (!bVal) return -1;
+      return (aVal.localeCompare(bVal)) * multiplier;
+    } else if (sort.field === "comment") {
+      const aVal = a.comment || "";
+      const bVal = b.comment || "";
       return (aVal.localeCompare(bVal)) * multiplier;
     }
     return 0;
@@ -300,9 +279,20 @@ const WorksheetsPage: React.FC = () => {
 
   // Render
   return (
-    <div className="flex-1 w-full h-full bg-white p-0 px-6 md:px-8">
+    <div className="flex-1 w-full h-full bg-white p-0 px-8 md:px-16">
       <div className="w-full pt-12">
-        <h1 className="text-2xl font-bold mb-6 ml-0">Your queries</h1>
+        <h1 className="text-2xl font-bold mb-4 ml-0">Your queries</h1>
+        {/* Search bar */}
+        <div className="flex items-center gap-2 mb-4 max-w-lg">
+          <input
+            type="text"
+            placeholder="Search by name or comment..."
+            className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-200 outline-none text-base bg-gray-50"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{ maxWidth: 420 }}
+          />
+        </div>
         <Table className="w-full">
           <TableHeader>
             <TableRow>
@@ -342,11 +332,7 @@ const WorksheetsPage: React.FC = () => {
                 <TableCell>
                   <div className="flex items-center gap-2">
                     {row.type === "folder" ? (
-                      <Folder
-                        className="text-black"
-                        size={18}
-                        strokeWidth={2}
-                      />
+                      <Folder className="text-black" size={18} strokeWidth={2} />
                     ) : (
                       <File className="text-gray-500" size={18} strokeWidth={2} />
                     )}
@@ -371,6 +357,9 @@ const WorksheetsPage: React.FC = () => {
                 </TableCell>
                 <TableCell>
                   {row.updatedAt || "-"}
+                </TableCell>
+                <TableCell>
+                  {row.comment || "-"}
                 </TableCell>
                 <TableCell>
                   {row.parentFolder ? row.parentFolder : row.type === "folder" ? "" : "-"}
