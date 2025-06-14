@@ -197,12 +197,12 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
           </button>
           {/* Resizable vertical textbox */}
           <div
-            className="resize-y overflow-auto min-h-[120px] max-h-[500px]"
-            style={{ minHeight: 120, maxHeight: 500 }}
+            className="resize-y overflow-auto min-h-[300px] max-h-[700px]"
+            style={{ minHeight: 300, maxHeight: 700 }}
           >
             <CodeMirror
               value={value}
-              minHeight="120px"
+              minHeight="300px"
               height="100%"
               extensions={[
                 sql(),
