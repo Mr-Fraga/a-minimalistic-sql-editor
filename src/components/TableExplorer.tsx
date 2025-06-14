@@ -230,6 +230,8 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
     onInsertSchemaTable?.(schema, table);
   };
 
+import SchemaExplorer from "./SchemaExplorer";
+
   return (
     <div className="h-full bg-gray-50 border-r border-gray-200 px-4 py-5 min-w-[220px]">
       <h2 className="font-bold text-gray-800 text-base mb-2 uppercase tracking-wider">
@@ -249,76 +251,14 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
       <ul className="space-y-2">
         {filteredSchemas.map((schema) => (
           <li key={schema.schema}>
-            <Collapsible open={openSchemas[schema.schema]} onOpenChange={() => toggleSchema(schema.schema)}>
-              <div className="flex items-center gap-1 cursor-pointer select-none" onClick={() => toggleSchema(schema.schema)}>
-                {openSchemas[schema.schema] ? (
-                  <ChevronDown className="w-4 h-4 text-gray-500" />
-                ) : (
-                  <ChevronRight className="w-4 h-4 text-gray-500" />
-                )}
-                <span className="font-mono text-gray-700 text-base font-bold">
-                  {schema.schema}
-                  <span className="ml-2 text-xs text-gray-400 font-normal">({schema.tables.length})</span>
-                </span>
-              </div>
-              <CollapsibleContent>
-                <ul className="pl-6 mt-2 space-y-1">
-                  {schema.tables.map((table) => (
-                    <li key={table.name}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            className="font-mono text-left text-sm w-full px-2 py-1 rounded hover:bg-black hover:text-white transition"
-                            onClick={() => handleTableClick(schema.schema, table.name)}
-                            type="button"
-                          >
-                            {table.name}
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent className="p-3 max-w-xs break-words">
-                          <div>
-                            {/* Table description and owner above columns */}
-                            <div className="font-bold text-xs uppercase tracking-wider mb-1">
-                              {schema.schema}.{table.name}
-                            </div>
-                            <div className="mb-1">
-                              <span className="block text-xs text-gray-600 font-semibold mb-0.5">
-                                Description:
-                              </span>
-                              <span className="block text-xs text-gray-800 mb-1">
-                                {table.description || "No description."}
-                              </span>
-                              <span className="block text-xs text-gray-600 font-semibold mb-0.5">
-                                Owner:
-                              </span>
-                              <span className="block text-xs text-gray-800 mb-2">
-                                {table.owner || "Unknown"}
-                              </span>
-                            </div>
-                            <div className="text-xs text-gray-600 mb-1">Columns:</div>
-                            <div className="flex flex-wrap gap-x-2">
-                              {table.columns.map((col) => (
-                                <button
-                                  key={col}
-                                  className="bg-gray-100 rounded px-2 py-0.5 text-xs text-gray-800 mb-1 hover:bg-gray-300 transition cursor-pointer"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleColumnClick(col);
-                                  }}
-                                  type="button"
-                                >
-                                  {col}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-                    </li>
-                  ))}
-                </ul>
-              </CollapsibleContent>
-            </Collapsible>
+            <SchemaExplorer
+              schemaName={schema.schema}
+              tables={schema.tables}
+              open={openSchemas[schema.schema]}
+              onToggleOpen={toggleSchema}
+              onInsertSchemaTable={onInsertSchemaTable}
+              onInsertColumn={onInsertColumn}
+            />
           </li>
         ))}
       </ul>
