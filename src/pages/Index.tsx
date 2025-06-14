@@ -4,7 +4,6 @@ import { SqlEditorImperativeHandle } from "@/components/SqlEditor";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import TableExplorer from "@/components/TableExplorer";
 import AccountSection from "@/components/AccountSection";
-import { Plus } from "lucide-react";
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -32,10 +31,10 @@ const Index: React.FC = () => {
         <ResizablePanelGroup direction="horizontal" className="w-full h-full">
           <ResizablePanel
             defaultSize={18}
-            minSize={10}
+            minSize={0}
             maxSize={35}
             collapsible
-            className="min-w-[60px]"
+            className="min-w-0"
           >
             <TableExplorer
               onInsertSchemaTable={(schema, table) => {
@@ -50,7 +49,7 @@ const Index: React.FC = () => {
               }}
             />
           </ResizablePanel>
-          <ResizableHandle withHandle />
+          <ResizableHandle withHandle={false} />
           <ResizablePanel minSize={30} defaultSize={82}>
             <div className="flex-1 min-h-0 flex flex-col h-full">
               <MainContent sqlEditorRef={sqlEditorRef} />
@@ -63,3 +62,4 @@ const Index: React.FC = () => {
 };
 
 export default Index;
+
