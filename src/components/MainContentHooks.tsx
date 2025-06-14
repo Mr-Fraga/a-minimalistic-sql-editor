@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 
 // LocalStorage hook from prior Index.tsx

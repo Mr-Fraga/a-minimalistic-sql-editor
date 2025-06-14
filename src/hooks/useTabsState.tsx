@@ -1,6 +1,7 @@
 
-import { useCallback, useMemo } from "react";
-import { useLocalStorage } from "../components/MainContentHooks";
+import { useCallback, useMemo, useState } from "react";
+
+// Removed useLocalStorage import
 
 export type TabType = {
   id: string;
@@ -24,13 +25,11 @@ function generateId() {
 }
 
 export function useTabsState() {
-  const [tabs, setTabs] = useLocalStorage<TabType[]>("tabs", [
+  // Use in-memory state only
+  const [tabs, setTabs] = useState<TabType[]>([
     { ...DEFAULT_TAB, id: generateId(), name: "Tab 1" },
   ]);
-  const [activeTabId, setActiveTabId] = useLocalStorage<string>(
-    "activeTabId",
-    tabs[0]?.id
-  );
+  const [activeTabId, setActiveTabId] = useState<string>(tabs[0]?.id);
 
   // Always compute the *fresh* activeTab from latest tabs and activeTabId.
   const activeTab = useMemo(() => {
@@ -43,7 +42,7 @@ export function useTabsState() {
     const newTabs = [...tabs, newTab];
     setTabs(newTabs);
     setActiveTabId(newTab.id);
-  }, [tabs, setTabs, setActiveTabId]);
+  }, [tabs]);
 
   const duplicateTab = useCallback(
     (id: string) => {
@@ -61,7 +60,7 @@ export function useTabsState() {
       setTabs(newTabs);
       setActiveTabId(copy.id);
     },
-    [tabs, setTabs, setActiveTabId]
+    [tabs]
   );
 
   const closeTab = useCallback(
@@ -72,7 +71,7 @@ export function useTabsState() {
         setActiveTabId(newTabs[0]?.id || null);
       }
     },
-    [tabs, setTabs, activeTabId, setActiveTabId]
+    [tabs, activeTabId]
   );
 
   const updateTab = useCallback(
@@ -82,7 +81,7 @@ export function useTabsState() {
       );
       setTabs(newTabs);
     },
-    [tabs, setTabs]
+    [tabs]
   );
 
   const renameTab = useCallback(
