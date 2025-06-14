@@ -123,7 +123,14 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
       try {
         if (USE_MOCK_QUERY) {
           await new Promise((res) => setTimeout(res, 350));
-          updateTab(tabId, { result: MOCK_RESULT, error: null });
+          // Only allow the exact default mock SQL (ignoring whitespace differences)
+          if (
+            sql.trim().replace(/\s+/g, " ") === DEFAULT_SQL.trim().replace(/\s+/g, " ")
+          ) {
+            updateTab(tabId, { result: MOCK_RESULT, error: null });
+          } else {
+            throw new Error("Only the default mock query is supported: SELECT * FROM users LIMIT 10;");
+          }
         } else {
           const response = await fetch(`${apiUrl}/query`, {
             method: "POST",
