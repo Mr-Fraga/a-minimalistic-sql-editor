@@ -102,7 +102,7 @@ const TabHeader: React.FC<TabHeaderProps> = ({
 
   return (
     <div
-      className={`flex items-center px-3 py-2 rounded-t-md text-sm font-medium transition-colors hover:bg-gray-100 cursor-pointer select-none border
+      className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-gray-100 cursor-pointer select-none border
         ${isActive ? "bg-gray-100 border-black" : "bg-white border-black"}`}
       style={{
         borderBottom: isActive ? "2px solid black" : "2px solid black",
