@@ -72,7 +72,10 @@ const Index: React.FC = () => {
   return (
     <div className="min-h-screen h-screen w-full flex flex-col bg-white">
       {/* Top horizontal panel */}
-      <div className="w-full bg-white shadow-sm flex items-center" style={{ zIndex: 10, minHeight: "56px" }}>
+      <div
+        className="w-full bg-white flex items-center" // removed shadow-sm and border styles here
+        style={{ zIndex: 10, minHeight: "56px" }}
+      >
         <div className="px-0 py-0 w-full flex items-center justify-end">
           <AccountSection account="john@example.com" role="readonly" />
         </div>
@@ -415,7 +418,6 @@ const Tab: React.FC<TabProps> = ({
   const [newName, setNewName] = useState(name);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Focus input on rename
   useEffect(() => {
     if (isRenaming && inputRef.current) {
       inputRef.current.focus();
@@ -462,9 +464,7 @@ const Tab: React.FC<TabProps> = ({
           className="text-sm font-medium rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 border-none shadow-none outline-none bg-transparent w-24"
         />
       ) : (
-        <span className="w-24 truncate">
-          {name}
-        </span>
+        <span className={`w-24 truncate ${isActive ? "font-bold" : ""}`}>{name}</span>
       )}
       <Button
         variant="ghost"

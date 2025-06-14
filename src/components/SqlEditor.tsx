@@ -1,4 +1,3 @@
-
 import React, { useRef, useImperativeHandle, forwardRef } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { sql } from "@codemirror/lang-sql";
@@ -34,6 +33,27 @@ const sqlLint = () =>
 export interface SqlEditorImperativeHandle {
   insertAtCursor: (toInsert: string) => void;
   getSelection: () => string;
+}
+
+function simpleSqlFormat(sql: string): string {
+  // Very simple formatter (for example only, not for production)
+  // Ensures uppercasing keywords and prettifies main clauses; users likely want something basic
+  if (!sql) return "";
+  // Basic SQL keywords
+  const keywords = ["select", "from", "where", "order by", "group by", "limit", "insert", "update", "delete", "values", "set"];
+  let formatted = sql;
+  keywords.forEach(kw => {
+    const regex = new RegExp(`\\b${kw}\\b`, "gi");
+    formatted = formatted.replace(regex, kw.toUpperCase());
+  });
+  // Add newlines before keywords except SELECT
+  formatted = formatted.replace(/\b(FROM|WHERE|ORDER BY|GROUP BY|LIMIT|INSERT|UPDATE|DELETE|VALUES|SET)\b/g, "\n$1");
+  // Remove multiple newlines
+  formatted = formatted.replace(/\n{2,}/g, "\n");
+  // Ensure trailing semicolon
+  formatted = formatted.trim();
+  if (!formatted.endsWith(";")) formatted += ";";
+  return formatted;
 }
 
 const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<SqlEditorProps>>(
@@ -118,6 +138,16 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
       }
     };
 
+    const handleFormatClick = () => {
+      // Use a client-side formatter
+      const formattedSql = simpleSqlFormat(value || "");
+      onChange(formattedSql);
+      toast({
+        title: "SQL Formatted!",
+        description: "Your SQL has been formatted.",
+      });
+    };
+
     return (
       <div className="w-full">
         <div className="rounded-md overflow-hidden border border-gray-200 shadow-sm bg-white relative">
@@ -137,7 +167,7 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
           {/* Format button */}
           <button
             className="absolute top-11 right-2 z-10 bg-white/90 rounded-md px-2 py-1 border border-gray-300 text-xs font-mono hover:bg-gray-50 flex items-center gap-1 shadow transition"
-            onClick={onFormat}
+            onClick={handleFormatClick}
             tabIndex={-1}
             title="Format SQL"
             aria-label="Format SQL"

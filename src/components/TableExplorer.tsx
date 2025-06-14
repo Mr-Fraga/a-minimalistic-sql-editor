@@ -233,7 +233,10 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
   };
 
   return (
-    <div className="h-full bg-gray-50 border-r border-gray-200 px-4 py-5 min-w-[220px]">
+    <div
+      className="h-full border-r px-4 py-5 min-w-[220px] bg-white"
+      style={{ borderRight: "2px solid black" }}
+    >
       <h2 className="font-bold text-gray-800 text-base mb-2 uppercase tracking-wider">
         Schemas & Tables
       </h2>
@@ -267,5 +270,3 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
 };
 
 export default TableExplorer;
-
-// NOTE: This file is now over 200 lines. Please consider refactoring it into smaller components for maintainability!
