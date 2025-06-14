@@ -32,7 +32,7 @@ const TabBar: React.FC<TabBarProps> = ({
 }) => {
   return (
     <div className="flex items-center bg-white px-6 md:px-8 pr-2 transition-colors duration-100">
-      {tabs.map((tab) => (
+      {tabs.map((tab, idx) => (
         <TabHeader
           key={tab.id}
           id={tab.id}
@@ -41,6 +41,7 @@ const TabBar: React.FC<TabBarProps> = ({
           onTabClick={() => setActiveTabId(tab.id)}
           onTabClose={closeTab}
           onTabRename={renameTab}
+          className={idx !== 0 ? "ml-2" : ""}
         />
       ))}
       <Button variant="ghost" size="sm" onClick={addTab}>
@@ -58,6 +59,7 @@ interface TabHeaderProps {
   onTabClick: () => void;
   onTabClose: (id: string) => void;
   onTabRename: (id: string, newName: string) => void;
+  className?: string;
 }
 
 const TabHeader: React.FC<TabHeaderProps> = ({
@@ -67,6 +69,7 @@ const TabHeader: React.FC<TabHeaderProps> = ({
   onTabClick,
   onTabClose,
   onTabRename,
+  className = "",
 }) => {
   const [isRenaming, setIsRenaming] = useState(false);
   const [newName, setNewName] = useState(name);
@@ -101,8 +104,11 @@ const TabHeader: React.FC<TabHeaderProps> = ({
 
   return (
     <div
-      className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-gray-100 cursor-pointer select-none border
-        ${isActive ? "bg-gray-100 border-black" : "bg-white border-black"}`}
+      className={
+        `flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-gray-100 cursor-pointer select-none border shadow-sm
+        ${isActive ? "bg-gray-100 border-black" : "bg-white border-black"} ` +
+        className
+      }
       style={{
         borderBottom: isActive ? "2px solid black" : "2px solid black",
         borderLeft: "1px solid black",
