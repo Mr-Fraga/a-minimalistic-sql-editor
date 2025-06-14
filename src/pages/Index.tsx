@@ -149,14 +149,14 @@ const Index: React.FC = () => {
   // --- FOR TABLE EXPLORER INSERTION (Fix to ensure proper ref logic): ---
   const handleInsertSchemaTable = (schema: string, table: string) => {
     const ref = sqlEditorRefs.current[activeTab];
-    if (ref && typeof ref.insertAtCursor === "function") {
-      ref.insertAtCursor(`${schema}.${table}`);
+    if (ref && ref.current && typeof ref.current.insertAtCursor === "function") {
+      ref.current.insertAtCursor(`${schema}.${table}`);
     }
   };
   const handleInsertColumn = (col: string) => {
     const ref = sqlEditorRefs.current[activeTab];
-    if (ref && typeof ref.insertAtCursor === "function") {
-      ref.insertAtCursor(col);
+    if (ref && ref.current && typeof ref.current.insertAtCursor === "function") {
+      ref.current.insertAtCursor(col);
     }
   };
 
