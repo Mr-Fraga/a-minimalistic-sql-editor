@@ -33,7 +33,9 @@ export function useTabsState() {
 
   // Always compute the *fresh* activeTab from latest tabs and activeTabId.
   const activeTab = useMemo(() => {
-    return tabs.find((tab) => tab.id === activeTabId) ?? tabs[0];
+    const found = tabs.find((tab) => tab.id === activeTabId) ?? tabs[0];
+    console.log("[useTabsState] useMemo activeTab recomputed: id =", found?.id, "| result =", found?.result, "| error =", found?.error);
+    return found;
   }, [tabs, activeTabId]);
 
   // Tab operations
@@ -76,10 +78,21 @@ export function useTabsState() {
 
   const updateTab = useCallback(
     (id: string, updates: Partial<TabType>) => {
+      // DEBUG before update
+      console.log("[useTabsState] updateTab called: id =", id, "| updates =", updates);
       const newTabs = tabs.map((tab) =>
         tab.id === id ? { ...tab, ...updates } : tab
       );
       setTabs(newTabs);
+      // DEBUG after update
+      setTimeout(() => {
+        // print after next event loop for React batching
+        console.log("[useTabsState] After setTabs (updateTab), tabs:", newTabs);
+        const found = newTabs.find(tab => tab.id === id);
+        if (found) {
+          console.log("[useTabsState] Tab after update id =", id, "| result =", found.result, "| error =", found.error);
+        }
+      }, 0);
     },
     [tabs]
   );
