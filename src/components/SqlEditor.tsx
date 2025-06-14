@@ -1,3 +1,4 @@
+
 import React, { useRef, useImperativeHandle, forwardRef } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { sql } from "@codemirror/lang-sql";
@@ -10,6 +11,7 @@ interface SqlEditorProps {
   onChange: (sql: string) => void;
   onFormat: () => void;
   onRun: (statement?: string) => void;
+  onRunAll: () => void; // New: run all SQL statements
   isRunning?: boolean;
 }
 
@@ -35,7 +37,7 @@ export interface SqlEditorImperativeHandle {
 }
 
 const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<SqlEditorProps>>(
-  ({ value, onChange, onFormat, onRun, isRunning }, ref) => {
+  ({ value, onChange, onFormat, onRun, onRunAll, isRunning }, ref) => {
     const editorRef = useRef<any>(null);
 
     useImperativeHandle(ref, () => ({
@@ -80,6 +82,7 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
       }
     };
 
+    // Play button: only run selected, not all
     const handleRunButton = () => {
       let selected = "";
       if (editorRef.current && typeof editorRef.current.view === "object") {
@@ -90,27 +93,28 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
           selected = state.doc.sliceString(from, to);
         }
       }
-      // If there's a selection, run only that; otherwise run all.
+      // Only run selected statement (or statement at cursor)
       onRun(selected || undefined);
     };
 
-    // New: handler for 'Search' (Find/Replace)
+    // "Double play": run ALL sql statements one-after-another
+    const handleRunAllButton = () => {
+      onRunAll();
+    };
+
     const handleSearchButton = () => {
       if (
         editorRef.current &&
         editorRef.current.view &&
         typeof editorRef.current.view.dispatch === "function"
       ) {
-        // Use the codemirror search extension command
+        // Use codemirror search extension
         const { view } = editorRef.current;
-        // Dynamically import to avoid SSR issues/bundle
         import("@codemirror/search").then(mod => {
-          // openSearchPanel(view) is the command to open the find/replace bar
           if (mod && typeof mod.openSearchPanel === "function") {
             mod.openSearchPanel(view);
           }
         });
-        // Fallback for CodeMirror 6 users (rare): view.dispatch({ effects: ... });
       }
     };
 
@@ -130,7 +134,7 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
             <Copy size={14} className="inline-block" />
             Copy
           </button>
-          {/* Format SQL button, below copy button */}
+          {/* Format button */}
           <button
             className="absolute top-11 right-2 z-10 bg-white/90 rounded-md px-2 py-1 border border-gray-300 text-xs font-mono hover:bg-gray-50 flex items-center gap-1 shadow transition"
             onClick={onFormat}
@@ -187,14 +191,27 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
         </div>
         {/* Buttons below the resizable box */}
         <div className="flex gap-2 mt-2">
+          {/* Play (runs only selection or current) */}
           <button
             className="rounded-md px-4 py-1 bg-black text-white text-sm font-mono hover:bg-gray-900 transition flex items-center"
             onClick={handleRunButton}
             disabled={isRunning}
             type="button"
-            aria-label="Run"
-            title="Run SQL"
+            aria-label="Run selected statement"
+            title="Run selected statement"
           >
+            <Play size={16} />
+          </button>
+          {/* Double play (run ALL statements) */}
+          <button
+            className="rounded-md px-4 py-1 bg-zinc-800 text-white text-sm font-mono hover:bg-zinc-900 transition flex items-center"
+            onClick={handleRunAllButton}
+            disabled={isRunning}
+            type="button"
+            aria-label="Run all statements"
+            title="Run all statements"
+          >
+            <Play size={16} className="mr-[-5px]" />
             <Play size={16} />
           </button>
         </div>

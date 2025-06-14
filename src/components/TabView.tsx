@@ -1,3 +1,4 @@
+
 import React from "react";
 import SqlEditor, { SqlEditorImperativeHandle } from "@/components/SqlEditor";
 import ResultTable from "@/components/ResultTable";
@@ -18,7 +19,8 @@ interface TabViewProps {
   sqlEditorRef: React.RefObject<SqlEditorImperativeHandle | null>;
   onSqlChange: (sql: string) => void;
   onFormat: () => void;
-  onRun: (selection?: string) => void; // <-- Accept selection string
+  onRun: (selection?: string) => void; // Accept selection string
+  onRunAll: () => void; // New for running all statements
   onDownloadCsv: () => void;
 }
 
@@ -28,6 +30,7 @@ const TabView: React.FC<TabViewProps> = ({
   onSqlChange,
   onFormat,
   onRun,
+  onRunAll,
   onDownloadCsv,
 }) => (
   <div className="w-full flex-1 flex flex-col min-h-0 h-full">
@@ -41,6 +44,7 @@ const TabView: React.FC<TabViewProps> = ({
             onChange={onSqlChange}
             onFormat={onFormat}
             onRun={onRun}
+            onRunAll={onRunAll}
             isRunning={tab.isRunning}
           />
         </div>

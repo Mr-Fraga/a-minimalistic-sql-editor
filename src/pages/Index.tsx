@@ -169,7 +169,8 @@ const Index: React.FC = () => {
       tab.id === id ? { ...tab, sql: formatSql(tab.sql) } : tab
     ));
   };
-  // Update handleRun to receive statement?
+
+  // Existing: handleRun (runs selected statement only)
   const handleRun = (id: string, statement?: string) => {
     setTabs(prev =>
       prev.map(tab =>
@@ -180,7 +181,6 @@ const Index: React.FC = () => {
       setTabs(prev =>
         prev.map(tab => {
           if (tab.id !== id) return tab;
-          // Use the selected statement if provided, otherwise the tab.sql
           const sqlToExecute = (statement && statement.trim() ? statement : tab.sql);
           const res = fakeRunQuery(sqlToExecute);
           if ("error" in res) {
@@ -191,6 +191,55 @@ const Index: React.FC = () => {
         })
       );
     }, 500);
+  };
+
+  // NEW: handleRunAll for double play button (executes all SQL statements in tab.sql, collecting results and errors)
+  const handleRunAll = (id: string) => {
+    const tab = tabs.find(tab => tab.id === id);
+    if (!tab) return;
+    setTabs(prev =>
+      prev.map(t => t.id === id ? { ...t, isRunning: true } : t)
+    );
+    // Split SQL into statements by semicolon (basic split)
+    const statements = tab.sql
+      .split(";")
+      .map(s => s.trim())
+      .filter(Boolean)
+      .map(s => s.endsWith(";") ? s : s + ";"); // Make sure each ends with ;
+
+    // For this demo, just run the last successful SELECT result or error; in reality, would show history
+    let lastResult: any = null;
+    let lastError: string | null = null;
+    function runNext(i: number) {
+      if (i >= statements.length) {
+        setTabs(prev =>
+          prev.map(t => t.id === id
+            ? {
+                ...t,
+                // Show last result or error
+                result: lastResult || null,
+                error: lastError,
+                isRunning: false
+              }
+            : t
+          )
+        );
+        return;
+      }
+      const stmt = statements[i];
+      setTimeout(() => {
+        const res = fakeRunQuery(stmt);
+        if ("error" in res) {
+          lastError = res.error;
+          lastResult = null;
+        } else {
+          lastResult = res;
+          lastError = null;
+        }
+        runNext(i + 1);
+      }, 400);
+    }
+    runNext(0);
   };
 
   // Helper for timestamp
@@ -423,11 +472,11 @@ const Index: React.FC = () => {
             {currentTab && (
               <TabView
                 tab={currentTab}
-                // Pass the real ref for this tab
                 sqlEditorRef={sqlEditorRefs.current[currentTab.id]}
                 onSqlChange={sql => handleSqlChange(currentTab.id, sql)}
                 onFormat={() => handleFormat(currentTab.id)}
                 onRun={(selection) => handleRun(currentTab.id, selection)}
+                onRunAll={() => handleRunAll(currentTab.id)}
                 onDownloadCsv={() => handleDownloadCsv(currentTab)}
               />
             )}
