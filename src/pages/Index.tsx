@@ -76,6 +76,34 @@ const Index: React.FC = () => {
   // Keep refs per tab for insertAtCursor support
   const sqlEditorRefs = useRef<Record<string, SqlEditorImperativeHandle | null>>({});
 
+  // NEW: Track which tab is being renamed (by id), and input value.
+  const [renamingTabId, setRenamingTabId] = React.useState<string | null>(null);
+  const [renameValue, setRenameValue] = React.useState("");
+
+  // Handler to start renaming
+  const handleTabDoubleClick = (tab: TabType) => {
+    setRenamingTabId(tab.id);
+    setRenameValue(tab.name);
+  };
+  // Handler to finish renaming (on blur or enter)
+  const finishRenaming = (tabId: string) => {
+    if (renameValue.trim() !== "") {
+      setTabs(prev => prev.map(tab => tab.id === tabId ? { ...tab, name: renameValue.trim() } : tab));
+    }
+    setRenamingTabId(null);
+    setRenameValue("");
+  };
+
+  // Handler for renaming input keyboard
+  const handleRenameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, tabId: string) => {
+    if (e.key === "Enter") {
+      finishRenaming(tabId);
+    } else if (e.key === "Escape") {
+      setRenamingTabId(null);
+      setRenameValue("");
+    }
+  };
+
   // For table explorer insertion
   const handleInsertSchemaTable = (schema: string, table: string) => {
     const tab = tabs.find(t => t.id === activeTab);
@@ -216,21 +244,48 @@ const Index: React.FC = () => {
                         : "bg-gray-100 border-transparent text-gray-700 hover:bg-gray-200"}
                       rounded-t-md
                     `}
-                    style={{ marginRight: 2 }}
+                    style={{ marginRight: 2, paddingRight: 30 /* reserve space for close btn */ }}
                     onClick={() => setActiveTab(tab.id)}
                     type="button"
                   >
-                    <span>{tab.name}</span>
+                    {/* Editable tab name */}
+                    {renamingTabId === tab.id ? (
+                      <input
+                        className="font-mono text-base bg-white border border-gray-300 rounded px-2 py-1 outline-none w-[90%] focus:ring-2 focus:ring-gray-300"
+                        value={renameValue}
+                        autoFocus
+                        onBlur={() => finishRenaming(tab.id)}
+                        onChange={e => setRenameValue(e.target.value)}
+                        onKeyDown={e => handleRenameKeyDown(e, tab.id)}
+                        spellCheck={false}
+                        onClick={e => e.stopPropagation()}
+                      />
+                    ) : (
+                      <span
+                        onDoubleClick={e => { e.stopPropagation(); handleTabDoubleClick(tab); }}
+                        className="truncate select-none"
+                        title={tab.name}
+                        style={{ display: "inline-block", maxWidth: "85%" }}
+                      >
+                        {tab.name}
+                      </span>
+                    )}
+                    {/* Make close (X) icon smaller and on top right */}
                     {tabs.length > 1 && (
                       <button
                         tabIndex={-1}
                         title="Close tab"
                         onClick={e => { e.stopPropagation(); handleRemoveTab(tab.id); }}
-                        className="absolute -right-2.5 top-[10px] z-10 bg-gray-200 hover:bg-gray-300 rounded-full p-0.5 transition"
-                        style={{ width: 18, height: 18, lineHeight: 0 }}
+                        className="absolute top-1.5 right-1 z-10 bg-gray-200 hover:bg-gray-300 rounded-full p-0 transition flex items-center justify-center"
+                        style={{
+                          width: 16,
+                          height: 16,
+                          lineHeight: 0,
+                          padding: 0,
+                        }}
                         type="button"
                       >
-                        <X size={13} />
+                        <X size={11} strokeWidth={2.2} />
                       </button>
                     )}
                   </button>
