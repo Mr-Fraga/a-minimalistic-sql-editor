@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -18,6 +19,16 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				din: [
+					'DIN Next',
+					'DIN Next LT Pro',
+					'DINNextLTPro-Regular',
+					'DINNextLTPro',
+					'DIN',
+					'sans-serif'
+				]
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
