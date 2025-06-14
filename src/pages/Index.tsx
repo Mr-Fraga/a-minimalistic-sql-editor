@@ -15,11 +15,11 @@ const Index: React.FC = () => {
     <div className="min-h-screen h-screen w-full flex flex-col bg-white">
       {/* Top slim horizontal panel */}
       <div
-        className="w-full bg-white flex items-center"
+        className="w-full bg-white flex items-center pt-6" // Added pt-6 for extra top padding
         style={{
           zIndex: 10,
-          minHeight: "48px",
-          maxHeight: "48px",
+          minHeight: "66px",  // Increased minHeight for visual buffer
+          maxHeight: "66px",
         }}
       >
         {/* Titles: SQL and Worksheets */}
