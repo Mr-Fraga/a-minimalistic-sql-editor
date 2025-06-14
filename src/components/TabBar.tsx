@@ -126,10 +126,10 @@ const TabHeader: React.FC<TabHeaderProps> = ({
           onChange={(e) => setNewName(e.target.value)}
           onKeyDown={handleKeyDown}
           onBlur={handleRename}
-          className="text-sm font-medium rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 border-none shadow-none outline-none bg-transparent w-24"
+          className="text-sm font-din font-medium rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 border-none shadow-none outline-none bg-transparent w-24"
         />
       ) : (
-        <span className={`w-24 truncate ${isActive ? "font-bold" : ""}`}>{name}</span>
+        <span className={`w-24 truncate font-din ${isActive ? "font-bold" : ""}`}>{name}</span>
       )}
       <Button
         variant="ghost"

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import ResultTable from "@/components/ResultTable";
 import { Button } from "@/components/ui/button";
@@ -68,7 +67,6 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
     if (onDownloadCsv) {
       onDownloadCsv(rowsToExport);
     } else {
-      // ... keep CSV fallback code the same ...
       const escape = (value: any) => {
         if (value == null) return '';
         const v = String(value);
@@ -128,7 +126,7 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
         {/* Stats if data */}
         {tab.result && tab.result.rows.length > 0 && (
           <div className="w-full px-4 mt-2">
-            <div className="text-xs font-mono text-gray-700 leading-relaxed">
+            <div className="text-xs font-din text-gray-700 leading-relaxed">
               {queryStats}
             </div>
           </div>
@@ -168,7 +166,7 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
                 />
                 <label
                   htmlFor="export-full-results-toggle"
-                  className="text-xs font-mono select-none text-gray-600 ml-1"
+                  className="text-xs font-din select-none text-gray-600 ml-1"
                   style={{
                     lineHeight: "1.4rem"
                   }}
