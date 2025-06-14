@@ -19,14 +19,14 @@ const worksheetData = [
     updatedAt: "2024-06-11",
     files: [
       {
-        type: "file",
-        name: "Q1_2024_Balance.xlsx",
+        type: "query",
+        name: "q1_profit_report.sql",
         createdAt: "2024-02-01",
         updatedAt: "2024-03-20",
       },
       {
-        type: "file",
-        name: "Expenses_April.csv",
+        type: "query",
+        name: "monthly_expense_summary.sql",
         createdAt: "2024-04-02",
         updatedAt: "2024-04-30",
       },
@@ -39,16 +39,16 @@ const worksheetData = [
     updatedAt: "2024-05-21",
     files: [
       {
-        type: "file",
-        name: "Employee_List_2025.xlsx",
+        type: "query",
+        name: "employee_directory_query.sql",
         createdAt: "2024-05-10",
         updatedAt: "2024-05-28",
       },
     ],
   },
   {
-    type: "file",
-    name: "Roadmap_2025.xlsx",
+    type: "query",
+    name: "annual_roadmap.sql",
     createdAt: "2024-03-15",
     updatedAt: "2024-06-13",
   },
@@ -62,14 +62,14 @@ const initialWorksheetData = [
     updatedAt: "2024-06-11",
     files: [
       {
-        type: "file",
-        name: "Q1_2024_Balance.xlsx",
+        type: "query",
+        name: "q1_profit_report.sql",
         createdAt: "2024-02-01",
         updatedAt: "2024-03-20",
       },
       {
-        type: "file",
-        name: "Expenses_April.csv",
+        type: "query",
+        name: "monthly_expense_summary.sql",
         createdAt: "2024-04-02",
         updatedAt: "2024-04-30",
       },
@@ -82,16 +82,16 @@ const initialWorksheetData = [
     updatedAt: "2024-05-21",
     files: [
       {
-        type: "file",
-        name: "Employee_List_2025.xlsx",
+        type: "query",
+        name: "employee_directory_query.sql",
         createdAt: "2024-05-10",
         updatedAt: "2024-05-28",
       },
     ],
   },
   {
-    type: "file",
-    name: "Roadmap_2025.xlsx",
+    type: "query",
+    name: "annual_roadmap.sql",
     createdAt: "2024-03-15",
     updatedAt: "2024-06-13",
   },
@@ -206,14 +206,14 @@ const WorksheetsPage: React.FC = () => {
 
       if (!parentFolder) {
         // root files
-        const rootFiles = prev.filter((item) => item.type === "file");
+        const rootFiles = prev.filter((item) => item.type === "query");
         const fileToCopy = rootFiles.find((f) => f.name === fileName);
         if (!fileToCopy) return prev;
         const allNames = rootFiles.map((f) => f.name);
         const newName = createCopyName(allNames, fileToCopy.name);
 
         // Insert copy after original
-        const idx = prev.findIndex((item) => item.type === "file" && item.name === fileName);
+        const idx = prev.findIndex((item) => item.type === "query" && item.name === fileName);
         const clone = cloneFileEntry(fileToCopy, newName);
         const newArr = [...prev];
         newArr.splice(idx + 1, 0, clone);
@@ -246,7 +246,7 @@ const WorksheetsPage: React.FC = () => {
     setData(prev => {
       // If it's a root file (no parent folder)
       if (!parentFolder) {
-        return prev.filter(item => !(item.type === "file" && item.name === fileName));
+        return prev.filter(item => !(item.type === "query" && item.name === fileName));
       }
       // For files inside folders
       return prev.map(item => {
@@ -372,7 +372,7 @@ const WorksheetsPage: React.FC = () => {
                   {row.parentFolder ? row.parentFolder : row.type === "folder" ? "" : "-"}
                 </TableCell>
                 <TableCell className="text-right">
-                  {row.type === "file" && (
+                  {row.type === "query" && (
                     <div className="flex items-center justify-end gap-2">
                       {/* Duplicate icon */}
                       <button
