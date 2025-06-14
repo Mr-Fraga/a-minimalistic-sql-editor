@@ -1,8 +1,16 @@
-import React, { useState, useRef, useEffect } from "react";
+
+import React from "react";
 import ResultTable from "@/components/ResultTable";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Download } from "lucide-react";
+// No longer need: Button, Switch, Download from lucide-react
+
+const MOCK_RESULT = {
+  columns: ["id", "name", "email"],
+  rows: [
+    [1, "Alice", "alice@email.com"],
+    [2, "Bob", "bob@email.com"],
+    [3, "Charlie", "charlie@email.com"],
+  ]
+};
 
 const MIN_RESULTS_HEIGHT = 80;
 const MAX_RESULTS_HEIGHT = 600;
@@ -22,19 +30,16 @@ interface TabResultsSectionProps {
 }
 
 const TabResultsSection: React.FC<TabResultsSectionProps> = ({
+  // props unused, but kept for signature compatibility
   tab,
   resultsHeight,
   setResultsHeight,
   onDownloadCsv
 }) => {
-  // Remove debug info
-  // useEffect(() => { ... }, [tab, tab.result, tab.error]);
+  // Drag logic only for resizing
+  const dragStartY = React.useRef<number | null>(null);
+  const dragStartHeight = React.useRef<number>(resultsHeight);
 
-  const [exportFullResults, setExportFullResults] = useState(false);
-  const dragStartY = useRef<number | null>(null);
-  const dragStartHeight = useRef<number>(resultsHeight);
-
-  // Drag handlers for resizing results section
   const handleDragStart = (e: React.MouseEvent) => {
     dragStartY.current = e.clientY;
     dragStartHeight.current = resultsHeight;
@@ -61,45 +66,6 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
     dragStartY.current = null;
   };
 
-  // CSV export (keep as is)
-  const handleDownloadCsv = () => {
-    if (!tab.result || tab.result.rows.length === 0) return;
-    const rowsToExport = exportFullResults
-      ? tab.result.rows
-      : tab.result.rows.slice(0, 500);
-    if (onDownloadCsv) {
-      onDownloadCsv(rowsToExport);
-    } else {
-      const escape = (value: any) => {
-        if (value == null) return '';
-        const v = String(value);
-        if (/["\n,]/.test(v)) return `"${v.replace(/"/g, '""')}"`;
-        return v;
-      };
-      const header = tab.result.columns.map(escape).join(",");
-      const rowsCsv = rowsToExport.map(row => row.map(escape).join(","));
-      const csv = [header, ...rowsCsv].join("\r\n");
-      const blob = new Blob([csv], { type: "text/csv" });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "results.csv";
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      }, 100);
-    }
-  };
-
-  // --- QUERY STATISTICS: For now, fake time and use rows length if result exists ---
-  const FAKE_QUERY_TIME_SECONDS = "0.10";
-  const rowsCount = tab.result?.rows?.length ?? 0;
-  const queryStats = `query in ${FAKE_QUERY_TIME_SECONDS} seconds. ${rowsCount} rows`;
-
-  // Remove debugInfo block
-
   return (
     <div
       className="flex flex-col min-h-[80px] bg-white overflow-hidden relative select-none"
@@ -125,66 +91,12 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
         <div className="flex-1"></div>
       </div>
       <div className="flex-1 flex flex-col min-h-0 h-full px-0 pt-4 pb-2 w-full">
-        {/* Always render ResultTable */}
-        <ResultTable result={tab.result || { columns: [], rows: [] }} error={tab.error} />
-
-        {/* Stats if data */}
-        {tab.result && tab.result.rows.length > 0 && (
-          <div className="w-full px-4 mt-2">
-            <div className="text-xs font-din text-gray-700 leading-relaxed">
-              {queryStats}
-            </div>
-          </div>
-        )}
-        {/* Spacing only when table has data */}
-        {tab.result && tab.result.rows.length > 0 && (
-          <div className="h-7" />
-        )}
-        {/* Always render button row for layout */}
-        <div className="flex items-center justify-between w-full px-4">
-          <div className="flex flex-row items-center gap-4">
-            {tab.result && tab.result.rows.length > 0 && (
-              <>
-                <Button
-                  size="sm"
-                  className="font-mono bg-black text-white hover:bg-gray-800 rounded-full px-4 min-w-[42px] flex items-center justify-center text-[0.92rem]"
-                  style={{
-                    height: "1.4rem",
-                    minWidth: "42px",
-                    fontSize: "0.92rem",
-                    padding: "0 1rem",
-                    borderRadius: "1.1rem",
-                    lineHeight: "1.2rem"
-                  }}
-                  onClick={handleDownloadCsv}
-                  variant="default"
-                >
-                  <Download size={14} className="mr-2" />
-                </Button>
-                <Switch
-                  checked={exportFullResults}
-                  onCheckedChange={(v: boolean) => setExportFullResults(v)}
-                  id="export-full-results-toggle"
-                  className="h-[1.4rem] w-12"
-                  style={{ verticalAlign: "middle" }}
-                />
-                <label
-                  htmlFor="export-full-results-toggle"
-                  className="text-xs font-din select-none text-gray-600 ml-1"
-                  style={{
-                    lineHeight: "1.4rem"
-                  }}
-                >
-                  Export full results
-                </label>
-              </>
-            )}
-          </div>
-          <div />
-        </div>
+        {/* ALWAYS render the MOCK_RESULT table */}
+        <ResultTable result={MOCK_RESULT} />
       </div>
     </div>
   );
 };
 
 export default TabResultsSection;
+
