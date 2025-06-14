@@ -200,7 +200,7 @@ const PageContent: React.FC<PageContentProps> = ({ sqlEditorRef }) => {
       updateTab(tabId, { isRunning: true, error: null, result: null });
       try {
         if (USE_MOCK_QUERY) {
-          // Simulate latency
+          // Always resolve with mock data
           await new Promise((res) => setTimeout(res, 350));
           updateTab(tabId, { result: MOCK_RESULT, error: null });
         } else {
@@ -413,6 +413,7 @@ const Tab: React.FC<TabProps> = ({
   useEffect(() => {
     if (isRenaming && inputRef.current) {
       inputRef.current.focus();
+      inputRef.current.select();
     }
   }, [isRenaming]);
 
@@ -434,15 +435,16 @@ const Tab: React.FC<TabProps> = ({
 
   return (
     <div
-      className={`flex items-center px-3 py-2 rounded-t-md text-sm font-medium transition-colors hover:bg-gray-100 cursor-pointer select-none border ${
-        isActive ? "bg-white border-b-0 border-black" : "bg-white border-b-0 border-black"
-      }`}
+      className={`flex items-center px-3 py-2 rounded-t-md text-sm font-medium transition-colors hover:bg-gray-100 cursor-pointer select-none border
+        ${isActive ? "bg-gray-100 border-black" : "bg-white border-black"}`}
       style={{
         borderBottom: isActive ? "2px solid black" : "2px solid black",
         borderLeft: "1px solid black",
         borderRight: "1px solid black",
         borderTop: "1px solid black"
       }}
+      onDoubleClick={() => setIsRenaming(true)}
+      onClick={onTabClick}
     >
       {isRenaming ? (
         <Input
@@ -454,11 +456,10 @@ const Tab: React.FC<TabProps> = ({
           className="text-sm font-medium rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 border-none shadow-none outline-none bg-transparent w-24"
         />
       ) : (
-        <span className="w-24 truncate" onClick={onTabClick}>
+        <span className="w-24 truncate">
           {name}
         </span>
       )}
-      {/* Restore close (X) button even for active tab */}
       <Button
         variant="ghost"
         size="icon"
@@ -485,34 +486,6 @@ const Tab: React.FC<TabProps> = ({
         </svg>
         <span className="sr-only">Close tab</span>
       </Button>
-      {/* Edit button only for active tab */}
-      {isActive && (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsRenaming(true);
-          }}
-          className="ml-1 -mr-2"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-pencil w-3 h-3"
-          >
-            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-          </svg>
-          <span className="sr-only">Rename tab</span>
-        </Button>
-      )}
     </div>
   );
 };
