@@ -1,4 +1,3 @@
-
 import React, { useCallback, useState } from "react";
 import { useTabsState } from "@/hooks/useTabsState";
 import { useQueryApi } from "@/hooks/useQueryApi";
@@ -78,6 +77,13 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
   }, [activeTab, formatSql, onSqlChange]);
 
   const role = "readonly";
+
+  // Add debug here
+  React.useEffect(() => {
+    if (activeTab) {
+      console.log("[MainContent] Rendering TabView for tab.id:", activeTab.id, "| tab.result:", activeTab.result, "| tab.error:", activeTab.error);
+    }
+  }, [activeTab]);
 
   return (
     <div className="flex-1 flex flex-col h-full">

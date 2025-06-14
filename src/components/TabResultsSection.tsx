@@ -104,6 +104,24 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
   const rowsCount = tab.result?.rows?.length ?? 0;
   const queryStats = `query in ${FAKE_QUERY_TIME_SECONDS} seconds. ${rowsCount} rows`;
 
+  // DEBUG VISIBLE:
+  const debugInfo = (
+    <div className="text-xs text-gray-400 font-mono p-1">
+      [tab.id: {tab.id}] | result?: {tab.result ? "YES" : "NO"} | error: {tab.error ?? "none"}
+      <br />
+      {/* Show actual content for mock query */}
+      {tab.result && (
+        <div>
+          columns: [{tab.result.columns.join(", ")}]
+          <br />
+          rows: {tab.result.rows.length}
+          <br />
+          first row: {JSON.stringify(tab.result.rows[0])}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div
       className="flex flex-col min-h-[80px] bg-white overflow-hidden relative select-none"
@@ -114,6 +132,8 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
         transition: "height 0.08s",
       }}
     >
+      {/* DEBUG INFO AT TOP */}
+      {debugInfo}
       {/* Drag handle/title */}
       <div
         className="cursor-ns-resize w-full flex items-center justify-between px-0 py-2 bg-white"
@@ -129,7 +149,6 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
         <div className="flex-1"></div>
       </div>
       <div className="flex-1 flex flex-col min-h-0 h-full px-0 pt-4 pb-2 w-full">
-        {/* Always render ResultTable, even if result is null, to keep resizer layout */}
         <ResultTable result={tab.result || undefined} error={tab.error} />
 
         {/* Stats if data */}
