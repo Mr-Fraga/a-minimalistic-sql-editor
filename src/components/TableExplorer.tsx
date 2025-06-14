@@ -14,7 +14,6 @@ import SchemaExplorer from "./SchemaExplorer";
 const rand = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
 function range(n: number) {
   return Array.from({ length: n }, (_, i) => i + 1);
-}
 function randInt(min: number, max: number): number {
   // Inclusive lower bound, inclusive upper bound.
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -235,8 +234,8 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
     <div
       className="h-full border-r px-4 py-5 min-w-[220px] bg-white"
     >
-      <h2 className="font-bold text-gray-800 text-base mb-2 uppercase tracking-wider">
-        Schemas & Tables
+      <h2 className="font-bold font-din text-gray-800 text-base mb-2 uppercase tracking-wider">
+        Explorer
       </h2>
       <div className="mb-4">
         <Input

@@ -116,7 +116,7 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
         aria-label="Drag to resize results"
         tabIndex={0}
       >
-        <h2 className="font-bold text-md font-mono tracking-tight select-none">
+        <h2 className="font-bold text-md font-mono font-din tracking-tight select-none">
           Results
         </h2>
         <div className="flex-1"></div>
