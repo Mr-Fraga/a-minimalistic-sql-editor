@@ -14,7 +14,7 @@ export const ResultsActionsBar: React.FC<ResultsActionsBarProps> = ({
   toggled,
   onToggle,
 }) => (
-  <div className="flex gap-2 items-center px-4 pt-3 pb-4 justify-end">
+  <div className="flex gap-2 items-center p-0 m-0">
     <Button
       variant="default"
       size="sm"
