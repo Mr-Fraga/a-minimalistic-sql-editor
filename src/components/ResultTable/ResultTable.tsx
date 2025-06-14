@@ -4,6 +4,7 @@ import { toast } from "@/hooks/use-toast";
 import { TableHeader } from "./TableHeader";
 import { TableBody } from "./TableBody";
 import { sortRows, filterRows, SortOrder, Selection } from "./utils";
+import { Button } from "@/components/ui/button";
 
 interface ResultTableProps {
   result?: {
@@ -162,6 +163,38 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, error }) => {
     }
   };
 
+  // DOWNLOAD AS CSV
+  function escape(value: any): string {
+    if (value == null) return '';
+    const v = String(value);
+    // If CSV special char, wrap in quotes and escape inner quotes
+    if (/["\n,]/.test(v)) return `"${v.replace(/"/g, '""')}"`;
+    return v;
+  }
+
+  const handleDownloadCsv = () => {
+    if (!result || filteredRows.length === 0) {
+      toast({ title: "No data", description: "No results to download." });
+      return;
+    }
+    const header = result.columns.map(escape).join(",");
+    const rowsCsv = filteredRows.map(row =>
+      row.map(escape).join(",")
+    );
+    const csv = [header, ...rowsCsv].join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "results.csv";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    }, 100);
+  };
+
   useEffect(() => {
     function onKeydown(e: KeyboardEvent) {
       if (
@@ -215,8 +248,17 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, error }) => {
           handleCopy={handleCopy}
         />
       </table>
+      {/* Download as CSV Button (left bottom) */}
+      {filteredRows.length > 0 && (
+        <div className="flex w-full justify-start items-end mt-2">
+          <Button size="sm" className="font-mono" onClick={handleDownloadCsv}>
+            Download as CSV
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
 
 export default ResultTable;
+
