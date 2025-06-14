@@ -202,6 +202,13 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
   const [search, setSearch] = useState("");
   const [openSchemas, setOpenSchemas] = useState<Record<string, boolean>>({});
 
+  // Reset openSchemas when the list of schemas, or the role, changes
+  React.useEffect(() => {
+    const collapsed: Record<string, boolean> = {};
+    for (const s of SCHEMA_DATA) collapsed[s.schema] = false;
+    setOpenSchemas(collapsed);
+  }, [role]);
+
   React.useEffect(() => {
     if (
       Object.keys(openSchemas).length === 0 &&
