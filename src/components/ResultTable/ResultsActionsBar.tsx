@@ -14,7 +14,7 @@ export const ResultsActionsBar: React.FC<ResultsActionsBarProps> = ({
   toggled,
   onToggle,
 }) => (
-  <div className="flex gap-2 items-center p-0 m-0">
+  <div className="flex gap-3 items-center p-0 m-0">
     <Button
       variant="default"
       size="sm"
@@ -34,11 +34,9 @@ export const ResultsActionsBar: React.FC<ResultsActionsBarProps> = ({
       {toggled ? (
         <ToggleRight size={18} />
       ) : (
-        <>
-          <ToggleLeft size={18} className="mr-1" />
-          <span className="ml-1">Export all results</span>
-        </>
+        <ToggleLeft size={18} />
       )}
     </Button>
+    <span className="text-gray-400 text-xs ml-1 select-none">Export all results</span>
   </div>
 );
