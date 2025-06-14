@@ -10,23 +10,6 @@ import { toast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Slider } from "@/components/ui/slider";
-import { Separator } from "@/components/ui/separator";
-import { Copy, Plus, Settings, ChevronDown } from "lucide-react";
-
-import {
   SidebarProvider,
   Sidebar,
 } from "@/components/ui/sidebar"; // use shadcn/ui sidebar
@@ -73,20 +56,34 @@ function useDebounce<T>(value: T, delay: number): T {
 const DEFAULT_SQL = `SELECT * FROM users LIMIT 10;`;
 
 const Index: React.FC = () => {
+  // SQL Editor ref (shared so TableExplorer can write to editor)
+  const sqlEditorRef = useRef<SqlEditorImperativeHandle | null>(null);
+
   return (
     <div className="min-h-screen w-full flex flex-col">
       {/* Top horizontal panel */}
       <div className="w-full bg-white shadow-sm flex items-center" style={{ zIndex: 10, minHeight: "56px" }}>
-        {/* Example: Place AccountSection and any other top-panel components here */}
         <div className="px-0 py-0 w-full flex items-center justify-end">
           <AccountSection account="john@example.com" role="readonly" />
         </div>
       </div>
       {/* Main content area */}
       <div className="flex-1 w-full flex flex-row gap-0 bg-gray-50">
-        {/* Sidebar with TableExplorer */}
-        <TableExplorer />
-        <PageContent />
+        {/* Sidebar with TableExplorer, passing callbacks */}
+        <TableExplorer
+          onInsertSchemaTable={(schema, table) => {
+            if (sqlEditorRef.current) {
+              // Insert schema.table at cursor
+              sqlEditorRef.current.insertAtCursor(`${schema}.${table}`);
+            }
+          }}
+          onInsertColumn={(col) => {
+            if (sqlEditorRef.current) {
+              sqlEditorRef.current.insertAtCursor(col);
+            }
+          }}
+        />
+        <PageContent sqlEditorRef={sqlEditorRef} />
       </div>
     </div>
   );
@@ -117,7 +114,11 @@ const DEFAULT_TAB: Omit<TabType, "id"> = {
   isRunning: false,
 };
 
-const PageContent: React.FC = () => {
+interface PageContentProps {
+  sqlEditorRef: React.RefObject<SqlEditorImperativeHandle | null>;
+}
+
+const PageContent: React.FC<PageContentProps> = ({ sqlEditorRef }) => {
   const [tabs, setTabs] = useLocalStorage<TabType[]>("tabs", [
     { ...DEFAULT_TAB, id: generateId(), name: "Tab 1" },
   ]);
@@ -125,20 +126,9 @@ const PageContent: React.FC = () => {
     "activeTabId",
     tabs[0]?.id
   );
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-
-  // Settings
-  const [settings, setSettings] = useLocalStorage("settings", {
-    // Remove process.env, just use the default value
-    apiUrl: "http://localhost:8000",
-    autoFormat: true,
-  });
 
   // Find the active tab
   const activeTab = tabs.find((tab) => tab.id === activeTabId);
-
-  // SQL Editor ref
-  const sqlEditorRef = useRef<SqlEditorImperativeHandle | null>(null);
 
   // ========================= TABS =========================
   const addTab = useCallback(() => {
@@ -185,11 +175,14 @@ const PageContent: React.FC = () => {
 
   // ========================= API =========================
 
+  // Default to the local backend URL
+  const apiUrl = "http://localhost:8000";
+
   const runSql = useCallback(
     async (sql: string, tabId: string) => {
       updateTab(tabId, { isRunning: true, error: null, result: null });
       try {
-        const response = await fetch(`${settings.apiUrl}/query`, {
+        const response = await fetch(`${apiUrl}/query`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -216,7 +209,7 @@ const PageContent: React.FC = () => {
         updateTab(tabId, { isRunning: false });
       }
     },
-    [updateTab, settings.apiUrl, toast]
+    [updateTab]
   );
 
   const onRun = useCallback(
@@ -236,7 +229,7 @@ const PageContent: React.FC = () => {
   const onFormat = useCallback(async () => {
     if (!activeTab) return;
     try {
-      const response = await fetch(`${settings.apiUrl}/format`, {
+      const response = await fetch(`${apiUrl}/format`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -263,7 +256,7 @@ const PageContent: React.FC = () => {
         variant: "destructive",
       });
     }
-  }, [activeTab, settings.apiUrl, toast, onSqlChange]);
+  }, [activeTab, apiUrl, toast, onSqlChange]);
 
   // ========================= Download CSV =========================
 
@@ -323,8 +316,6 @@ const PageContent: React.FC = () => {
     [activeTab, toast]
   );
 
-  // ========================= Hotkeys =========================
-
   // ========================= Render =========================
 
   return (
@@ -347,55 +338,7 @@ const PageContent: React.FC = () => {
           New Tab
         </Button>
         <div className="flex-1" />
-        <Popover open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-          <PopoverTrigger asChild>
-            <Button variant="ghost" size="sm">
-              <Settings className="w-4 h-4 mr-1" />
-              Settings
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent
-            className="w-80"
-            align="end"
-            alignOffset={-5}
-            side="bottom"
-          >
-            <div className="grid gap-4">
-              <div className="space-y-2">
-                <h4 className="font-medium leading-none">API Settings</h4>
-                <p className="text-sm text-muted-foreground">
-                  Configure the API endpoint.
-                </p>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="name">API URL</Label>
-                <Input
-                  id="api-url"
-                  value={settings.apiUrl}
-                  onChange={(e) =>
-                    setSettings({ ...settings, apiUrl: e.target.value })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <h4 className="font-medium leading-none">Editor Settings</h4>
-                <p className="text-sm text-muted-foreground">
-                  Configure the SQL editor.
-                </p>
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="auto-format">Auto Format</Label>
-                <Switch
-                  id="auto-format"
-                  checked={settings.autoFormat}
-                  onCheckedChange={(checked) =>
-                    setSettings({ ...settings, autoFormat: checked })
-                  }
-                />
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
+        {/* Settings button has been removed */}
       </div>
 
       {/* Tab View */}
@@ -486,34 +429,34 @@ const Tab: React.FC<TabProps> = ({
           {name}
         </span>
       )}
-      {!isActive && (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={(e) => {
-            e.stopPropagation();
-            onTabClose(id);
-          }}
-          className="ml-1 -mr-2"
+      {/* Restore close (X) button even for active tab */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={(e) => {
+          e.stopPropagation();
+          onTabClose(id);
+        }}
+        className="ml-1 -mr-2"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="lucide lucide-x w-3 h-3"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-x w-3 h-3"
-          >
-            <path d="M18 6 6 18" />
-            <path d="M6 6 18 18" />
-          </svg>
-          <span className="sr-only">Close tab</span>
-        </Button>
-      )}
+          <path d="M18 6 6 18" />
+          <path d="M6 6 18 18" />
+        </svg>
+        <span className="sr-only">Close tab</span>
+      </Button>
+      {/* Edit button only for active tab */}
       {isActive && (
         <Button
           variant="ghost"
