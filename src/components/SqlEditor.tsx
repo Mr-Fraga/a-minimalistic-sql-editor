@@ -1,10 +1,9 @@
-
 import React, { useRef, useImperativeHandle, forwardRef } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { sql } from "@codemirror/lang-sql";
 import { linter, lintGutter } from "@codemirror/lint";
 import { toast } from "@/hooks/use-toast";
-import { Copy, Play, Settings2 } from "lucide-react";
+import { Copy, Play, Settings2, Glass } from "lucide-react";
 
 interface SqlEditorProps {
   value: string;
@@ -95,6 +94,26 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
       onRun(selected || undefined);
     };
 
+    // New: handler for 'Search' (Find/Replace)
+    const handleSearchButton = () => {
+      if (
+        editorRef.current &&
+        editorRef.current.view &&
+        typeof editorRef.current.view.dispatch === "function"
+      ) {
+        // Use the codemirror search extension command
+        const { view } = editorRef.current;
+        // Dynamically import to avoid SSR issues/bundle
+        import("@codemirror/search").then(mod => {
+          // openSearchPanel(view) is the command to open the find/replace bar
+          if (mod && typeof mod.openSearchPanel === "function") {
+            mod.openSearchPanel(view);
+          }
+        });
+        // Fallback for CodeMirror 6 users (rare): view.dispatch({ effects: ... });
+      }
+    };
+
     return (
       <div className="w-full">
         <div className="rounded-md overflow-hidden border border-gray-200 shadow-sm bg-white relative">
@@ -124,6 +143,21 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
           >
             <Settings2 size={14} className="inline-block" />
             Format
+          </button>
+
+          {/* Search button, below Format */}
+          <button
+            className="absolute top-[54px] right-2 z-10 bg-white/90 rounded-md px-2 py-1 border border-gray-300 text-xs font-mono hover:bg-gray-50 flex items-center gap-1 shadow transition"
+            onClick={handleSearchButton}
+            tabIndex={-1}
+            title="search"
+            aria-label="Search"
+            disabled={isRunning}
+            style={{ marginTop: 2 }}
+            type="button"
+          >
+            <Glass size={14} className="inline-block" />
+            Search
           </button>
           {/* Resizable vertical textbox */}
           <div

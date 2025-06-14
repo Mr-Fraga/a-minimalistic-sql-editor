@@ -18,7 +18,7 @@ interface TabViewProps {
   sqlEditorRef: React.RefObject<SqlEditorImperativeHandle | null>;
   onSqlChange: (sql: string) => void;
   onFormat: () => void;
-  onRun: () => void;
+  onRun: (selection?: string) => void; // <-- Accept selection string
   onDownloadCsv: () => void;
 }
 
