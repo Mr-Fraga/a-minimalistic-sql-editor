@@ -1,13 +1,30 @@
-
 import React, { useState, useMemo } from "react";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 
-const TABLES = [
-  { name: "users", columns: ["id", "name", "email", "created_at"] },
-  { name: "orders", columns: ["id", "user_id", "total", "date"] },
-  { name: "products", columns: ["id", "name", "price"] },
-  { name: "categories", columns: ["id", "title", "description"] },
+// Example: schemas and tables within them (can be extended)
+const SCHEMA_DATA = [
+  {
+    schema: "public",
+    tables: [
+      { name: "users", columns: ["id", "name", "email", "created_at"] },
+      { name: "orders", columns: ["id", "user_id", "total", "date"] },
+      { name: "products", columns: ["id", "name", "price"] },
+      { name: "categories", columns: ["id", "title", "description"] },
+    ],
+  },
+  {
+    schema: "audit",
+    tables: [
+      { name: "logs", columns: ["id", "table", "user", "change_type", "date"] },
+    ],
+  },
 ];
 
 interface TableExplorerProps {
@@ -16,17 +33,45 @@ interface TableExplorerProps {
 
 const TableExplorer: React.FC<TableExplorerProps> = ({ onTableClick }) => {
   const [search, setSearch] = useState("");
+  // Collapsed state: schema -> boolean. Default is all schemas collapsed.
+  const [openSchemas, setOpenSchemas] = useState<Record<string, boolean>>({});
 
-  const filteredTables = useMemo(() => {
-    if (!search.trim()) return TABLES;
-    return TABLES.filter((table) =>
-      table.name.toLowerCase().includes(search.trim().toLowerCase())
-    );
+  // Default all schemas collapsed
+  React.useEffect(() => {
+    if (
+      Object.keys(openSchemas).length === 0 &&
+      SCHEMA_DATA.length > 0
+    ) {
+      const collapsed: Record<string, boolean> = {};
+      for (const s of SCHEMA_DATA) collapsed[s.schema] = false;
+      setOpenSchemas(collapsed);
+    }
+    // eslint-disable-next-line
+  }, []);
+
+  const filteredSchemas = useMemo(() => {
+    if (!search.trim()) return SCHEMA_DATA;
+    // Filter each schema's tables by name, keep schemas with > 0 tables after filtering
+    return SCHEMA_DATA.map((schema) => ({
+      ...schema,
+      tables: schema.tables.filter((t) =>
+        t.name.toLowerCase().includes(search.trim().toLowerCase())
+      ),
+    })).filter((schema) => schema.tables.length > 0);
   }, [search]);
 
+  const toggleSchema = (schema: string) => {
+    setOpenSchemas((prev) => ({
+      ...prev,
+      [schema]: !prev[schema]
+    }));
+  };
+
   return (
-    <div className="h-full bg-gray-50 border-r border-gray-200 px-4 py-5 min-w-[180px]">
-      <h2 className="font-bold text-gray-800 text-base mb-2 uppercase tracking-wider">Tables</h2>
+    <div className="h-full bg-gray-50 border-r border-gray-200 px-4 py-5 min-w-[220px]">
+      <h2 className="font-bold text-gray-800 text-base mb-2 uppercase tracking-wider">
+        Schemas & Tables
+      </h2>
       <div className="mb-4">
         <Input
           placeholder="Search tables..."
@@ -35,34 +80,62 @@ const TableExplorer: React.FC<TableExplorerProps> = ({ onTableClick }) => {
           onChange={e => setSearch(e.target.value)}
         />
       </div>
+      {filteredSchemas.length === 0 && (
+        <div className="text-xs text-gray-400 px-2">No tables found</div>
+      )}
       <ul className="space-y-2">
-        {filteredTables.length === 0 && (
-          <li className="text-xs text-gray-400 px-2">No tables found</li>
-        )}
-        {filteredTables.map((table) => (
-          <li key={table.name}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  className="font-mono text-left text-sm w-full px-2 py-1 rounded hover:bg-black hover:text-white transition"
-                  onClick={() => onTableClick?.(table.name)}
-                  type="button"
-                >
-                  {table.name}
-                </button>
-              </TooltipTrigger>
-              <TooltipContent className="p-3 max-w-xs break-words">
-                <div>
-                  <div className="font-bold text-xs uppercase tracking-wider mb-1">{table.name}</div>
-                  <div className="text-xs text-gray-600 mb-1">Columns:</div>
-                  <ul className="list-disc list-inside text-xs text-gray-800">
-                    {table.columns.map((col) => (
-                      <li key={col} className="">{col}</li>
-                    ))}
-                  </ul>
-                </div>
-              </TooltipContent>
-            </Tooltip>
+        {filteredSchemas.map((schema) => (
+          <li key={schema.schema}>
+            <Collapsible open={openSchemas[schema.schema]} onOpenChange={() => toggleSchema(schema.schema)}>
+              <div className="flex items-center gap-1 cursor-pointer select-none" onClick={() => toggleSchema(schema.schema)}>
+                {openSchemas[schema.schema] ? (
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 text-gray-500" />
+                )}
+                <span className="font-mono text-gray-700 text-base font-bold">
+                  {schema.schema}
+                  <span className="ml-2 text-xs text-gray-400 font-normal">({schema.tables.length})</span>
+                </span>
+              </div>
+              <CollapsibleContent>
+                <ul className="pl-6 mt-2 space-y-1">
+                  {schema.tables.map((table) => (
+                    <li key={table.name}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            className="font-mono text-left text-sm w-full px-2 py-1 rounded hover:bg-black hover:text-white transition"
+                            onClick={() => onTableClick?.(table.name)}
+                            type="button"
+                          >
+                            {table.name}
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent className="p-3 max-w-xs break-words">
+                          <div>
+                            <div className="font-bold text-xs uppercase tracking-wider mb-1">
+                              {schema.schema}.{table.name}
+                            </div>
+                            <div className="text-xs text-gray-600 mb-1">Columns:</div>
+                            <div className="flex flex-wrap gap-x-2">
+                              {table.columns.map((col) => (
+                                <span
+                                  key={col}
+                                  className="bg-gray-100 rounded px-2 py-0.5 text-xs text-gray-800 mb-1"
+                                >
+                                  {col}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </li>
+                  ))}
+                </ul>
+              </CollapsibleContent>
+            </Collapsible>
           </li>
         ))}
       </ul>
@@ -71,4 +144,3 @@ const TableExplorer: React.FC<TableExplorerProps> = ({ onTableClick }) => {
 };
 
 export default TableExplorer;
-
