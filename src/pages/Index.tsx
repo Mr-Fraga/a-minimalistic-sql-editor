@@ -35,7 +35,6 @@ const Index: React.FC = () => {
           minHeight: "18px",
           maxHeight: "18px",
           boxShadow: "0 2px 6px 0 rgba(0,0,0,0.03)",
-          borderBottom: "1px solid #e5e7eb",
         }}
       />
       {/* Main content area */}
