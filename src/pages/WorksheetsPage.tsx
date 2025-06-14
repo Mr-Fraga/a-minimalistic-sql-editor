@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Table,
@@ -9,16 +10,6 @@ import {
 } from "@/components/ui/table";
 import { Folder, File, Trash, Copy } from "lucide-react";
 import DeleteFileModal from "@/components/DeleteFileModal";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 // Updated worksheet mock data with comment fields
@@ -163,13 +154,6 @@ const WorksheetsPage: React.FC = () => {
   // SEARCH state
   const [search, setSearch] = useState<string>("");
 
-  // COMMENT MODAL state
-  const [commentModal, setCommentModal] = useState<{
-    open: boolean;
-    rowKey: string | null;
-    currentComment: string;
-  }>({ open: false, rowKey: null, currentComment: "" });
-
   // COMMENTS state: a map of key -> comment (so edits stay persistent in UI)
   const [comments, setComments] = useState<{[key: string]: string}>({});
 
@@ -302,29 +286,6 @@ const WorksheetsPage: React.FC = () => {
     }));
   };
 
-  // Handle double-click to edit comment
-  const handleRowDoubleClick = (row: typeof rows[number]) => {
-    setCommentModal({
-      open: true,
-      rowKey: row.key,
-      currentComment: row.comment || "",
-    });
-  };
-
-  const handleCommentChange = (val: string) => {
-    setCommentModal(cm => ({ ...cm, currentComment: val }));
-  };
-
-  const handleSaveComment = () => {
-    if (commentModal.rowKey) {
-      setComments(prev => ({
-        ...prev,
-        [commentModal.rowKey!]: commentModal.currentComment,
-      }));
-    }
-    setCommentModal({ open: false, rowKey: null, currentComment: "" });
-  };
-
   // Render
   return (
     <div className="flex-1 w-full h-full bg-white p-0 px-10 md:px-20">
@@ -343,101 +304,173 @@ const WorksheetsPage: React.FC = () => {
             />
           </div>
         </div>
-        <TooltipProvider>
         <Table className="w-full">
           <TableHeader>
             <TableRow>
-              {[
-                { key: "name", label: "Name" },
-                { key: "type", label: "Type" },
-                { key: "createdAt", label: "Created At" },
-                { key: "updatedAt", label: "Updated At" },
-                { key: "comment", label: "Comment" },
-                { key: "owner", label: "Owner" },
-              ].map((col) => (
-                <TableHead
-                  key={col.key}
-                  className="cursor-pointer select-none"
-                  onClick={() =>
-                    setSort((prev) => ({
-                      field: col.key as SortField,
-                      direction:
-                        prev.field === col.key && prev.direction === "asc"
-                          ? "desc"
-                          : "asc",
-                    }))
-                  }
-                >
-                  {col.label}
-                  {sort.field === col.key && (
-                    <span className="ml-1">{sort.direction === "asc" ? "▲" : "▼"}</span>
-                  )}
-                </TableHead>
-              ))}
+              <TableHead
+                className="cursor-pointer select-none"
+                onClick={() =>
+                  setSort((prev) => ({
+                    field: "name",
+                    direction:
+                      prev.field === "name" && prev.direction === "asc"
+                        ? "desc"
+                        : "asc",
+                  }))
+                }
+              >
+                Name
+                {sort.field === "name" && (
+                  <span className="ml-1">{sort.direction === "asc" ? "▲" : "▼"}</span>
+                )}
+              </TableHead>
+              <TableHead
+                className="cursor-pointer select-none"
+                onClick={() =>
+                  setSort((prev) => ({
+                    field: "type",
+                    direction:
+                      prev.field === "type" && prev.direction === "asc"
+                        ? "desc"
+                        : "asc",
+                  }))
+                }
+              >
+                Type
+                {sort.field === "type" && (
+                  <span className="ml-1">{sort.direction === "asc" ? "▲" : "▼"}</span>
+                )}
+              </TableHead>
+              <TableHead
+                className="cursor-pointer select-none"
+                onClick={() =>
+                  setSort((prev) => ({
+                    field: "createdAt",
+                    direction:
+                      prev.field === "createdAt" && prev.direction === "asc"
+                        ? "desc"
+                        : "asc",
+                  }))
+                }
+              >
+                Created At
+                {sort.field === "createdAt" && (
+                  <span className="ml-1">{sort.direction === "asc" ? "▲" : "▼"}</span>
+                )}
+              </TableHead>
+              <TableHead
+                className="cursor-pointer select-none"
+                onClick={() =>
+                  setSort((prev) => ({
+                    field: "updatedAt",
+                    direction:
+                      prev.field === "updatedAt" && prev.direction === "asc"
+                        ? "desc"
+                        : "asc",
+                  }))
+                }
+              >
+                Updated At
+                {sort.field === "updatedAt" && (
+                  <span className="ml-1">{sort.direction === "asc" ? "▲" : "▼"}</span>
+                )}
+              </TableHead>
+              <TableHead
+                className="cursor-pointer select-none"
+                onClick={() =>
+                  setSort((prev) => ({
+                    field: "comment",
+                    direction:
+                      prev.field === "comment" && prev.direction === "asc"
+                        ? "desc"
+                        : "asc",
+                  }))
+                }
+              >
+                Comment
+                {sort.field === "comment" && (
+                  <span className="ml-1">{sort.direction === "asc" ? "▲" : "▼"}</span>
+                )}
+              </TableHead>
+              <TableHead
+                className="cursor-pointer select-none"
+                onClick={() =>
+                  setSort((prev) => ({
+                    field: "owner",
+                    direction:
+                      prev.field === "owner" && prev.direction === "asc"
+                        ? "desc"
+                        : "asc",
+                  }))
+                }
+              >
+                Owner
+                {sort.field === "owner" && (
+                  <span className="ml-1">{sort.direction === "asc" ? "▲" : "▼"}</span>
+                )}
+              </TableHead>
               <TableHead className="w-1/5">Folder</TableHead>
               <TableHead className="text-right"> </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {rows.map((row) => (
-              
-                
-                  
-                    
-                      {row.type === "folder" ? (
-                        
-                      ) : (
-                        
-                      )}
-                      
-                        {row.name}
-                      
-                    
-                  
-                
-                  {row.type === "folder" ? "Folder" : "File"}
-                
-                  {row.createdAt || "-"}
-                
-                  {row.updatedAt || "-"}
-                
-                  {row.comment || "-"}
-                
-                  {/* Owner column (always "john.smith") */}
-                  john.smith
-                
-                  {row.parentFolder ? row.parentFolder : row.type === "folder" ? "" : "-"}
-                
-                  {row.type === "query" && (
-                    
-                      {/* Duplicate icon */}
-                      
-                        
-                          
-                            handleDuplicateFile(row.parentFolder, row.name);
-                          }}
-                        >
-                          
-                        
-                      
-                      {/* Trash icon */}
-                      
-                        
-                          
-                            setModalState({ open: true, fileName: row.name, parentFolder: row.parentFolder });
-                          }}
-                        >
-                          
-                        
-                      
-                    
+              <TableRow key={row.key}>
+                <TableCell>
+                  {row.type === "folder" ? (
+                    <button
+                      className="flex items-center gap-2"
+                      onClick={() => toggleFolder(row.name)}
+                      title={expandedFolders[row.name] ? "Collapse folder" : "Expand folder"}
+                    >
+                      <Folder size={16} className="text-yellow-500" />
+                      <span className="font-semibold">{row.name}</span>
+                      <span className="ml-1 text-xs text-gray-400">
+                        {expandedFolders[row.name] ? "▾" : "▸"}
+                      </span>
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <File size={16} className="text-blue-400" />
+                      <span>{row.name}</span>
+                    </div>
                   )}
-                
-              
+                </TableCell>
+                <TableCell>{row.type === "folder" ? "Folder" : "File"}</TableCell>
+                <TableCell>{row.createdAt || "-"}</TableCell>
+                <TableCell>{row.updatedAt || "-"}</TableCell>
+                <TableCell>{row.comment || "-"}</TableCell>
+                <TableCell>john.smith</TableCell>
+                <TableCell>
+                  {row.parentFolder ? row.parentFolder : row.type === "folder" ? "" : "-"}
+                </TableCell>
+                <TableCell className="flex gap-2 justify-end">
+                  {/* Only for query file rows */}
+                  {row.type === "query" && (
+                    <>
+                      <button
+                        className="text-gray-400 hover:text-blue-500"
+                        onClick={() => handleDuplicateFile(row.parentFolder, row.name)}
+                        title="Duplicate"
+                      >
+                        <Copy size={16} />
+                      </button>
+                      <button
+                        className="text-gray-400 hover:text-red-600"
+                        onClick={() =>
+                          setModalState({ open: true, fileName: row.name, parentFolder: row.parentFolder })
+                        }
+                        title="Delete"
+                      >
+                        <Trash size={16} />
+                      </button>
+                    </>
+                  )}
+                </TableCell>
+              </TableRow>
             ))}
           </TableBody>
         </Table>
-        </TooltipProvider>
       </div>
       {/* Delete confirmation modal */}
       <DeleteFileModal
@@ -450,8 +483,7 @@ const WorksheetsPage: React.FC = () => {
           }
         }}
       />
-      
-    
+    </div>
   );
 };
 
