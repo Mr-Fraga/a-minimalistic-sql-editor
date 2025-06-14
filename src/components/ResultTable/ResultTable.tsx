@@ -218,7 +218,7 @@ const ResultTable: React.FC<ResultTableProps & { onDownloadCsv?: () => void }> =
 
   if (error)
     return (
-      <div className="rounded bg-red-50 border border-red-200 text-red-700 p-4 font-mono mt-2">
+      <div className="rounded-md bg-red-50 border border-red-200 text-red-700 p-4 font-mono mt-2">
         {error}
       </div>
     );
@@ -229,7 +229,7 @@ const ResultTable: React.FC<ResultTableProps & { onDownloadCsv?: () => void }> =
     );
 
   return (
-    <div className="w-full overflow-x-auto border border-gray-200 rounded bg-white mt-2 flex flex-col min-h-0">
+    <div className="w-full overflow-x-auto border border-gray-200 rounded-md bg-white mt-2 flex flex-col min-h-0">
       <table className="min-w-full text-xs font-mono text-black select-none">
         <TableHeader
           columns={result.columns}

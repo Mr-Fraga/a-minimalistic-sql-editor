@@ -72,10 +72,10 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
 
     return (
       <div className="w-full">
-        <div className="rounded-lg overflow-hidden border border-gray-200 shadow-sm bg-white relative">
+        <div className="rounded-md overflow-hidden border border-gray-200 shadow-sm bg-white relative">
           <button
             type="button"
-            className="absolute top-2 right-2 z-10 bg-white/90 rounded px-2 py-1 border border-gray-300 text-xs font-mono hover:bg-gray-50 flex items-center gap-1 shadow transition"
+            className="absolute top-2 right-2 z-10 bg-white/90 rounded-md px-2 py-1 border border-gray-300 text-xs font-mono hover:bg-gray-50 flex items-center gap-1 shadow transition"
             onClick={handleCopy}
             tabIndex={-1}
             title="Copy SQL to clipboard"
@@ -115,7 +115,7 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
         {/* Buttons below the resizable box */}
         <div className="flex gap-2 mt-2">
           <button
-            className="rounded-lg px-4 py-1 bg-black text-white text-sm font-mono hover:bg-gray-900 transition"
+            className="rounded-md px-4 py-1 bg-black text-white text-sm font-mono hover:bg-gray-900 transition"
             onClick={onRun}
             disabled={isRunning}
             type="button"
@@ -123,7 +123,7 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
             {isRunning ? "Running..." : "Run"}
           </button>
           <button
-            className="rounded-lg px-4 py-1 bg-gray-900 text-white text-sm font-mono hover:bg-black/80 transition"
+            className="rounded-md px-4 py-1 bg-gray-900 text-white text-sm font-mono hover:bg-black/80 transition"
             onClick={onFormat}
             disabled={isRunning}
             type="button"
