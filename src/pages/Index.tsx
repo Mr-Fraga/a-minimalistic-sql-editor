@@ -1,12 +1,110 @@
-// Update this page (the content is just a fallback if you fail to update the page)
 
-const Index = () => {
+// Main page for the "SQL query engine" app
+import React, { useState } from "react";
+import AccountSection from "@/components/AccountSection";
+import TableExplorer from "@/components/TableExplorer";
+import SqlEditor from "@/components/SqlEditor";
+import ResultTable from "@/components/ResultTable";
+
+const DEFAULT_SQL = "SELECT * FROM users;";
+
+function fakeRunQuery(sql: string): { columns: string[]; rows: Array<any[]> } | { error: string } {
+  const lower = sql.trim().toLowerCase();
+  if (!lower.endsWith(";")) {
+    return { error: "Statement must end with a semicolon." };
+  }
+  if (lower.startsWith("select * from users")) {
+    return {
+      columns: ["id", "name", "email", "created_at"],
+      rows: [
+        [1, "Alice", "alice@email.com", "2023-01-01"],
+        [2, "Bob", "bob@email.com", "2023-02-01"],
+        [3, "Cathy", "cathy@email.com", "2023-03-11"],
+      ],
+    };
+  }
+  if (lower.startsWith("select * from orders")) {
+    return {
+      columns: ["id", "user_id", "total", "date"],
+      rows: [
+        [1, 1, "$25.00", "2023-04-01"],
+        [2, 2, "$85.00", "2023-04-02"],
+      ],
+    };
+  }
+  return {
+    error: "Mock engine: Only 'SELECT * FROM users;' and 'SELECT * FROM orders;' supported in this demo.",
+  };
+}
+
+// minimal "formatter" for pretty SQL (only indent SELECT * FROM ...)
+function formatSql(sql: string) {
+  return sql
+    .replace(/\bSELECT\b/i, "SELECT")
+    .replace(/\bFROM\b/i, "\nFROM")
+    .replace(/\bWHERE\b/i, "\nWHERE")
+    .replace(/\s*;\s*$/, ";")
+    .replace(/\n{2,}/g, "\n")
+    .trim();
+}
+
+const Index: React.FC = () => {
+  const [sql, setSql] = useState(DEFAULT_SQL);
+  const [result, setResult] = useState<{ columns: string[]; rows: Array<any[]> } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isRunning, setIsRunning] = useState(false);
+
+  const handleTableClick = (table: string) => {
+    setSql(`SELECT * FROM ${table};`);
+    setResult(null);
+    setError(null);
+  };
+
+  const handleFormat = () => {
+    setSql(formatSql(sql));
+  };
+
+  const handleRun = () => {
+    setIsRunning(true);
+    setTimeout(() => {
+      const res = fakeRunQuery(sql);
+      if ("error" in res) {
+        setResult(null);
+        setError(res.error);
+      } else {
+        setResult(res);
+        setError(null);
+      }
+      setIsRunning(false);
+    }, 500);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-white text-black flex flex-col">
+      <header>
+        <AccountSection account="john_smith" role="readonly" />
+      </header>
+      <main className="flex-1 flex min-h-0 border-t border-gray-200">
+        <aside className="w-[230px] bg-gray-50 border-r border-gray-200 flex-shrink-0 min-h-0">
+          <TableExplorer onTableClick={handleTableClick} />
+        </aside>
+        <section className="flex-1 flex flex-col px-8 py-6 min-w-0">
+          <h1 className="font-bold text-xl mb-4 font-mono tracking-tight select-none">SQL Editor</h1>
+          <div className="flex-1 flex flex-col min-h-0">
+            <SqlEditor
+              value={sql}
+              onChange={setSql}
+              onFormat={handleFormat}
+              onRun={handleRun}
+              isRunning={isRunning}
+            />
+            <div className="mt-6">
+              <h2 className="font-bold text-md mb-2 font-mono tracking-tight select-none">Results</h2>
+              <ResultTable result={result || undefined} error={error} />
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
   );
 };
