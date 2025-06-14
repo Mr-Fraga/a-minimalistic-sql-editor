@@ -4,7 +4,7 @@ import CodeMirror from "@uiw/react-codemirror";
 import { sql } from "@codemirror/lang-sql";
 import { linter, lintGutter } from "@codemirror/lint";
 import { toast } from "@/hooks/use-toast";
-import { Copy } from "lucide-react";
+import { Copy, Play } from "lucide-react";
 
 interface SqlEditorProps {
   value: string;
@@ -34,7 +34,6 @@ export interface SqlEditorImperativeHandle {
   insertAtCursor: (toInsert: string) => void;
 }
 
-// Note: now using forwardRef to allow imperative methods
 const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<SqlEditorProps>>(
   ({ value, onChange, onFormat, onRun, isRunning }, ref) => {
     const editorRef = useRef<any>(null);
@@ -73,6 +72,7 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
     return (
       <div className="w-full">
         <div className="rounded-md overflow-hidden border border-gray-200 shadow-sm bg-white relative">
+          {/* Copy button */}
           <button
             type="button"
             className="absolute top-2 right-2 z-10 bg-white/90 rounded-md px-2 py-1 border border-gray-300 text-xs font-mono hover:bg-gray-50 flex items-center gap-1 shadow transition"
@@ -84,6 +84,19 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
           >
             <Copy size={14} className="inline-block" />
             Copy
+          </button>
+          {/* Format SQL button, below copy button */}
+          <button
+            className="absolute top-11 right-2 z-10 bg-gray-900 text-white text-xs font-mono rounded-md px-2 py-1 border border-gray-800 hover:bg-black/80 shadow transition"
+            onClick={onFormat}
+            tabIndex={-1}
+            title="Format SQL"
+            aria-label="Format SQL"
+            disabled={isRunning}
+            style={{marginTop: 2}}
+            type="button"
+          >
+            Format SQL
           </button>
           {/* Resizable vertical textbox */}
           <div
@@ -119,16 +132,10 @@ const SqlEditor = forwardRef<SqlEditorImperativeHandle, React.PropsWithChildren<
             onClick={onRun}
             disabled={isRunning}
             type="button"
+            aria-label="Run"
+            title="Run SQL"
           >
-            {isRunning ? "Running..." : "Run"}
-          </button>
-          <button
-            className="rounded-md px-4 py-1 bg-gray-900 text-white text-sm font-mono hover:bg-black/80 transition"
-            onClick={onFormat}
-            disabled={isRunning}
-            type="button"
-          >
-            Format SQL
+            <Play size={16} />
           </button>
         </div>
       </div>

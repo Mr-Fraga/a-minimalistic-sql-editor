@@ -1,8 +1,8 @@
-
 import React from "react";
 import SqlEditor, { SqlEditorImperativeHandle } from "@/components/SqlEditor";
 import ResultTable from "@/components/ResultTable";
 import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 
 export type TabType = {
   id: string;
@@ -55,8 +55,8 @@ const TabView: React.FC<TabViewProps> = ({
       {/* Download button, only if there are rows */}
       {tab.result && tab.result.rows.length > 0 && (
         <div className="flex w-full justify-start mt-2">
-          <Button size="sm" className="font-mono" onClick={onDownloadCsv}>
-            Download as CSV
+          <Button size="sm" className="font-mono" onClick={onDownloadCsv} variant="outline">
+            <Download size={16} />
           </Button>
         </div>
       )}
