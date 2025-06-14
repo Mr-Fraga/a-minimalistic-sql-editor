@@ -105,8 +105,9 @@ const TabHeader: React.FC<TabHeaderProps> = ({
   return (
     <div
       className={
-        `flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-gray-100 cursor-pointer select-none border shadow-sm
-        ${isActive ? "bg-gray-100 border-black" : "bg-white border-black"} ` +
+        `flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-gray-100 cursor-pointer select-none border ` +
+        `shadow-md ring-1 ring-gray-200 ` + // darker shadow & subtle gray contour
+        `${isActive ? "bg-gray-100 border-black" : "bg-white border-black"} ` +
         className
       }
       style={{
