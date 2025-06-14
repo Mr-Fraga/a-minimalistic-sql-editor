@@ -9,7 +9,7 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, X } from "lucide-react";
 
 const DEFAULT_SQL = "SELECT * FROM users;";
@@ -185,6 +185,9 @@ const Index: React.FC = () => {
     delete sqlEditorRefs.current[id];
   };
 
+  // Find currently active tab object
+  const currentTab = tabs.find(tab => tab.id === activeTab);
+
   return (
     <div className="min-h-screen bg-white text-black flex flex-col">
       {/* Top bar */}
@@ -209,87 +212,88 @@ const Index: React.FC = () => {
           <section className="flex-1 flex flex-col px-8 py-6 min-w-0 h-full">
             {/* --- TABS --- */}
             <div className="w-full border-b border-gray-200 flex items-center pr-0 mb-3">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1">
-                <TabsList className="rounded-none bg-transparent shadow-none px-0 space-x-1 h-auto min-h-0">
-                  {tabs.map((tab, i) => (
-                    <TabsTrigger
-                      key={tab.id}
-                      value={tab.id}
-                      className={`rounded-t-md border-none bg-transparent px-4 py-2.5 text-base font-mono font-medium relative group
-                        ${activeTab === tab.id ? "bg-white shadow" : "bg-gray-100 hover:bg-gray-200"}
-                        transition min-w-[6rem]
-                      `}
-                    >
-                      <span>{tab.name}</span>
-                      {tabs.length > 1 && (
-                        <button
-                          tabIndex={-1}
-                          title="Close tab"
-                          onClick={e => { e.stopPropagation(); handleRemoveTab(tab.id); }}
-                          className="absolute -right-2.5 top-[8px] z-10 bg-gray-200 hover:bg-gray-300 rounded-full p-0.5 transition"
-                        >
-                          <X size={14} />
-                        </button>
-                      )}
-                    </TabsTrigger>
-                  ))}
-                  {/* + Add new tab button */}
+              <div className="flex-1 flex">
+                {tabs.map((tab, i) => (
                   <button
-                    className="ml-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center transition"
-                    type="button"
-                    title="New Tab"
-                    style={{ marginLeft: 'auto' }}
-                    onClick={handleAddTab}
-                  >
-                    <Plus size={20} />
-                  </button>
-                </TabsList>
-                {tabs.map(tab => (
-                  <TabsContent
                     key={tab.id}
-                    value={tab.id}
-                    className="pt-0 pb-0 px-0 mt-0"
+                    className={`
+                      relative font-mono text-base px-4 py-2.5 min-w-[6rem] transition
+                      border-b-2 focus:outline-none
+                      ${activeTab === tab.id
+                        ? "bg-white border-black text-black font-medium shadow"
+                        : "bg-gray-100 border-transparent text-gray-700 hover:bg-gray-200"}
+                      rounded-t-md
+                    `}
+                    style={{ marginRight: 2 }}
+                    onClick={() => setActiveTab(tab.id)}
+                    type="button"
                   >
-                    <div className="flex-1 flex flex-col min-h-0 h-full">
-                      {/* Vertically divide SQL editor vs Results */}
-                      <ResizablePanelGroup direction="vertical" className="flex-1 min-h-0 h-full">
-                        <ResizablePanel defaultSize={60} minSize={20} className="flex flex-col min-h-0">
-                          <ResizablePanelGroup direction="vertical" className="flex-1 min-h-0 h-full">
-                            <ResizablePanel defaultSize={75} minSize={40} maxSize={95} className="min-h-[80px]">
-                              <SqlEditor
-                                ref={el => { sqlEditorRefs.current[tab.id] = el; }}
-                                value={tab.sql}
-                                onChange={sql => handleSqlChange(tab.id, sql)}
-                                onFormat={() => handleFormat(tab.id)}
-                                onRun={() => handleRun(tab.id)}
-                                isRunning={tab.isRunning}
-                              />
-                            </ResizablePanel>
-                            {/* No handle for clean look, but easy to add if you wish */}
-                          </ResizablePanelGroup>
-                        </ResizablePanel>
-                        <ResizableHandle withHandle className="bg-gray-200" />
-                        <ResizablePanel defaultSize={40} minSize={20}>
-                          <div className="mt-6 flex flex-col min-h-0 h-full">
-                            <h2 className="font-bold text-md mb-2 font-mono tracking-tight select-none">Results</h2>
-                            <ResultTable result={tab.result || undefined} error={tab.error} />
-                            {/* Download as CSV below the table, left bottom */}
-                            {tab.result && tab.result.rows.length > 0 && (
-                              <div className="flex w-full justify-start mt-2">
-                                <Button size="sm" className="font-mono" onClick={() => handleDownloadCsv(tab)}>
-                                  Download as CSV
-                                </Button>
-                              </div>
-                            )}
-                          </div>
-                        </ResizablePanel>
-                      </ResizablePanelGroup>
-                    </div>
-                  </TabsContent>
+                    <span>{tab.name}</span>
+                    {tabs.length > 1 && (
+                      <button
+                        tabIndex={-1}
+                        title="Close tab"
+                        onClick={e => { e.stopPropagation(); handleRemoveTab(tab.id); }}
+                        className="absolute -right-2.5 top-[10px] z-10 bg-gray-200 hover:bg-gray-300 rounded-full p-0.5 transition"
+                        style={{ width: 18, height: 18, lineHeight: 0 }}
+                        type="button"
+                      >
+                        <X size={13} />
+                      </button>
+                    )}
+                  </button>
                 ))}
-              </Tabs>
+                {/* + Add new tab button */}
+                <button
+                  className="ml-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center transition"
+                  type="button"
+                  title="New Tab"
+                  style={{ marginLeft: 'auto' }}
+                  onClick={handleAddTab}
+                >
+                  <Plus size={20} />
+                </button>
+              </div>
             </div>
-            {/* End tab section */}
+            {/* End tab header section */}
+
+            {/* Only render the editor and result for the currently selected tab */}
+            <div className="w-full flex-1 flex flex-col min-h-0 h-full">
+              {currentTab && (
+                <ResizablePanelGroup direction="vertical" className="flex-1 min-h-0 h-full">
+                  <ResizablePanel defaultSize={60} minSize={20} className="flex flex-col min-h-0">
+                    <ResizablePanelGroup direction="vertical" className="flex-1 min-h-0 h-full">
+                      <ResizablePanel defaultSize={75} minSize={40} maxSize={95} className="min-h-[80px]">
+                        <SqlEditor
+                          ref={el => { sqlEditorRefs.current[currentTab.id] = el; }}
+                          value={currentTab.sql}
+                          onChange={sql => handleSqlChange(currentTab.id, sql)}
+                          onFormat={() => handleFormat(currentTab.id)}
+                          onRun={() => handleRun(currentTab.id)}
+                          isRunning={currentTab.isRunning}
+                        />
+                      </ResizablePanel>
+                      {/* No handle for clean look, but easy to add if you wish */}
+                    </ResizablePanelGroup>
+                  </ResizablePanel>
+                  <ResizableHandle withHandle className="bg-gray-200" />
+                  <ResizablePanel defaultSize={40} minSize={20}>
+                    <div className="mt-6 flex flex-col min-h-0 h-full">
+                      <h2 className="font-bold text-md mb-2 font-mono tracking-tight select-none">Results</h2>
+                      <ResultTable result={currentTab.result || undefined} error={currentTab.error} />
+                      {currentTab.result && currentTab.result.rows.length > 0 && (
+                        <div className="flex w-full justify-start mt-2">
+                          <Button size="sm" className="font-mono" onClick={() => handleDownloadCsv(currentTab)}>
+                            Download as CSV
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </ResizablePanel>
+                </ResizablePanelGroup>
+              )}
+            </div>
+            {/* End tab content section */}
           </section>
         </ResizablePanel>
       </ResizablePanelGroup>
