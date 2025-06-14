@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from "react";
 import { useLocalStorage, useDebounce } from "./MainContentHooks";
 import TabView from "@/components/TabView";
@@ -56,6 +55,26 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
     setTabs([...tabs, newTab]);
     setActiveTabId(newTab.id);
   }, [tabs, setTabs, setActiveTabId]);
+
+  // Add duplicateTab logic
+  const duplicateTab = useCallback(
+    (id: string) => {
+      const tabToCopy = tabs.find(tab => tab.id === id);
+      if (!tabToCopy) return;
+      // Ensure new ID and sequenced name "Tab N (copy [i])"
+      let baseName = tabToCopy.name.replace(/\s\(copy( \d+)?\)$/i, "");
+      let newName = `${baseName} (copy)`;
+      const existingNames = tabs.map(t => t.name);
+      let copyIdx = 2;
+      while (existingNames.includes(newName)) {
+        newName = `${baseName} (copy ${copyIdx++})`;
+      }
+      const copy = { ...tabToCopy, id: generateId(), name: newName, isRunning: false };
+      setTabs([...tabs, copy]);
+      setActiveTabId(copy.id);
+    },
+    [tabs, setTabs, setActiveTabId]
+  );
 
   const closeTab = useCallback(
     (id: string) => {
@@ -252,6 +271,7 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
         addTab={addTab}
         closeTab={closeTab}
         renameTab={renameTab}
+        duplicateTab={duplicateTab} {/* <-- FIX: wire duplicateTab */}
       />
       <div className="flex-1 flex flex-col px-6 md:px-8 mt-4">
         {activeTab ? (
