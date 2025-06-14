@@ -1,7 +1,13 @@
+
 import React, { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, X } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Plus, X, Copy } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import CommentEditModal from "@/components/CommentEditModal";
 
 interface TabType {
@@ -21,6 +27,7 @@ interface TabBarProps {
   addTab: () => void;
   closeTab: (id: string) => void;
   renameTab: (id: string, name: string) => void;
+  duplicateTab: (id: string) => void; // <-- Added prop
 }
 
 const TabBar: React.FC<TabBarProps> = ({
@@ -30,6 +37,7 @@ const TabBar: React.FC<TabBarProps> = ({
   addTab,
   closeTab,
   renameTab,
+  duplicateTab,
 }) => {
   // Comment editing state per tab
   const [commentModal, setCommentModal] = useState<{
@@ -63,7 +71,7 @@ const TabBar: React.FC<TabBarProps> = ({
   };
 
   return (
-    <div className="w-full bg-white pl-6 md:pl-8"> {/* left-align, match SQL title, no border or shadow */}
+    <div className="w-full bg-white pl-6 md:pl-8 select-none" style={{border: "none", boxShadow: "none"}}>
       <TooltipProvider>
         <Tabs
           value={activeTabId || (tabs.length > 0 ? tabs[0].id : undefined)}
@@ -90,32 +98,44 @@ const TabBar: React.FC<TabBarProps> = ({
                       value={tab.id}
                       onClick={() => setActiveTabId(tab.id)}
                       className={
-                        "flex items-center px-4 py-2 font-semibold rounded-lg bg-white border border-gray-200 text-sm shadow text-black transition-none select-none focus-visible:ring-0 focus:ring-0 focus:outline-none " +
+                        "flex items-center px-4 py-2 font-semibold rounded-lg border text-sm shadow transition-none select-none focus-visible:ring-0 focus:ring-0 focus:outline-none " +
                         (tab.id === activeTabId
-                          ? "z-10 " // keep active on top
-                          : "text-gray-700 hover:bg-gray-50")
+                          ? "bg-gray-100 border-gray-400 z-10 text-black"
+                          : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50")
                       }
                       style={{
                         outline: "none",
                         marginBottom: "0px",
-                        borderBottom: "none",
+                        borderBottom: "2.5px solid transparent",
                         gap: ".5rem",
-                        boxShadow: "0 1px 2.5px 0 rgb(60 60 60 / 0.02)",
                         alignItems: "center",
-                        minWidth: "80px", // for stability
+                        minWidth: "80px",
+                        maxHeight: "42px",
+                        boxShadow: "0 1.5px 5px 0 rgb(24 24 24 / 0.03)",
+                        borderWidth: "1.5px",
+                        borderStyle: "solid",
+                        borderColor: tab.id === activeTabId ? "#d1d5db" : "#e5e7eb", // gray-400 or gray-200
+                        paddingRight: "1.75rem", // leave room for icons
+                        paddingLeft: "0.9rem",
+                        borderRadius: "0.85rem",
+                        position: "relative",
+                        zIndex: tab.id === activeTabId ? 20 : undefined,
+                        transition: "background 0.15s, border 0.15s",
                       }}
                     >
-                      <span className="truncate max-w-[120px]" title={tab.name}>
+                      <span className="truncate max-w-[110px]" title={tab.name}>
                         {tab.name}
                       </span>
+                      {/* Duplicate tab icon */}
                       <button
-                        className="ml-2 text-gray-400 hover:text-red-600 p-0 flex items-center"
+                        className="ml-2 text-gray-400 hover:text-blue-600 p-0 flex items-center"
                         onClick={e => {
                           e.stopPropagation();
-                          closeTab(tab.id);
+                          duplicateTab(tab.id);
                         }}
-                        title="Close tab"
+                        title="Duplicate tab"
                         tabIndex={-1}
+                        aria-label="Duplicate tab"
                         style={{
                           display: "flex",
                           alignItems: "center",
@@ -123,7 +143,29 @@ const TabBar: React.FC<TabBarProps> = ({
                           border: "none",
                           outline: "none",
                           lineHeight: 0,
-                          marginLeft: ".25rem"
+                          marginLeft: ".2rem",
+                        }}
+                      >
+                        <Copy size={16} />
+                      </button>
+                      {/* Close tab icon */}
+                      <button
+                        className="ml-1 text-gray-400 hover:text-red-600 p-0 flex items-center"
+                        onClick={e => {
+                          e.stopPropagation();
+                          closeTab(tab.id);
+                        }}
+                        title="Close tab"
+                        tabIndex={-1}
+                        aria-label="Close tab"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          background: "transparent",
+                          border: "none",
+                          outline: "none",
+                          lineHeight: 0,
+                          marginLeft: ".2rem"
                         }}
                       >
                         <X size={16} />
@@ -155,6 +197,7 @@ const TabBar: React.FC<TabBarProps> = ({
                 display: "flex",
                 alignItems: "center",
               }}
+              aria-label="Add Tab"
             >
               <Plus size={20} />
             </button>
@@ -178,3 +221,4 @@ const TabBar: React.FC<TabBarProps> = ({
 };
 
 export default TabBar;
+
