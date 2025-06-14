@@ -271,7 +271,7 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
         addTab={addTab}
         closeTab={closeTab}
         renameTab={renameTab}
-        duplicateTab={duplicateTab} {/* <-- FIX: wire duplicateTab */}
+        duplicateTab={duplicateTab}
       />
       <div className="flex-1 flex flex-col px-6 md:px-8 mt-4">
         {activeTab ? (
