@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from "react";
 import { ArrowDown, ArrowUp, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -58,6 +57,10 @@ function filterRows(rows: Array<any[]>, filters: string[]): Array<any[]> {
     )
   );
 }
+
+// Use the same style as RL SQL editor's Run/Format buttons
+const downloadBtnClass =
+  "rounded px-4 py-1 bg-black text-white text-sm font-mono hover:bg-gray-900 transition";
 
 const ResultTable: React.FC<ResultTableProps> = ({ result, error }) => {
   // One filter input per column
@@ -123,17 +126,7 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, error }) => {
     );
 
   return (
-    <div className="w-full overflow-x-auto border border-gray-200 rounded bg-white mt-2">
-      <div className="flex justify-end px-2 pt-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-xs font-mono"
-          onClick={handleDownload}
-        >
-          Download CSV
-        </Button>
-      </div>
+    <div className="w-full overflow-x-auto border border-gray-200 rounded bg-white mt-2 flex flex-col min-h-0">
       <table className="min-w-full text-xs font-mono text-black">
         <thead>
           {/* Filtering Row */}
@@ -196,6 +189,15 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, error }) => {
           )}
         </tbody>
       </table>
+      <div className="flex justify-end px-2 pt-4 pb-2">
+        <button
+          type="button"
+          className={downloadBtnClass}
+          onClick={handleDownload}
+        >
+          Download CSV
+        </button>
+      </div>
     </div>
   );
 };

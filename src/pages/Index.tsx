@@ -3,6 +3,11 @@ import AccountSection from "@/components/AccountSection";
 import TableExplorer from "@/components/TableExplorer";
 import SqlEditor, { SqlEditorImperativeHandle } from "@/components/SqlEditor";
 import ResultTable from "@/components/ResultTable";
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "@/components/ui/resizable";
 
 const DEFAULT_SQL = "SELECT * FROM users;";
 
@@ -97,18 +102,25 @@ const Index: React.FC = () => {
         <section className="flex-1 flex flex-col px-8 py-6 min-w-0">
           <h1 className="font-bold text-xl mb-4 font-mono tracking-tight select-none">SQL Editor</h1>
           <div className="flex-1 flex flex-col min-h-0">
-            <SqlEditor
-              ref={sqlEditorRef}
-              value={sql}
-              onChange={setSql}
-              onFormat={handleFormat}
-              onRun={handleRun}
-              isRunning={isRunning}
-            />
-            <div className="mt-6">
-              <h2 className="font-bold text-md mb-2 font-mono tracking-tight select-none">Results</h2>
-              <ResultTable result={result || undefined} error={error} />
-            </div>
+            <ResizablePanelGroup direction="vertical" className="flex-1 min-h-0">
+              <ResizablePanel defaultSize={60} minSize={20}>
+                <SqlEditor
+                  ref={sqlEditorRef}
+                  value={sql}
+                  onChange={setSql}
+                  onFormat={handleFormat}
+                  onRun={handleRun}
+                  isRunning={isRunning}
+                />
+              </ResizablePanel>
+              <ResizableHandle withHandle className="bg-gray-200" />
+              <ResizablePanel defaultSize={40} minSize={20}>
+                <div className="mt-6 flex flex-col min-h-0 h-full">
+                  <h2 className="font-bold text-md mb-2 font-mono tracking-tight select-none">Results</h2>
+                  <ResultTable result={result || undefined} error={error} />
+                </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
           </div>
         </section>
       </main>
