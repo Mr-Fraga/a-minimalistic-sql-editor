@@ -27,10 +27,14 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
   setResultsHeight,
   onDownloadCsv
 }) => {
-  // DEBUG
+  // Debug the actual value and identity
   useEffect(() => {
-    console.log("[TabResultsSection] tab.result:", tab.result, "tab.error:", tab.error);
-  }, [tab.result, tab.error]);
+    console.log(
+      "[TabResultsSection] tab.id:", tab.id, 
+      "| .result:", tab.result, 
+      "| .error:", tab.error
+    );
+  }, [tab, tab.result, tab.error]);
 
   const [exportFullResults, setExportFullResults] = useState(false);
   const dragStartY = useRef<number | null>(null);
