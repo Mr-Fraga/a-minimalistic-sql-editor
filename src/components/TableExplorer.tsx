@@ -11,7 +11,13 @@ import { toast } from "@/hooks/use-toast";
 
 // --- Extended dummy schemas and tables for exploration! --- //
 const rand = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
-function range(n: number) { return Array.from({ length: n }, (_, i) => i + 1); }
+function range(n: number) {
+  return Array.from({ length: n }, (_, i) => i + 1);
+}
+function randInt(min: number, max: number): number {
+  // Inclusive lower bound, inclusive upper bound.
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 const SCHEMA_DATA = [
   {
@@ -36,7 +42,7 @@ const SCHEMA_DATA = [
         owner: "orders_ops",
         rowsSample: range(28).map(i => [
           i + 1,
-          rand(range(30)),
+          randInt(1, 30),
           `$${(rand([20,35,50,29,79,110,14,7,88,67,99,45,31,59]) + Math.floor(Math.random()*10)).toFixed(2)}`,
           `2023-0${rand([1,2,3,4,5,6,7,8,9])}-${(rand([10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29])).toString().padStart(2,"0")}`
         ]),
@@ -125,8 +131,8 @@ const SCHEMA_DATA = [
         rowsSample: range(40).map(i => [
           9000 + i,
           rand(["/","/login","/dashboard","/profile","/orders","/about","/products","/categories"]),
-          rand(range(30)),
-          `2024-04-${(rand(range(1,28))).toString().padStart(2,"0")} 0${rand(range(0,9))}:${rand(["05","15","22","38","42","57"])}:00`
+          randInt(1, 30),
+          `2024-04-${(randInt(1,27)).toString().padStart(2,"0")} 0${randInt(0,8)}:${rand(["05","15","22","38","42","57"])}:00`
         ])
       },
       {
@@ -137,7 +143,7 @@ const SCHEMA_DATA = [
         rowsSample: range(8).map(i => [
           i + 1,
           rand(["Landing","Sign Up","Email Entered","Payment","Onboarded","Trial","Upgrade","Churn"]),
-          rand(range(500,1000)),
+          randInt(500,1000),
         ])
       },
     ],
@@ -155,7 +161,7 @@ const SCHEMA_DATA = [
           3000 + i,
           rand(["Alex","Barbara","Carlos","Diana","Eva","Frank","Grace","Hank","Irene","Jacob","Kate","Leo","Maria","Ned","Olga","Peter","Quincy","Rita","Steve","Tina","Ulysses","Veronica","Will","Xena","Yuri","Zora"]),
           rand(["IT","Sales","HR","Finance","Legal","Analytics"]),
-          `20${rand([11,12,13,14,15,16,17,18,19,20,21,22])}-0${rand(range(1,9))}-${(rand(range(1,28))).toString().padStart(2,"0")}`
+          `20${rand([11,12,13,14,15,16,17,18,19,20,21,22])}-0${randInt(1,8)}-${(randInt(1,27)).toString().padStart(2,"0")}`
         ])
       },
       {
