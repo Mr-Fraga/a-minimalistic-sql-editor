@@ -7,7 +7,7 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import { Folder, File } from "lucide-react";
+import { Folder, File, Trash } from "lucide-react";
 
 // Mock folders/files data with dates
 const worksheetData = [
@@ -53,9 +53,52 @@ const worksheetData = [
   },
 ];
 
+const initialWorksheetData = [
+  {
+    type: "folder",
+    name: "Finance Reports",
+    createdAt: "2024-01-10",
+    updatedAt: "2024-06-11",
+    files: [
+      {
+        type: "file",
+        name: "Q1_2024_Balance.xlsx",
+        createdAt: "2024-02-01",
+        updatedAt: "2024-03-20",
+      },
+      {
+        type: "file",
+        name: "Expenses_April.csv",
+        createdAt: "2024-04-02",
+        updatedAt: "2024-04-30",
+      },
+    ],
+  },
+  {
+    type: "folder",
+    name: "HR",
+    createdAt: "2024-02-01",
+    updatedAt: "2024-05-21",
+    files: [
+      {
+        type: "file",
+        name: "Employee_List_2025.xlsx",
+        createdAt: "2024-05-10",
+        updatedAt: "2024-05-28",
+      },
+    ],
+  },
+  {
+    type: "file",
+    name: "Roadmap_2025.xlsx",
+    createdAt: "2024-03-15",
+    updatedAt: "2024-06-13",
+  },
+];
+
 // Flatten the data for easier table mapping
 function flattenData(
-  data: typeof worksheetData,
+  data: typeof initialWorksheetData,
   expandedFolders: Record<string, boolean>
 ) {
   const rows: Array<{
@@ -118,9 +161,30 @@ const WorksheetsPage: React.FC = () => {
   });
   // Track which folders are expanded
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
+  // Worksheet data can now be mutated
+  const [data, setData] = useState(initialWorksheetData);
 
-  // Flatten rows for the current UI
-  let rows = flattenData(worksheetData, expandedFolders);
+  // To handle file deletion
+  const handleDeleteFile = (parentFolder: string | undefined, fileName: string) => {
+    setData(prev => {
+      // If it's a root file (no parent folder)
+      if (!parentFolder) {
+        return prev.filter(item => !(item.type === "file" && item.name === fileName));
+      }
+      // For files inside folders
+      return prev.map(item => {
+        if (item.type !== "folder" || item.name !== parentFolder) return item;
+
+        return {
+          ...item,
+          files: item.files.filter((f: any) => f.name !== fileName),
+        };
+      });
+    });
+  };
+
+  // Flatten for current data
+  let rows = flattenData(data, expandedFolders);
 
   // Sorting the flattened data
   rows = [...rows].sort((a, b) => {
@@ -181,6 +245,7 @@ const WorksheetsPage: React.FC = () => {
                 </TableHead>
               ))}
               <TableHead className="w-1/5">Folder</TableHead>
+              <TableHead className="text-right"> </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -227,6 +292,20 @@ const WorksheetsPage: React.FC = () => {
                 </TableCell>
                 <TableCell>
                   {row.parentFolder ? row.parentFolder : row.type === "folder" ? "" : "-"}
+                </TableCell>
+                <TableCell className="text-right">
+                  {row.type === "file" && (
+                    <button
+                      className="p-1 rounded hover:bg-red-50"
+                      title="Delete file"
+                      onClick={e => {
+                        e.stopPropagation();
+                        handleDeleteFile(row.parentFolder, row.name);
+                      }}
+                    >
+                      <Trash className="text-red-500" size={18} strokeWidth={2} />
+                    </button>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
