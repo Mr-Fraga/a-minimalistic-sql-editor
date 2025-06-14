@@ -73,6 +73,23 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
   // Demo toggle state
   const [toggled, setToggled] = useState(false);
 
+  // Helper to create filename with tab name and timestamp
+  function getDownloadFilename(tabName: string) {
+    function sanitize(str: string) {
+      return str.replace(/[^a-zA-Z0-9_\-]/g, "_");
+    }
+    const now = new Date();
+    const timestamp =
+      now.getFullYear().toString() +
+      ("0" + (now.getMonth() + 1)).slice(-2) +
+      ("0" + now.getDate()).slice(-2) +
+      "_" +
+      ("0" + now.getHours()).slice(-2) +
+      ("0" + now.getMinutes()).slice(-2) +
+      ("0" + now.getSeconds()).slice(-2);
+    return `${sanitize(tabName)}_${timestamp}.csv`;
+  }
+
   // Download as CSV handler for demo
   const handleDownload = () => {
     const header = MOCK_RESULT.columns.join(",");
@@ -83,8 +100,9 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
     const blob = new Blob([csv], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
+    // For the demo, use "Tab" as tab name; replace with actual tab name in real usage
+    a.download = getDownloadFilename("Tab");
     a.href = url;
-    a.download = "results.csv";
     document.body.appendChild(a);
     a.click();
     setTimeout(() => {
@@ -145,3 +163,4 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
 };
 
 export default TabResultsSection;
+
