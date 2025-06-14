@@ -54,14 +54,15 @@ const Index: React.FC = () => {
 
   const sqlEditorRef = useRef<SqlEditorImperativeHandle>(null);
 
+  // Handles inserting schema.table or column
   const handleInsertSchemaTable = (schema: string, table: string) => {
     sqlEditorRef.current?.insertAtCursor(`${schema}.${table}`);
   };
-
-  const handleFormat = () => {
-    setSql(formatSql(sql));
+  const handleInsertColumn = (col: string) => {
+    sqlEditorRef.current?.insertAtCursor(col);
   };
 
+  const handleFormat = () => setSql(formatSql(sql));
   const handleRun = () => {
     setIsRunning(true);
     setTimeout(() => {
@@ -77,14 +78,12 @@ const Index: React.FC = () => {
     }, 500);
   };
 
-  // Layout: move Account + Role to top right
   return (
     <div className="min-h-screen bg-white text-black flex flex-col">
       {/* Top bar */}
-      <header className="w-full flex justify-end items-center border-b border-gray-200 p-0 px-8 py-2">
-        <div className="flex items-center gap-4 ml-auto">
-          {/* Role selector (left), Account section (right) */}
-          {/* The AccountSection now has role selector inside already */}
+      <header className="w-full flex justify-end items-center border-b border-gray-200 p-0 px-8 py-0 bg-black">
+        <div className="flex items-center gap-4 ml-auto py-3">
+          {/* Reordered: Role left, Account right */}
           <AccountSection account="john_smith" role="readonly" />
         </div>
       </header>
@@ -92,7 +91,7 @@ const Index: React.FC = () => {
         <aside className="w-[230px] bg-gray-50 border-r border-gray-200 flex-shrink-0 min-h-0">
           <TableExplorer
             onInsertSchemaTable={handleInsertSchemaTable}
-            // don't reset editor or SQL!
+            onInsertColumn={handleInsertColumn}
           />
         </aside>
         <section className="flex-1 flex flex-col px-8 py-6 min-w-0">

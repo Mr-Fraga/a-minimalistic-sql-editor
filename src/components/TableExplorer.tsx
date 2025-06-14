@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from "react";
 import {
   Collapsible,
@@ -15,25 +14,54 @@ const SCHEMA_DATA = [
   {
     schema: "public",
     tables: [
-      { name: "users", columns: ["id", "name", "email", "created_at"] },
-      { name: "orders", columns: ["id", "user_id", "total", "date"] },
-      { name: "products", columns: ["id", "name", "price"] },
-      { name: "categories", columns: ["id", "title", "description"] },
+      {
+        name: "users",
+        columns: ["id", "name", "email", "created_at"],
+        description: "All application users currently registered.",
+        owner: "admin_account",
+      },
+      {
+        name: "orders",
+        columns: ["id", "user_id", "total", "date"],
+        description: "Records of all purchases/orders made by users.",
+        owner: "orders_ops",
+      },
+      {
+        name: "products",
+        columns: ["id", "name", "price"],
+        description: "Product catalog items.",
+        owner: "shop_manager",
+      },
+      {
+        name: "categories",
+        columns: ["id", "title", "description"],
+        description: "Product category organization.",
+        owner: "shop_manager",
+      },
     ],
   },
   {
     schema: "audit",
     tables: [
-      { name: "logs", columns: ["id", "table", "user", "change_type", "date"] },
+      {
+        name: "logs",
+        columns: ["id", "table", "user", "change_type", "date"],
+        description: "Audit logs for changes to tables in the database.",
+        owner: "security_team",
+      },
     ],
   },
 ];
 
 interface TableExplorerProps {
   onInsertSchemaTable?: (schema: string, table: string) => void;
+  onInsertColumn?: (col: string) => void;
 }
 
-const TableExplorer: React.FC<TableExplorerProps> = ({ onInsertSchemaTable }) => {
+const TableExplorer: React.FC<TableExplorerProps> = ({
+  onInsertSchemaTable,
+  onInsertColumn,
+}) => {
   const [search, setSearch] = useState("");
   const [openSchemas, setOpenSchemas] = useState<Record<string, boolean>>({});
 
@@ -66,14 +94,14 @@ const TableExplorer: React.FC<TableExplorerProps> = ({ onInsertSchemaTable }) =>
     }));
   };
 
+  // Insert column at cursor in editor
   const handleColumnClick = (col: string) => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(col);
-      toast({
-        title: "Copied column!",
-        description: `"${col}" was copied to your clipboard.`,
-      });
-    }
+    onInsertColumn?.(col);
+  };
+
+  // Insert schema.table at cursor in editor
+  const handleTableClick = (schema: string, table: string) => {
+    onInsertSchemaTable?.(schema, table);
   };
 
   return (
@@ -115,7 +143,7 @@ const TableExplorer: React.FC<TableExplorerProps> = ({ onInsertSchemaTable }) =>
                         <TooltipTrigger asChild>
                           <button
                             className="font-mono text-left text-sm w-full px-2 py-1 rounded hover:bg-black hover:text-white transition"
-                            onClick={() => onInsertSchemaTable?.(schema.schema, table.name)}
+                            onClick={() => handleTableClick(schema.schema, table.name)}
                             type="button"
                           >
                             {table.name}
@@ -123,8 +151,23 @@ const TableExplorer: React.FC<TableExplorerProps> = ({ onInsertSchemaTable }) =>
                         </TooltipTrigger>
                         <TooltipContent className="p-3 max-w-xs break-words">
                           <div>
+                            {/* Table description and owner above columns */}
                             <div className="font-bold text-xs uppercase tracking-wider mb-1">
                               {schema.schema}.{table.name}
+                            </div>
+                            <div className="mb-1">
+                              <span className="block text-xs text-gray-600 font-semibold mb-0.5">
+                                Description:
+                              </span>
+                              <span className="block text-xs text-gray-800 mb-1">
+                                {table.description || "No description."}
+                              </span>
+                              <span className="block text-xs text-gray-600 font-semibold mb-0.5">
+                                Owner:
+                              </span>
+                              <span className="block text-xs text-gray-800 mb-2">
+                                {table.owner || "Unknown"}
+                              </span>
                             </div>
                             <div className="text-xs text-gray-600 mb-1">Columns:</div>
                             <div className="flex flex-wrap gap-x-2">
