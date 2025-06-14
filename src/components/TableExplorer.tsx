@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from "react";
 import {
   Collapsible,
@@ -8,6 +9,7 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
+import SchemaExplorer from "./SchemaExplorer";
 
 // --- Extended dummy schemas and tables for exploration! --- //
 const rand = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
@@ -229,8 +231,6 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
   const handleTableClick = (schema: string, table: string) => {
     onInsertSchemaTable?.(schema, table);
   };
-
-import SchemaExplorer from "./SchemaExplorer";
 
   return (
     <div className="h-full bg-gray-50 border-r border-gray-200 px-4 py-5 min-w-[220px]">
