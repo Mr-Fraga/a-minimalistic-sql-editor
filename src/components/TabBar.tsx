@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +31,7 @@ const TabBar: React.FC<TabBarProps> = ({
   renameTab
 }) => {
   return (
-    <div className="flex items-center bg-white border-b border-black px-6 md:px-8 pr-2 transition-colors duration-100">
+    <div className="flex items-center bg-white px-6 md:px-8 pr-2 transition-colors duration-100">
       {tabs.map((tab) => (
         <TabHeader
           key={tab.id}
