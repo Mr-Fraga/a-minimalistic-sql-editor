@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import SqlEditor, { SqlEditorImperativeHandle } from "@/components/SqlEditor";
 import ResultTable from "@/components/ResultTable";
@@ -103,6 +104,11 @@ const TabView: React.FC<TabViewProps> = ({
     }
   };
 
+  // --- QUERY STATISTICS: For now, fake time and use rows length if result exists ---
+  const FAKE_QUERY_TIME_SECONDS = "0.10"; // In a real app, this would come from measurements, or be passed via tab.result.
+  const rowsCount = tab.result?.rows?.length ?? 0;
+  const queryStats = `query in ${FAKE_QUERY_TIME_SECONDS} seconds. ${rowsCount} rows`;
+
   return (
     <div className="w-full flex-1 flex flex-col min-h-0 h-full">
       {/* SQL Editor Section; fill the rest minus resultsHeight */}
@@ -147,14 +153,30 @@ const TabView: React.FC<TabViewProps> = ({
         </div>
         <div className="flex-1 flex flex-col min-h-0 h-full px-0 pt-4 pb-2 w-full">
           <ResultTable result={tab.result || undefined} error={tab.error} />
-          <div className="flex items-center justify-between w-full mt-2 px-4">
-            {/* Download button and toggler should sit together, in a row */}
-            <div className="flex flex-row items-center gap-2">
+
+          {/* --- STATISTICS LINE BELOW TABLE --- */}
+          {tab.result && tab.result.rows.length > 0 && (
+            <div className="w-full px-4 mt-2">
+              <div className="text-xs font-mono text-gray-700 leading-relaxed">
+                {queryStats}
+              </div>
+            </div>
+          )}
+
+          {/* Add space between stats and buttons */}
+          {tab.result && tab.result.rows.length > 0 && (
+            <div className="h-4" />
+          )}
+
+          <div className="flex items-center justify-between w-full px-4">
+            {/* Download button and toggler side by side, same height and aligned */}
+            <div className="flex flex-row items-center gap-3">
               {tab.result && tab.result.rows.length > 0 && (
                 <>
                   <Button
                     size="sm"
-                    className="font-mono bg-black text-white hover:bg-gray-800"
+                    className="font-mono bg-black text-white hover:bg-gray-800 h-9 flex items-center"
+                    style={{ height: "2.25rem", minWidth: "2.25rem", padding: 0, borderRadius: "9999px", display: "flex", alignItems: "center", justifyContent: "center" }}
                     onClick={handleDownloadCsv}
                     variant="default"
                   >
@@ -164,10 +186,11 @@ const TabView: React.FC<TabViewProps> = ({
                     checked={exportFullResults}
                     onCheckedChange={(v: boolean) => setExportFullResults(v)}
                     id="export-full-results-toggle"
+                    className="h-9"
                   />
                   <label
                     htmlFor="export-full-results-toggle"
-                    className="text-xs font-mono select-none text-gray-600"
+                    className="text-xs font-mono select-none text-gray-600 ml-1"
                   >
                     Export full results
                   </label>
@@ -184,3 +207,4 @@ const TabView: React.FC<TabViewProps> = ({
 };
 
 export default TabView;
+
