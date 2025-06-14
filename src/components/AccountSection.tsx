@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import {
   Tooltip,
@@ -79,7 +80,7 @@ const AccountSection: React.FC<AccountSectionProps> = ({
               aria-label="Role"
             >
               <div
-                className="w-9 h-9 rounded-full bg-white border border-black flex items-center justify-center"
+                className="w-9 h-9 rounded-full bg-white flex items-center justify-center" // removed border
               >
                 <currentRoleObj.Icon className="w-6 h-6 text-black" />
               </div>
@@ -87,7 +88,8 @@ const AccountSection: React.FC<AccountSectionProps> = ({
           </TooltipTrigger>
           <TooltipContent
             side="bottom"
-            className="bg-black text-white font-mono text-base px-4 py-2 rounded shadow border border-gray-500"
+            align="start"
+            className="bg-black text-white font-mono text-base px-4 py-2 rounded shadow border border-gray-500 mt-1"
           >
             {currentRoleObj.label}
           </TooltipContent>
@@ -133,14 +135,16 @@ const AccountSection: React.FC<AccountSectionProps> = ({
               onFocus={() => setAccountTooltipOpen(true)}
               onBlur={() => setAccountTooltipOpen(false)}
             >
-              <div className="w-9 h-9 rounded-full bg-white border border-black flex items-center justify-center">
+              <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center">
+                {/* removed border */}
                 <User className="w-6 h-6 text-black" />
               </div>
             </div>
           </TooltipTrigger>
           <TooltipContent
             side="bottom"
-            className="bg-black text-white font-mono text-base px-4 py-3 rounded shadow border border-gray-500 min-w-[210px]"
+            align="start"
+            className="bg-black text-white font-mono text-base px-4 py-3 rounded shadow border border-gray-500 min-w-[210px] mt-1"
           >
             <div>
               <div className="font-bold mb-1">{MOCK_NAME}</div>

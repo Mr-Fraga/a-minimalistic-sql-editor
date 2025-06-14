@@ -69,11 +69,14 @@ const Index: React.FC = () => {
   // SQL Editor ref (shared so TableExplorer can write to editor)
   const sqlEditorRef = useRef<SqlEditorImperativeHandle | null>(null);
 
+  // Add state for collapsible sidebar (true = open)
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
+
   return (
     <div className="min-h-screen h-screen w-full flex flex-col bg-white">
       {/* Top horizontal panel */}
       <div
-        className="w-full bg-white flex items-center" // removed shadow-sm and border styles here
+        className="w-full bg-white flex items-center"
         style={{ zIndex: 10, minHeight: "56px" }}
       >
         <div className="px-0 py-0 w-full flex items-center justify-end">
@@ -82,21 +85,42 @@ const Index: React.FC = () => {
       </div>
       {/* Main content area */}
       <div className="flex-1 flex flex-row w-full min-h-0 h-full bg-white">
-        {/* Sidebar with TableExplorer, passing callbacks */}
+        {/* Collapsible Sidebar with TableExplorer */}
         <div className="h-full flex flex-col min-h-0">
-          <TableExplorer
-            onInsertSchemaTable={(schema, table) => {
-              if (sqlEditorRef.current) {
-                // Insert schema.table at cursor
-                sqlEditorRef.current.insertAtCursor(`${schema}.${table}`);
-              }
-            }}
-            onInsertColumn={(col) => {
-              if (sqlEditorRef.current) {
-                sqlEditorRef.current.insertAtCursor(col);
-              }
-            }}
-          />
+          {/* Collapse/expand button */}
+          <button
+            className="absolute z-20 bg-white border border-black rounded-full shadow-md w-6 h-6 flex items-center justify-center mt-5 ml-[202px] transition-opacity hover:bg-gray-100"
+            style={{ left: sidebarOpen ? undefined : 0, top: 70 }}
+            onClick={() => setSidebarOpen((o) => !o)}
+            aria-label={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
+            tabIndex={0}
+          >
+            <span className="flex items-center justify-center">
+              {sidebarOpen ? (
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="black">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 5l5 5-5 5"/>
+                </svg>
+              ) : (
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="black">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 5l-5 5 5 5"/>
+                </svg>
+              )}
+            </span>
+          </button>
+          {sidebarOpen && (
+            <TableExplorer
+              onInsertSchemaTable={(schema, table) => {
+                if (sqlEditorRef.current) {
+                  sqlEditorRef.current.insertAtCursor(`${schema}.${table}`);
+                }
+              }}
+              onInsertColumn={(col) => {
+                if (sqlEditorRef.current) {
+                  sqlEditorRef.current.insertAtCursor(col);
+                }
+              }}
+            />
+          )}
         </div>
         <div className="flex-1 min-h-0 flex flex-col h-full">
           <PageContent sqlEditorRef={sqlEditorRef} />
@@ -331,12 +355,26 @@ const PageContent: React.FC<PageContentProps> = ({ sqlEditorRef }) => {
 
       const csvString = csvRows.join("\n");
 
-      // Create a download link
+      // Create a download link with tabname_timestamp pattern
+      function sanitize(str: string) {
+        return str.replace(/[^a-zA-Z0-9_\- ]/g, "_");
+      }
+      const now = new Date();
+      const timestamp =
+        now.getFullYear().toString() +
+        ("0" + (now.getMonth() + 1)).slice(-2) +
+        ("0" + now.getDate()).slice(-2) +
+        "_" +
+        ("0" + now.getHours()).slice(-2) +
+        ("0" + now.getMinutes()).slice(-2) +
+        ("0" + now.getSeconds()).slice(-2);
+      const fname = `${sanitize(activeTab.name)}_${timestamp}.csv`;
+
       const blob = new Blob([csvString], { type: "text/csv" });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.setAttribute("href", url);
-      a.setAttribute("download", `${activeTab.name}.csv`);
+      a.setAttribute("download", fname);
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
