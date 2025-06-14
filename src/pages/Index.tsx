@@ -20,7 +20,7 @@ const Index: React.FC = () => {
         }}
       >
         {/* Titles: SQL and Worksheets */}
-        <div className="flex flex-row items-center gap-6 px-6">
+        <div className="flex flex-row items-center gap-6 ml-6">
           <span className="text-xl font-bold text-gray-900 tracking-tight select-none">SQL</span>
           <span className="text-md font-semibold text-gray-600 select-none">Worksheets</span>
         </div>
