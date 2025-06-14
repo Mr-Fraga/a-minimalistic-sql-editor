@@ -20,22 +20,23 @@ export const ResultsActionsBar: React.FC<ResultsActionsBarProps> = ({
       size="sm"
       className="bg-black hover:bg-black/90 text-white border-none"
       onClick={onDownload}
+      aria-label="Download CSV"
     >
-      <Download size={16} className="mr-1" /> Download CSV
+      <Download size={18} />
     </Button>
     <Button
       variant="default"
       size="sm"
       className="bg-black hover:bg-black/90 text-white border-none"
       onClick={onToggle}
+      aria-label={toggled ? "Toggled On" : "Export all results"}
     >
       {toggled ? (
-        <>
-          <ToggleRight size={16} className="mr-1" /> Toggled On
-        </>
+        <ToggleRight size={18} />
       ) : (
         <>
-          <ToggleLeft size={16} className="mr-1" /> Export all results
+          <ToggleLeft size={18} className="mr-1" />
+          <span className="ml-1">Export all results</span>
         </>
       )}
     </Button>

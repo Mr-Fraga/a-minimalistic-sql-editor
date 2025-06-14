@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import ResultTable from "@/components/ResultTable";
 import { ResultsActionsBar } from "@/components/ResultTable/ResultsActionsBar";
@@ -111,14 +110,16 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
         <ResultTable result={MOCK_RESULT} />
       </div>
 
-      {/* Statistics below the table */}
-      <ResultsStatsBar
-        numRows={MOCK_RESULT.rows.length}
-        numColumns={MOCK_RESULT.columns.length}
-        elapsedMs={64}
-      />
+      {/* Statistics below the table, left aligned */}
+      <div className="w-full">
+        <ResultsStatsBar
+          numRows={MOCK_RESULT.rows.length}
+          numColumns={MOCK_RESULT.columns.length}
+          elapsedMs={64}
+        />
+      </div>
 
-      {/* Actions at the very bottom */}
+      {/* Actions at the very bottom, right aligned */}
       <ResultsActionsBar
         onDownload={handleDownload}
         toggled={toggled}
