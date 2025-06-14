@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   DropdownMenu,
@@ -89,8 +90,8 @@ const AccountSection: React.FC<AccountSectionProps> = ({
             onKeyDown={handleAvatarKeyDown}
             onBlur={handleAvatarBlur}
           >
-            <Avatar className="h-12 w-12 border-2 border-black shadow bg-white">
-              <AvatarFallback className="bg-white text-black font-bold text-xl flex items-center justify-center">
+            <Avatar className="h-12 w-12 border-2 border-black shadow bg-gray-200">
+              <AvatarFallback className="bg-gray-200 text-black font-bold text-xl flex items-center justify-center">
                 J
               </AvatarFallback>
             </Avatar>

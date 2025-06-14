@@ -27,14 +27,8 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
   setResultsHeight,
   onDownloadCsv
 }) => {
-  // Debug the actual value and identity
-  useEffect(() => {
-    console.log(
-      "[TabResultsSection] tab.id:", tab.id, 
-      "| .result:", tab.result, 
-      "| .error:", tab.error
-    );
-  }, [tab, tab.result, tab.error]);
+  // Remove debug info
+  // useEffect(() => { ... }, [tab, tab.result, tab.error]);
 
   const [exportFullResults, setExportFullResults] = useState(false);
   const dragStartY = useRef<number | null>(null);
@@ -104,23 +98,7 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
   const rowsCount = tab.result?.rows?.length ?? 0;
   const queryStats = `query in ${FAKE_QUERY_TIME_SECONDS} seconds. ${rowsCount} rows`;
 
-  // DEBUG VISIBLE:
-  const debugInfo = (
-    <div className="text-xs text-gray-400 font-mono p-1">
-      [tab.id: {tab.id}] | result?: {tab.result ? "YES" : "NO"} | error: {tab.error ?? "none"}
-      <br />
-      {/* Show actual content for mock query */}
-      {tab.result && (
-        <div>
-          columns: [{tab.result.columns.join(", ")}]
-          <br />
-          rows: {tab.result.rows.length}
-          <br />
-          first row: {JSON.stringify(tab.result.rows[0])}
-        </div>
-      )}
-    </div>
-  );
+  // Remove debugInfo block
 
   return (
     <div
@@ -132,8 +110,6 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
         transition: "height 0.08s",
       }}
     >
-      {/* DEBUG INFO AT TOP */}
-      {debugInfo}
       {/* Drag handle/title */}
       <div
         className="cursor-ns-resize w-full flex items-center justify-between px-0 py-2 bg-white"
@@ -149,7 +125,8 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
         <div className="flex-1"></div>
       </div>
       <div className="flex-1 flex flex-col min-h-0 h-full px-0 pt-4 pb-2 w-full">
-        <ResultTable result={tab.result || undefined} error={tab.error} />
+        {/* Always render ResultTable */}
+        <ResultTable result={tab.result || { columns: [], rows: [] }} error={tab.error} />
 
         {/* Stats if data */}
         {tab.result && tab.result.rows.length > 0 && (

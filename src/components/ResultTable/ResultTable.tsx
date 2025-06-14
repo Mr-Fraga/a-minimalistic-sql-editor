@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { TableHeader } from "./TableHeader";
@@ -19,9 +20,7 @@ const ResultTable: React.FC<ResultTableProps & { onDownloadCsv?: () => void }> =
   onDownloadCsv,
 }) => {
   // DEBUG
-  useEffect(() => {
-    console.log("[ResultTable] props.result:", result, "props.error:", error);
-  }, [result, error]);
+  // useEffect(() => { ... }, [result, error]);
 
   const [filters, setFilters] = useState<string[]>([]);
   // Track which filter popover is open per column
@@ -228,16 +227,16 @@ const ResultTable: React.FC<ResultTableProps & { onDownloadCsv?: () => void }> =
       </div>
     );
 
-  if (!result)
-    return (
-      <div className="text-gray-500 font-mono px-4 py-4 italic">No results yet.</div>
-    );
+  // Always render the table, even if result is empty or missing
+  // Provide empty columns/rows if necessary
+  const columns = result?.columns ?? [];
+  const rows = result?.rows ?? [];
 
   return (
     <div className="w-full overflow-x-auto border border-gray-200 rounded-md bg-white mt-2 flex flex-col min-h-0">
       <table className="min-w-full text-xs font-mono text-black select-none">
         <TableHeader
-          columns={result.columns}
+          columns={columns}
           filters={filters}
           setFilters={setFilters}
           filterOpen={filterOpen}
@@ -249,7 +248,7 @@ const ResultTable: React.FC<ResultTableProps & { onDownloadCsv?: () => void }> =
         />
         <TableBody
           rows={filteredRows}
-          columnsLength={result.columns.length}
+          columnsLength={columns.length}
           selection={selection}
           selectedCellsSet={selectedCellsSet}
           selectedCol={selectedCol}
