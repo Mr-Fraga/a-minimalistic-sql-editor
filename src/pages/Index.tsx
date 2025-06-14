@@ -19,6 +19,7 @@ import TabView from "@/components/TabView";
 import AccountSection from "@/components/AccountSection";
 import { SqlEditorImperativeHandle } from "@/components/SqlEditor";
 import TableTooltipContent from "@/components/TableTooltipContent";
+import { Plus } from "lucide-react";
 
 // Add simple local implementations for useLocalStorage and useDebounce
 
