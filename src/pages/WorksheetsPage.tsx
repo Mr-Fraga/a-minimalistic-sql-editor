@@ -8,6 +8,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Folder, File, Trash } from "lucide-react";
+import DeleteFileModal from "@/components/DeleteFileModal";
 
 // Mock folders/files data with dates
 const worksheetData = [
@@ -163,6 +164,11 @@ const WorksheetsPage: React.FC = () => {
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
   // Worksheet data can now be mutated
   const [data, setData] = useState(initialWorksheetData);
+  const [modalState, setModalState] = useState<{
+    open: boolean;
+    fileName: string | null;
+    parentFolder: string | undefined;
+  }>({ open: false, fileName: null, parentFolder: undefined });
 
   // To handle file deletion
   const handleDeleteFile = (parentFolder: string | undefined, fileName: string) => {
@@ -181,6 +187,7 @@ const WorksheetsPage: React.FC = () => {
         };
       });
     });
+    setModalState({ open: false, fileName: null, parentFolder: undefined });
   };
 
   // Flatten for current data
@@ -300,7 +307,7 @@ const WorksheetsPage: React.FC = () => {
                       title="Delete file"
                       onClick={e => {
                         e.stopPropagation();
-                        handleDeleteFile(row.parentFolder, row.name);
+                        setModalState({ open: true, fileName: row.name, parentFolder: row.parentFolder });
                       }}
                     >
                       <Trash className="text-red-500" size={18} strokeWidth={2} />
@@ -312,6 +319,17 @@ const WorksheetsPage: React.FC = () => {
           </TableBody>
         </Table>
       </div>
+      {/* Delete confirmation modal */}
+      <DeleteFileModal
+        open={modalState.open}
+        onOpenChange={open => setModalState(ms => ({ ...ms, open }))}
+        fileName={modalState.fileName}
+        onConfirm={() => {
+          if (modalState.fileName) {
+            handleDeleteFile(modalState.parentFolder, modalState.fileName);
+          }
+        }}
+      />
     </div>
   );
 };
