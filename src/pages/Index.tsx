@@ -104,6 +104,32 @@ const Index: React.FC = () => {
     }
   };
 
+    // Handler to duplicate a tab
+    const handleDuplicateTab = (id: string) => {
+      const sourceTab = tabs.find(t => t.id === id);
+      if (!sourceTab) return;
+      const newId = `tab-${crypto.randomUUID()}`;
+      // Append " Copy" (numbered if needed)
+      let baseName = sourceTab.name + " Copy";
+      let copyName = baseName;
+      let i = 2;
+      while (tabs.some(tab => tab.name === copyName)) {
+        copyName = `${baseName} ${i}`;
+        i++;
+      }
+      setTabs(prev => [
+        ...prev,
+        {
+          ...sourceTab,
+          id: newId,
+          name: copyName,
+          // do not share running state or result error, only the last query
+          isRunning: false,
+        }
+      ]);
+      setActiveTab(newId);
+    };
+
   // For table explorer insertion
   const handleInsertSchemaTable = (schema: string, table: string) => {
     const tab = tabs.find(t => t.id === activeTab);
@@ -237,21 +263,21 @@ const Index: React.FC = () => {
                   <button
                     key={tab.id}
                     className={`
-                      relative font-mono text-base px-4 py-2.5 min-w-[6rem] transition
+                      relative font-mono text-[13px] px-3 py-2 min-w-[5.2rem] transition
                       border-b-2 focus:outline-none
                       ${activeTab === tab.id
                         ? "bg-white border-black text-black font-medium shadow"
                         : "bg-gray-100 border-transparent text-gray-700 hover:bg-gray-200"}
                       rounded-t-md
                     `}
-                    style={{ marginRight: 2, paddingRight: 30 /* reserve space for close btn */ }}
+                    style={{ marginRight: 2, paddingRight: 35 /* reserve space for icons */ }}
                     onClick={() => setActiveTab(tab.id)}
                     type="button"
                   >
-                    {/* Editable tab name */}
+                    {/* Editable tab name (smaller input) */}
                     {renamingTabId === tab.id ? (
                       <input
-                        className="font-mono text-base bg-white border border-gray-300 rounded px-2 py-1 outline-none w-[90%] focus:ring-2 focus:ring-gray-300"
+                        className="font-mono text-[13px] bg-white border border-gray-300 rounded px-1 py-0.5 outline-none w-[85%] focus:ring-2 focus:ring-gray-300"
                         value={renameValue}
                         autoFocus
                         onBlur={() => finishRenaming(tab.id)}
@@ -259,34 +285,70 @@ const Index: React.FC = () => {
                         onKeyDown={e => handleRenameKeyDown(e, tab.id)}
                         spellCheck={false}
                         onClick={e => e.stopPropagation()}
+                        style={{ height: 22 }}
                       />
                     ) : (
                       <span
                         onDoubleClick={e => { e.stopPropagation(); handleTabDoubleClick(tab); }}
                         className="truncate select-none"
                         title={tab.name}
-                        style={{ display: "inline-block", maxWidth: "85%" }}
+                        style={{ display: "inline-block", maxWidth: "78%" }}
                       >
                         {tab.name}
                       </span>
                     )}
-                    {/* Make close (X) icon smaller and on top right */}
-                    {tabs.length > 1 && (
-                      <button
-                        tabIndex={-1}
-                        title="Close tab"
-                        onClick={e => { e.stopPropagation(); handleRemoveTab(tab.id); }}
-                        className="absolute top-1.5 right-1 z-10 bg-gray-200 hover:bg-gray-300 rounded-full p-0 transition flex items-center justify-center"
-                        style={{
-                          width: 16,
-                          height: 16,
-                          lineHeight: 0,
-                          padding: 0,
-                        }}
-                        type="button"
-                      >
-                        <X size={11} strokeWidth={2.2} />
-                      </button>
+                    {/* Duplicated (copy) and Close (X) icons vertical position */}
+                    {(tabs.length > 1 || true) && (
+                      <div className="absolute right-1 top-1.5 flex flex-col items-center gap-0 p-0 z-10" style={{height: 27}}>
+                        {/* Duplicate icon (copy) */}
+                        <button
+                          tabIndex={-1}
+                          title="Duplicate tab"
+                          onClick={e => { e.stopPropagation(); handleDuplicateTab(tab.id); }}
+                          className="bg-gray-100 hover:bg-gray-200 rounded-full p-0 m-0 flex items-center justify-center mb-0.5"
+                          style={{
+                            width: 16,
+                            height: 16,
+                            lineHeight: 0,
+                            padding: 0,
+                          }}
+                          type="button"
+                        >
+                          {/* lucide-react "copy" icon, size 11 */}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width={11}
+                            height={11}
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+                            <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path>
+                          </svg>
+                        </button>
+                        {/* Close icon, smaller and below duplicate */}
+                        {tabs.length > 1 && (
+                          <button
+                            tabIndex={-1}
+                            title="Close tab"
+                            onClick={e => { e.stopPropagation(); handleRemoveTab(tab.id); }}
+                            className="bg-gray-200 hover:bg-gray-300 rounded-full p-0 flex items-center justify-center"
+                            style={{
+                              width: 16,
+                              height: 16,
+                              lineHeight: 0,
+                              padding: 0,
+                            }}
+                            type="button"
+                          >
+                            <X size={11} strokeWidth={2.2} />
+                          </button>
+                        )}
+                      </div>
                     )}
                   </button>
                 ))}
