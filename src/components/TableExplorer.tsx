@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from "react";
 import {
   Collapsible,
@@ -7,8 +8,9 @@ import {
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/hooks/use-toast";
 
-// Example: schemas and tables within them (can be extended)
+// Mock data: schemas, tables, columns
 const SCHEMA_DATA = [
   {
     schema: "public",
@@ -28,15 +30,13 @@ const SCHEMA_DATA = [
 ];
 
 interface TableExplorerProps {
-  onTableClick?: (table: string) => void;
+  onInsertSchemaTable?: (schema: string, table: string) => void;
 }
 
-const TableExplorer: React.FC<TableExplorerProps> = ({ onTableClick }) => {
+const TableExplorer: React.FC<TableExplorerProps> = ({ onInsertSchemaTable }) => {
   const [search, setSearch] = useState("");
-  // Collapsed state: schema -> boolean. Default is all schemas collapsed.
   const [openSchemas, setOpenSchemas] = useState<Record<string, boolean>>({});
 
-  // Default all schemas collapsed
   React.useEffect(() => {
     if (
       Object.keys(openSchemas).length === 0 &&
@@ -51,7 +51,6 @@ const TableExplorer: React.FC<TableExplorerProps> = ({ onTableClick }) => {
 
   const filteredSchemas = useMemo(() => {
     if (!search.trim()) return SCHEMA_DATA;
-    // Filter each schema's tables by name, keep schemas with > 0 tables after filtering
     return SCHEMA_DATA.map((schema) => ({
       ...schema,
       tables: schema.tables.filter((t) =>
@@ -65,6 +64,16 @@ const TableExplorer: React.FC<TableExplorerProps> = ({ onTableClick }) => {
       ...prev,
       [schema]: !prev[schema]
     }));
+  };
+
+  const handleColumnClick = (col: string) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(col);
+      toast({
+        title: "Copied column!",
+        description: `"${col}" was copied to your clipboard.`,
+      });
+    }
   };
 
   return (
@@ -106,7 +115,7 @@ const TableExplorer: React.FC<TableExplorerProps> = ({ onTableClick }) => {
                         <TooltipTrigger asChild>
                           <button
                             className="font-mono text-left text-sm w-full px-2 py-1 rounded hover:bg-black hover:text-white transition"
-                            onClick={() => onTableClick?.(table.name)}
+                            onClick={() => onInsertSchemaTable?.(schema.schema, table.name)}
                             type="button"
                           >
                             {table.name}
@@ -120,12 +129,17 @@ const TableExplorer: React.FC<TableExplorerProps> = ({ onTableClick }) => {
                             <div className="text-xs text-gray-600 mb-1">Columns:</div>
                             <div className="flex flex-wrap gap-x-2">
                               {table.columns.map((col) => (
-                                <span
+                                <button
                                   key={col}
-                                  className="bg-gray-100 rounded px-2 py-0.5 text-xs text-gray-800 mb-1"
+                                  className="bg-gray-100 rounded px-2 py-0.5 text-xs text-gray-800 mb-1 hover:bg-gray-300 transition cursor-pointer"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleColumnClick(col);
+                                  }}
+                                  type="button"
                                 >
                                   {col}
-                                </span>
+                                </button>
                               ))}
                             </div>
                           </div>

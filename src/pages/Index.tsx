@@ -1,9 +1,7 @@
-
-// Main page for the "SQL query engine" app
-import React, { useState } from "react";
+import React, { useRef } from "react";
 import AccountSection from "@/components/AccountSection";
 import TableExplorer from "@/components/TableExplorer";
-import SqlEditor from "@/components/SqlEditor";
+import SqlEditor, { SqlEditorImperativeHandle } from "@/components/SqlEditor";
 import ResultTable from "@/components/ResultTable";
 
 const DEFAULT_SQL = "SELECT * FROM users;";
@@ -49,15 +47,15 @@ function formatSql(sql: string) {
 }
 
 const Index: React.FC = () => {
-  const [sql, setSql] = useState(DEFAULT_SQL);
-  const [result, setResult] = useState<{ columns: string[]; rows: Array<any[]> } | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isRunning, setIsRunning] = useState(false);
+  const [sql, setSql] = React.useState(DEFAULT_SQL);
+  const [result, setResult] = React.useState<{ columns: string[]; rows: Array<any[]> } | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+  const [isRunning, setIsRunning] = React.useState(false);
 
-  const handleTableClick = (table: string) => {
-    setSql(`SELECT * FROM ${table};`);
-    setResult(null);
-    setError(null);
+  const sqlEditorRef = useRef<SqlEditorImperativeHandle>(null);
+
+  const handleInsertSchemaTable = (schema: string, table: string) => {
+    sqlEditorRef.current?.insertAtCursor(`${schema}.${table}`);
   };
 
   const handleFormat = () => {
@@ -79,19 +77,29 @@ const Index: React.FC = () => {
     }, 500);
   };
 
+  // Layout: move Account + Role to top right
   return (
     <div className="min-h-screen bg-white text-black flex flex-col">
-      <header>
-        <AccountSection account="john_smith" role="readonly" />
+      {/* Top bar */}
+      <header className="w-full flex justify-end items-center border-b border-gray-200 p-0 px-8 py-2">
+        <div className="flex items-center gap-4 ml-auto">
+          {/* Role selector (left), Account section (right) */}
+          {/* The AccountSection now has role selector inside already */}
+          <AccountSection account="john_smith" role="readonly" />
+        </div>
       </header>
       <main className="flex-1 flex min-h-0 border-t border-gray-200">
         <aside className="w-[230px] bg-gray-50 border-r border-gray-200 flex-shrink-0 min-h-0">
-          <TableExplorer onTableClick={handleTableClick} />
+          <TableExplorer
+            onInsertSchemaTable={handleInsertSchemaTable}
+            // don't reset editor or SQL!
+          />
         </aside>
         <section className="flex-1 flex flex-col px-8 py-6 min-w-0">
           <h1 className="font-bold text-xl mb-4 font-mono tracking-tight select-none">SQL Editor</h1>
           <div className="flex-1 flex flex-col min-h-0">
             <SqlEditor
+              ref={sqlEditorRef}
               value={sql}
               onChange={setSql}
               onFormat={handleFormat}
