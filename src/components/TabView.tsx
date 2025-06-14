@@ -105,7 +105,7 @@ const TabView: React.FC<TabViewProps> = ({
   };
 
   // --- QUERY STATISTICS: For now, fake time and use rows length if result exists ---
-  const FAKE_QUERY_TIME_SECONDS = "0.10"; // In a real app, this would come from measurements, or be passed via tab.result.
+  const FAKE_QUERY_TIME_SECONDS = "0.10";
   const rowsCount = tab.result?.rows?.length ?? 0;
   const queryStats = `query in ${FAKE_QUERY_TIME_SECONDS} seconds. ${rowsCount} rows`;
 
@@ -163,43 +163,46 @@ const TabView: React.FC<TabViewProps> = ({
             </div>
           )}
 
-          {/* Add space between stats and buttons */}
+          {/* Increased spacing between statistics and buttons */}
           {tab.result && tab.result.rows.length > 0 && (
-            <div className="h-4" />
+            <div className="h-6" /> // Increased vertical space here
           )}
 
           <div className="flex items-center justify-between w-full px-4">
-            <div className="flex flex-row items-center gap-2">
+            <div className="flex flex-row items-center gap-4">
               {tab.result && tab.result.rows.length > 0 && (
                 <>
-                  {/* Download Button, now smaller and wider */}
+                  {/* Download Button, reduced height */}
                   <Button
                     size="sm"
-                    className="font-mono bg-black text-white hover:bg-gray-800 rounded-full px-5 h-8 min-w-[110px] flex items-center justify-center"
+                    className="font-mono bg-black text-white hover:bg-gray-800 rounded-full px-4 h-7 min-w-[100px] flex items-center justify-center text-[0.95rem]"
                     style={{
-                      height: "2rem",
-                      minWidth: "110px",
+                      height: "1.75rem", // reduced height
+                      minWidth: "100px",
                       fontSize: "0.95rem",
-                      padding: "0 1.1rem",
-                      borderRadius: "1.2rem",
+                      padding: "0 1rem",
+                      borderRadius: "1.1rem",
                     }}
                     onClick={handleDownloadCsv}
                     variant="default"
                   >
-                    <Download size={16} className="mr-2" />
+                    <Download size={15} className="mr-2" />
                     Download
                   </Button>
-                  {/* Toggle, now matching height & proper alignment */}
+                  {/* Toggle, reduced height and width and aligned */}
                   <Switch
                     checked={exportFullResults}
                     onCheckedChange={(v: boolean) => setExportFullResults(v)}
                     id="export-full-results-toggle"
-                    className="h-8 w-14"
+                    className="h-7 w-12" // reduced height/width to match button
+                    style={{ verticalAlign: "middle" }}
                   />
                   <label
                     htmlFor="export-full-results-toggle"
                     className="text-xs font-mono select-none text-gray-600 ml-1"
-                    style={{ lineHeight: "2rem" }}
+                    style={{
+                      lineHeight: "1.75rem", // matches button and switch
+                    }}
                   >
                     Export full results
                   </label>
@@ -215,4 +218,3 @@ const TabView: React.FC<TabViewProps> = ({
 };
 
 export default TabView;
-
