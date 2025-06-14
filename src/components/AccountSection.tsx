@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Tooltip,
@@ -56,9 +55,9 @@ const AccountSection: React.FC<AccountSectionProps> = ({
               onFocus={() => setAccountTooltipOpen(true)}
               onBlur={() => setAccountTooltipOpen(false)}
             >
-              {/* Reduced avatar size to h-10 w-10 */}
-              <Avatar className="h-10 w-10 border-2 border-black shadow bg-white">
-                <AvatarFallback className="bg-white text-black font-bold text-lg flex items-center justify-center">
+              {/* Changed avatar size to h-12 w-12 */}
+              <Avatar className="h-12 w-12 border-2 border-black shadow bg-white">
+                <AvatarFallback className="bg-white text-black font-bold text-xl flex items-center justify-center">
                   J
                 </AvatarFallback>
               </Avatar>
