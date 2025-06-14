@@ -56,8 +56,9 @@ const AccountSection: React.FC<AccountSectionProps> = ({
               onFocus={() => setAccountTooltipOpen(true)}
               onBlur={() => setAccountTooltipOpen(false)}
             >
-              <Avatar className="h-14 w-14 border-2 border-black shadow bg-white">
-                <AvatarFallback className="bg-white text-black font-bold text-2xl flex items-center justify-center">
+              {/* Reduced avatar size to h-10 w-10 */}
+              <Avatar className="h-10 w-10 border-2 border-black shadow bg-white">
+                <AvatarFallback className="bg-white text-black font-bold text-lg flex items-center justify-center">
                   J
                 </AvatarFallback>
               </Avatar>
@@ -84,4 +85,3 @@ const AccountSection: React.FC<AccountSectionProps> = ({
 };
 
 export default AccountSection;
-
