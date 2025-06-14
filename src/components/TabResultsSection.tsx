@@ -1,40 +1,32 @@
 
-import React from "react";
+import React, { useState } from "react";
 import ResultTable from "@/components/ResultTable";
-// No longer need: Button, Switch, Download from lucide-react
+import { ResultsActionsBar } from "@/components/ResultTable/ResultsActionsBar";
+import { ResultsStatsBar } from "@/components/ResultTable/ResultsStatsBar";
 
+// Always use MOCK_RESULT for demonstration
 const MOCK_RESULT = {
   columns: ["id", "name", "email"],
   rows: [
     [1, "Alice", "alice@email.com"],
     [2, "Bob", "bob@email.com"],
     [3, "Charlie", "charlie@email.com"],
-  ]
+  ],
 };
 
 const MIN_RESULTS_HEIGHT = 80;
 const MAX_RESULTS_HEIGHT = 600;
 
 interface TabResultsSectionProps {
-  tab: {
-    id: string;
-    name: string;
-    sql: string;
-    result: { columns: string[]; rows: Array<any[]> } | null;
-    error: string | null;
-    isRunning: boolean;
-  };
+  tab: any;
   resultsHeight: number;
   setResultsHeight: (h: number) => void;
   onDownloadCsv?: (rowsToExport?: Array<any[]>) => void;
 }
 
 const TabResultsSection: React.FC<TabResultsSectionProps> = ({
-  // props unused, but kept for signature compatibility
-  tab,
   resultsHeight,
   setResultsHeight,
-  onDownloadCsv
 }) => {
   // Drag logic only for resizing
   const dragStartY = React.useRef<number | null>(null);
@@ -66,6 +58,36 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
     dragStartY.current = null;
   };
 
+  // Demo toggle state
+  const [toggled, setToggled] = useState(false);
+
+  // Copy handler for demo – copies the whole table as TSV
+  const handleCopy = () => {
+    const header = MOCK_RESULT.columns.join("\t");
+    const rows = MOCK_RESULT.rows.map(r => r.join("\t")).join("\n");
+    navigator.clipboard.writeText([header, rows].join("\n"));
+  };
+
+  // Download as CSV handler for demo
+  const handleDownload = () => {
+    const header = MOCK_RESULT.columns.join(",");
+    const rows = MOCK_RESULT.rows.map(r =>
+      r.map(val => (typeof val === "string" ? `"${val.replace(/"/g, '""')}"` : val)).join(",")
+    );
+    const csv = [header, ...rows].join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "results.csv";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    }, 100);
+  };
+
   return (
     <div
       className="flex flex-col min-h-[80px] bg-white overflow-hidden relative select-none"
@@ -90,13 +112,23 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
         </h2>
         <div className="flex-1"></div>
       </div>
+      {/* Actions bar */}
+      <ResultsActionsBar
+        onCopy={handleCopy}
+        onDownload={handleDownload}
+        toggled={toggled}
+        onToggle={() => setToggled(t => !t)}
+      />
       <div className="flex-1 flex flex-col min-h-0 h-full px-0 pt-4 pb-2 w-full">
-        {/* ALWAYS render the MOCK_RESULT table */}
         <ResultTable result={MOCK_RESULT} />
       </div>
+      <ResultsStatsBar
+        numRows={MOCK_RESULT.rows.length}
+        numColumns={MOCK_RESULT.columns.length}
+        elapsedMs={64}
+      />
     </div>
   );
 };
 
 export default TabResultsSection;
-
