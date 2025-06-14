@@ -5,7 +5,6 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import MainContent from "@/components/MainContent";
 import AccountSection from "@/components/AccountSection";
 
-// Home page layout, now much cleaner!
 const Index: React.FC = () => {
   const sqlEditorRef = useRef<SqlEditorImperativeHandle | null>(null);
 
@@ -18,9 +17,13 @@ const Index: React.FC = () => {
           zIndex: 10,
           minHeight: "48px",
           maxHeight: "48px",
-          // Border removed per instruction
         }}
       >
+        {/* Titles: SQL and Worksheets */}
+        <div className="flex flex-row items-center gap-6 px-6">
+          <span className="text-xl font-bold text-gray-900 tracking-tight select-none">SQL</span>
+          <span className="text-md font-semibold text-gray-600 select-none">Worksheets</span>
+        </div>
         <div className="flex-1 px-4" />
         {/* AccountSection on the right */}
         <AccountSection account="john@example.com" role="readonly" />
