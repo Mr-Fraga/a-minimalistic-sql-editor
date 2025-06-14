@@ -11,11 +11,13 @@ export type TabType = {
   isRunning: boolean;
 };
 
-const DEFAULT_SQL = ``;
+// UPDATED: set default SQL to the mock query for proper detection!
+const DEFAULT_SQL = `SELECT * FROM users LIMIT 10;`;
+
 const DEFAULT_TAB: Omit<TabType, "id"> = {
   name: "New Tab",
   sql: DEFAULT_SQL,
-  result: { columns: [], rows: [] }, // NEW: always empty dataset for new tab
+  result: { columns: [], rows: [] }, // always empty dataset for new tab
   error: null,
   isRunning: false,
 };
