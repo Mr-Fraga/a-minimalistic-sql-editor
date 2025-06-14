@@ -190,6 +190,21 @@ const Index: React.FC = () => {
     }, 500);
   };
 
+  // Helper for timestamp
+  function getCurrentTimestamp() {
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return (
+      now.getFullYear().toString() +
+      pad(now.getMonth() + 1) +
+      pad(now.getDate()) +
+      "_" +
+      pad(now.getHours()) +
+      pad(now.getMinutes()) +
+      pad(now.getSeconds())
+    );
+  }
+
   // Download CSV handler (per tab)
   function escapeCsv(value: any): string {
     if (value == null) return '';
@@ -203,10 +218,14 @@ const Index: React.FC = () => {
     const rowsCsv = tab.result.rows.map(row => row.map(escapeCsv).join(","));
     const csv = [header, ...rowsCsv].join("\r\n");
     const blob = new Blob([csv], { type: "text/csv" });
+    const timestamp = getCurrentTimestamp();
+    // Sanitize tab.name for filename (basic: remove non-filename characters)
+    const safeTabName = tab.name.replace(/[^a-zA-Z0-9-_]/g, "_");
+    const filename = `${safeTabName}__${timestamp}.csv`;
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "results.csv";
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     setTimeout(() => {
