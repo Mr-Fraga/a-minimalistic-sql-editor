@@ -3,8 +3,7 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { TableHeader } from "./TableHeader";
 import { TableBody } from "./TableBody";
-import { TableActions } from "./TableActions";
-import { toCSV, sortRows, filterRows, SortOrder, Selection } from "./utils";
+import { sortRows, filterRows, SortOrder, Selection } from "./utils";
 
 interface ResultTableProps {
   result?: {
@@ -14,11 +13,10 @@ interface ResultTableProps {
   error?: string | null;
 }
 
-const downloadBtnClass =
-  "rounded px-4 py-1 bg-black text-white text-sm font-mono hover:bg-gray-900 transition";
-
 const ResultTable: React.FC<ResultTableProps> = ({ result, error }) => {
   const [filters, setFilters] = useState<string[]>([]);
+  // Track which filter popover is open per column
+  const [filterOpen, setFilterOpen] = useState<boolean[]>([]);
   const [sortCol, setSortCol] = useState<number | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>(null);
 
@@ -29,7 +27,9 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, error }) => {
 
   // Reset sort/filter/selection if new result
   useEffect(() => {
-    setFilters(result ? Array(result.columns.length).fill("") : []);
+    const colCount = result ? result.columns.length : 0;
+    setFilters(result ? Array(colCount).fill("") : []);
+    setFilterOpen(result ? Array(colCount).fill(false) : []);
     setSortCol(null);
     setSortOrder(null);
     setSelection(null);
@@ -102,34 +102,50 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, error }) => {
 
   const selectedCol = selection && selection.type === "column" ? selection.col : null;
 
-  // Copy cell(s), column or whole table
+  // Copy cell(s), column or whole table - always include column header!
   const handleCopy = () => {
     if (!result) return;
     let textToCopy = "";
     if (selection) {
       if (selection.type === "cell") {
-        const sRows = Math.max(...selection.cells.map(([r]) => r)) + 1;
-        const sCols = Math.max(...selection.cells.map(([,c]) => c)) + 1;
-        const grid: { [row: number]: { [col: number]: any } } = {};
-        for (const [r, c] of selection.cells) {
-          if (!grid[r]) grid[r] = {};
-          grid[r][c] = filteredRows[r]?.[c] ?? "";
-        }
-        let rows = [];
-        for (let r = 0; r < filteredRows.length; r++) {
-          if (!grid[r]) continue;
-          let vals: any[] = [];
-          for (let c = 0; c < result.columns.length; c++) {
-            if (grid[r][c] !== undefined) vals.push(grid[r][c]);
+        // Find column/row range
+        const rowsSelected = selection.cells.map(([r]) => r);
+        const colsSelected = selection.cells.map(([, c]) => c);
+        const rowMin = Math.min(...rowsSelected);
+        const rowMax = Math.max(...rowsSelected);
+        const colMin = Math.min(...colsSelected);
+        const colMax = Math.max(...colsSelected);
+
+        // Make grid with selected only
+        let header = [];
+        for (let c = colMin; c <= colMax; c++) {
+          if (
+            selection.cells.some(([_r, cc]) => cc === c)
+          ) {
+            header.push(result.columns[c]);
           }
-          if (vals.length) rows.push(vals.join("\t"));
         }
-        textToCopy = rows.join("\n");
+        let rowsVals: string[] = [];
+        for (let r = rowMin; r <= rowMax; r++) {
+          let vals: any[] = [];
+          for (let c = colMin; c <= colMax; c++) {
+            if (
+              selection.cells.some(
+                ([rr, cc]) => rr === r && cc === c
+              )
+            ) {
+              vals.push(filteredRows[r]?.[c] ?? "");
+            }
+          }
+          if (vals.length) rowsVals.push(vals.join("\t"));
+        }
+        textToCopy = [header.join("\t"), ...rowsVals].join("\n");
       } else if (selection.type === "column") {
+        const colIdx = selection.col;
         textToCopy =
-          result.columns[selection.col] +
+          result.columns[colIdx] +
           "\n" +
-          filteredRows.map((row) => row[selection.col]).join("\n");
+          filteredRows.map((row) => row[colIdx]).join("\n");
       }
     } else if (result && filteredRows.length) {
       textToCopy =
@@ -162,39 +178,6 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, error }) => {
     return () => window.removeEventListener("keydown", onKeydown);
   }, [selection, result, filteredRows]);
 
-  const handleCopyColumn = () => {
-    if (
-      selection &&
-      selection.type === "column" &&
-      result
-    ) {
-      const colIdx = selection.col;
-      const text =
-        result.columns[colIdx] +
-        "\n" +
-        filteredRows.map((row) => row[colIdx]).join("\n");
-      navigator.clipboard.writeText(text);
-      toast({
-        title: "Copied column",
-        description: `Copied column "${result.columns[colIdx]}" to clipboard.`,
-      });
-    }
-  };
-
-  const handleClearSelection = () => setSelection(null);
-
-  const handleDownloadCSV = () => {
-    if (!result) return;
-    const csv = toCSV(result.columns, filteredRows);
-    const blob = new Blob([csv], { type: "text/csv" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "results.csv";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   if (error)
     return (
       <div className="rounded bg-red-50 border border-red-200 text-red-700 p-4 font-mono mt-2">
@@ -214,6 +197,8 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, error }) => {
           columns={result.columns}
           filters={filters}
           setFilters={setFilters}
+          filterOpen={filterOpen}
+          setFilterOpen={setFilterOpen}
           sortCol={sortCol}
           sortOrder={sortOrder}
           selectedCol={selectedCol}
@@ -230,19 +215,6 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, error }) => {
           handleCopy={handleCopy}
         />
       </table>
-      <TableActions
-        downloadBtnClass={downloadBtnClass}
-        handleCopy={handleCopy}
-        handleCopyColumn={handleCopyColumn}
-        handleClearSelection={handleClearSelection}
-        canCopy={
-          (!selection && filteredRows.length !== 0) ||
-          (!!selection && selection.type === "cell")
-        }
-        canCopyColumn={!!(selection && selection.type === "column")}
-        selection={selection}
-        handleDownloadCSV={handleDownloadCSV}
-      />
     </div>
   );
 };
