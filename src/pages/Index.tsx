@@ -1,4 +1,3 @@
-
 import React, { useRef } from "react";
 import AccountSection from "@/components/AccountSection";
 import TableExplorer from "@/components/TableExplorer";
@@ -94,7 +93,8 @@ const Index: React.FC = () => {
       {/* Outer horizontal resize between sidebar and main */}
       <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0 w-full">
         {/* Sidebar */}
-        <ResizablePanel defaultSize={23} minSize={16} maxSize={40}>
+        {/* Set minSize={0} to allow full collapse */}
+        <ResizablePanel defaultSize={23} minSize={0} maxSize={40}>
           <aside className="w-full h-full bg-gray-50 border-r border-gray-200 flex-shrink-0 min-h-0">
             <TableExplorer
               onInsertSchemaTable={handleInsertSchemaTable}
@@ -102,6 +102,7 @@ const Index: React.FC = () => {
             />
           </aside>
         </ResizablePanel>
+        {/* Make sure the handle is always visible as a "grab" line */}
         <ResizableHandle className="bg-gray-200" />
         {/* Main area with editor/results, now vertically resizable */}
         <ResizablePanel defaultSize={77} minSize={47}>
