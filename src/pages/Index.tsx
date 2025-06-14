@@ -111,6 +111,7 @@ function generateId() {
   return Math.random().toString(36).substring(2, 15);
 }
 
+// MODIFY: result will always be set to MOCK_RESULT by default
 type TabType = {
   id: string;
   name: string;
@@ -123,7 +124,7 @@ type TabType = {
 const DEFAULT_TAB: Omit<TabType, "id"> = {
   name: "New Tab",
   sql: DEFAULT_SQL,
-  result: null,
+  result: MOCK_RESULT, // show mock result by default
   error: null,
   isRunning: false,
 };
@@ -133,6 +134,7 @@ interface PageContentProps {
 }
 
 const PageContent: React.FC<PageContentProps> = ({ sqlEditorRef }) => {
+  // Initial tab should have mock results by default
   const [tabs, setTabs] = useLocalStorage<TabType[]>("tabs", [
     { ...DEFAULT_TAB, id: generateId(), name: "Tab 1" },
   ]);
@@ -146,7 +148,11 @@ const PageContent: React.FC<PageContentProps> = ({ sqlEditorRef }) => {
 
   // ========================= TABS =========================
   const addTab = useCallback(() => {
-    const newTab: TabType = { ...DEFAULT_TAB, id: generateId() };
+    // new tabs should show mock result by default
+    const newTab: TabType = {
+      ...DEFAULT_TAB,
+      id: generateId(),
+    };
     setTabs([...tabs, newTab]);
     setActiveTabId(newTab.id);
   }, [tabs, setTabs, setActiveTabId]);
@@ -356,9 +362,9 @@ const PageContent: React.FC<PageContentProps> = ({ sqlEditorRef }) => {
             onTabRename={renameTab}
           />
         ))}
+        {/* Replace "New Tab" button with only a + icon */}
         <Button variant="ghost" size="sm" onClick={addTab}>
-          <Plus className="w-4 h-4 mr-1" />
-          New Tab
+          <Plus className="w-4 h-4" />
         </Button>
         <div className="flex-1" />
         {/* Settings button has been removed */}
