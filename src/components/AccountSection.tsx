@@ -14,7 +14,7 @@ const MOCK_NAME = "John Smith";
 
 interface AccountSectionProps {
   account: string; // This is email
-  role: string;
+  role: string;    // Should match one of: "readonly", "admin", "sensitive"
 }
 
 const ROLES = [
@@ -23,12 +23,12 @@ const ROLES = [
     label: "Readonly",
   },
   {
-    key: "readwrite",
-    label: "Read/Write",
-  },
-  {
     key: "admin",
     label: "Admin",
+  },
+  {
+    key: "sensitive",
+    label: "Sensitive",
   },
 ];
 
@@ -38,7 +38,6 @@ const AccountSection: React.FC<AccountSectionProps> = ({
 }) => {
   // Local role state for demonstration (since there's no backend)
   const [role, setRole] = React.useState(initialRole);
-  // Dropdown state for role selection (open on click/focus)
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
 
   // Find role label
