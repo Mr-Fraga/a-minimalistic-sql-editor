@@ -255,6 +255,13 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
   // --- Collapsible state for pinned tables ---
   const [showPinned, setShowPinned] = useState(true);
 
+  // Ensure that when pinnedTables gets non-empty, pinned section is opened by default
+  React.useEffect(() => {
+    if (pinnedTables.length > 0) {
+      setShowPinned(true);
+    }
+  }, [pinnedTables.length]);
+
   // --- UPDATED: Collapsible for pinned tables, now at the top, WITHOUT chevron icon ---
   const renderPinnedTables = () => {
     if (!pinnedTables.length) return null;
