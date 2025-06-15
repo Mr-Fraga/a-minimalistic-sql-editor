@@ -51,6 +51,17 @@ const TabView: React.FC<TabViewProps> = ({
   const [isHandleHovered, setIsHandleHovered] = useState(false);
   const [isHandleDragging, setIsHandleDragging] = useState(false);
 
+  // New: State for collapsing editor/results
+  const [collapseEditor, setCollapseEditor] = useState(false);
+  const [collapseResults, setCollapseResults] = useState(false);
+
+  // If both collapsed, don't allow it
+  React.useEffect(() => {
+    if (collapseEditor && collapseResults) {
+      setCollapseEditor(false); // Only allow one section collapsed at a time (never both)
+    }
+  }, [collapseEditor, collapseResults]);
+
   return (
     <ResizablePanelGroup direction="horizontal" className="flex h-full w-full min-h-0">
       {/* Main SQL/Results Section */}
@@ -60,34 +71,30 @@ const TabView: React.FC<TabViewProps> = ({
         style={{
           minWidth: 0,
           background: "#fff",
-          paddingRight: "36px", // WIDER right margin for separation
+          paddingRight: "36px",
           transition: "padding-right 0.18s",
         }}
       >
         <div className="flex flex-col min-h-0 h-full w-full">
-          <div
-            style={{
-              flex: "1 1 0%",
-              minHeight: 0,
-              background: "#fff",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <TabSqlEditorSection
-              tab={tab}
-              sqlEditorRef={sqlEditorRef}
-              onSqlChange={onSqlChange}
-              onFormat={onFormat}
-              onRun={onRun}
-              onRunAll={onRunAll}
-            />
-          </div>
+          <TabSqlEditorSection
+            tab={tab}
+            sqlEditorRef={sqlEditorRef}
+            onSqlChange={onSqlChange}
+            onFormat={onFormat}
+            onRun={onRun}
+            onRunAll={onRunAll}
+            collapsed={collapseEditor}
+            onCollapseToggle={() => setCollapseEditor(v => !v)}
+            disableCollapse={collapseResults}
+          />
           <TabResultsSection
             tab={tab}
             resultsHeight={resultsHeight}
             setResultsHeight={setResultsHeight}
             onDownloadCsv={onDownloadCsv}
+            collapsed={collapseResults}
+            onCollapseToggle={() => setCollapseResults(v => !v)}
+            disableCollapse={collapseEditor}
           />
         </div>
       </ResizablePanel>
@@ -103,7 +110,7 @@ const TabView: React.FC<TabViewProps> = ({
         onPointerDown={() => setIsHandleDragging(true)}
         onPointerUp={() => setIsHandleDragging(false)}
         style={{
-          zIndex: 12, // always above explorer bg
+          zIndex: 12,
           width: isHandleHovered || isHandleDragging ? "16px" : "4px",
           minWidth: 0,
           cursor: "col-resize",

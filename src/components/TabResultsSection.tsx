@@ -4,6 +4,12 @@ import ResultTable from "@/components/ResultTable";
 import { ResultsActionsBar } from "@/components/ResultTable/ResultsActionsBar";
 import { ResultsStatsBar } from "@/components/ResultTable/ResultsStatsBar";
 import { toast } from "@/hooks/use-toast";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 // Minimum/Maximum result height
 const MIN_RESULTS_HEIGHT = 80;
@@ -14,6 +20,10 @@ interface TabResultsSectionProps {
   resultsHeight: number;
   setResultsHeight: (h: number) => void;
   onDownloadCsv?: (rowsToExport?: Array<any[]>) => void;
+  // NEW COLLAPSIBLE props
+  collapsed?: boolean;
+  onCollapseToggle?: () => void;
+  disableCollapse?: boolean;
 }
 
 const TabResultsSection: React.FC<TabResultsSectionProps> = ({
@@ -21,12 +31,16 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
   resultsHeight,
   setResultsHeight,
   onDownloadCsv,
+  collapsed = false,
+  onCollapseToggle,
+  disableCollapse = false,
 }) => {
   // Drag logic only for resizing
   const dragStartY = React.useRef<number | null>(null);
   const dragStartHeight = React.useRef<number>(resultsHeight);
 
   const handleDragStart = (e: React.MouseEvent) => {
+    if (collapsed) return; // Prevent drag when collapsed
     dragStartY.current = e.clientY;
     dragStartHeight.current = resultsHeight;
     window.addEventListener("mousemove", handleDrag);
@@ -121,62 +135,80 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
   const hasTableData = !!(tab?.result && Array.isArray(tab.result.columns) && tab.result.columns.length > 0);
 
   return (
-    <div
-      className="flex flex-col min-h-[80px] bg-white overflow-hidden relative select-none"
-      style={{
-        height: resultsHeight,
-        minHeight: 80,
-        maxHeight: 600,
-        transition: "height 0.08s",
-      }}
-    >
-      {/* Drag handle/title */}
-      <div
-        className="cursor-ns-resize w-full flex items-center justify-between px-0 py-2 bg-white"
-        style={{ userSelect: "none", minHeight: 32, border: 0 }}
-        onMouseDown={handleDragStart}
-        role="separator"
-        aria-label="Drag to resize results"
-        tabIndex={0}
+    <Collapsible open={!collapsed}>
+      <div className="flex flex-col min-h-[80px] bg-white overflow-hidden relative select-none"
+        style={{
+          height: collapsed ? undefined : resultsHeight,
+          minHeight: collapsed ? 0 : 80,
+          maxHeight: collapsed ? undefined : 600,
+          transition: "height 0.08s",
+        }}
       >
-        <h2 className="font-din font-bold text-base text-gray-800 ml-4" style={{ letterSpacing: "0.04em" }}>
-          Results
-        </h2>
-        <div className="flex-1"></div>
-      </div>
-
-      {/* Results Table or Placeholder */}
-      <div className="flex-1 flex flex-col min-h-0 h-full px-0 pt-4 pb-2 w-full">
-        {hasTableData ? (
-          <ResultTable result={tab.result} error={resultTableError} />
-        ) : (
-          // Updated: end-to-end gray rectangle, stretches full width of results area
-          <div className="bg-gray-100 rounded-lg font-din text-gray-400 flex items-center justify-center w-full h-32 text-lg flex-1">
-            No Data
+        {/* Drag handle/title */}
+        <div
+          className="flex items-center justify-between px-0 py-2 bg-white border-b border-gray-200"
+          style={{
+            userSelect: "none",
+            minHeight: 32,
+            border: 0,
+            cursor: collapsed ? undefined : "ns-resize"
+          }}
+        >
+          <div
+            className="flex-1 flex items-center"
+            onMouseDown={collapsed ? undefined : handleDragStart}
+            role="separator"
+            aria-label="Drag to resize results"
+            tabIndex={0}
+          >
+            <h2 className="font-din font-bold text-base text-gray-800 ml-4" style={{ letterSpacing: "0.04em" }}>
+              Results
+            </h2>
           </div>
-        )}
-      </div>
-
-      {/* Bottom bar: buttons left, stats right */}
-      <div className="flex items-end justify-between px-4 pb-3 pt-0 w-full">
-        {/* Buttons left */}
-        <ResultsActionsBar
-          onDownload={handleDownload}
-          toggled={toggled}
-          onToggle={() => setToggled(t => !t)}
-        />
-        {/* Stats right */}
-        <div className="flex flex-1 items-center justify-end">
-          <ResultsStatsBar
-            numRows={numRows}
-            numColumns={numColumns}
-            elapsedMs={tab?.result?.elapsedMs ?? undefined}
-          />
+          <CollapsibleTrigger
+            asChild
+            disabled={disableCollapse}
+          >
+            <button
+              type="button"
+              aria-label={collapsed ? "Expand Results" : "Collapse Results"}
+              onClick={onCollapseToggle}
+              className="ml-2 mr-3 text-gray-500 bg-transparent hover:text-black rounded p-1 transition"
+            >
+              {collapsed ? <ChevronDown size={20}/> : <ChevronUp size={20}/>}
+            </button>
+          </CollapsibleTrigger>
         </div>
+
+        <CollapsibleContent asChild>
+          <div className="flex flex-col min-h-0 h-full px-0 pt-4 pb-2 w-full">
+            {hasTableData ? (
+              <ResultTable result={tab.result} error={resultTableError} />
+            ) : (
+              <div className="bg-gray-100 rounded-lg font-din text-gray-400 flex items-center justify-center w-full h-32 text-lg flex-1">
+                No Data
+              </div>
+            )}
+            {/* Bottom bar: buttons left, stats right */}
+            <div className="flex items-end justify-between px-4 pb-3 pt-0 w-full">
+              <ResultsActionsBar
+                onDownload={handleDownload}
+                toggled={toggled}
+                onToggle={() => setToggled(t => !t)}
+              />
+              <div className="flex flex-1 items-center justify-end">
+                <ResultsStatsBar
+                  numRows={numRows}
+                  numColumns={numColumns}
+                  elapsedMs={tab?.result?.elapsedMs ?? undefined}
+                />
+              </div>
+            </div>
+          </div>
+        </CollapsibleContent>
       </div>
-    </div>
+    </Collapsible>
   );
 };
 
 export default TabResultsSection;
-
