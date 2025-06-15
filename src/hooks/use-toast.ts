@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 import type {
@@ -55,6 +56,7 @@ interface State {
 
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
+// FIX: After 3s, call DISMISS_TOAST (triggers close animation), *not* REMOVE_TOAST
 const addToRemoveQueue = (toastId: string) => {
   if (toastTimeouts.has(toastId)) {
     return
@@ -62,8 +64,9 @@ const addToRemoveQueue = (toastId: string) => {
 
   const timeout = setTimeout(() => {
     toastTimeouts.delete(toastId)
+    // Instead of removing directly, we dispatch DISMISS so "open" becomes false
     dispatch({
-      type: "REMOVE_TOAST",
+      type: "DISMISS_TOAST",
       toastId: toastId,
     })
   }, TOAST_REMOVE_DELAY)
@@ -93,10 +96,30 @@ export const reducer = (state: State, action: Action): State => {
       // ! Side effects ! - This could be extracted into a dismissToast() action,
       // but I'll keep it here for simplicity
       if (toastId) {
-        addToRemoveQueue(toastId)
+        // On manual or automatic dismiss, schedule REMOVE_TOAST after animation
+        if (!toastTimeouts.has(toastId)) {
+          const removeTimeout = setTimeout(() => {
+            toastTimeouts.delete(toastId)
+            dispatch({
+              type: "REMOVE_TOAST",
+              toastId: toastId,
+            })
+          }, 300) // Delay for closing animation (Radix default is 200-300ms)
+          toastTimeouts.set(toastId, removeTimeout)
+        }
       } else {
+        // Dismiss all
         state.toasts.forEach((toast) => {
-          addToRemoveQueue(toast.id)
+          if (!toastTimeouts.has(toast.id)) {
+            const removeTimeout = setTimeout(() => {
+              toastTimeouts.delete(toast.id)
+              dispatch({
+                type: "REMOVE_TOAST",
+                toastId: toast.id,
+              })
+            }, 300)
+            toastTimeouts.set(toast.id, removeTimeout)
+          }
         })
       }
 
@@ -161,6 +184,9 @@ function toast({ ...props }: Toast) {
     },
   })
 
+  // Automatically remove the toast after TOAST_REMOVE_DELAY
+  addToRemoveQueue(id)
+
   return {
     id: id,
     dismiss,
@@ -189,3 +215,4 @@ function useToast() {
 }
 
 export { useToast, toast }
+
