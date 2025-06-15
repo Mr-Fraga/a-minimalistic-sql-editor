@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import ResultTable from "@/components/ResultTable";
 import { ResultsActionsBar } from "@/components/ResultTable/ResultsActionsBar";
@@ -136,55 +135,50 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
 
   // --- LAYOUT CHANGE SECTION ---
 
-  // We make a vertical flex container,
-  // - The main content (results table etc.) is CollapsibleContent and flex-0 when collapsed, flex-auto otherwise.
-  // - The collapsed bar (header with collapse/expand) is always at the bottom.
-
+  // Outer Collapsible wraps BOTH the bar and the content
   return (
-    <div className="flex flex-col h-full min-h-0 w-full">
+    <Collapsible open={!collapsed}>
       {/* Collapsible content (main table/results), hidden when collapsed */}
-      <Collapsible open={!collapsed}>
-        <CollapsibleContent asChild>
+      <CollapsibleContent asChild>
+        <div
+          className="flex flex-col min-h-0 w-full bg-white"
+          style={{
+            height: resultsHeight,
+            minHeight: 80,
+            maxHeight: 600,
+            transition: "height 0.08s",
+            flex: "0 0 auto",
+          }}
+        >
           <div
-            className="flex flex-col min-h-0 w-full bg-white"
-            style={{
-              height: resultsHeight,
-              minHeight: 80,
-              maxHeight: 600,
-              transition: "height 0.08s",
-              flex: "0 0 auto", // don't expand, just this height
-            }}
+            className="flex-1 flex flex-col min-h-0 px-0 pt-4 pb-2 w-full"
+            style={{ background: "#fff" }}
           >
-            <div
-              className="flex-1 flex flex-col min-h-0 px-0 pt-4 pb-2 w-full"
-              style={{ background: "#fff" }}
-            >
-              {hasTableData ? (
-                <ResultTable result={tab.result} error={resultTableError} />
-              ) : (
-                <div className="bg-gray-100 rounded-lg font-din text-gray-400 flex items-center justify-center w-full h-32 text-lg flex-1">
-                  No Data
-                </div>
-              )}
-              {/* Bottom bar: buttons left, stats right */}
-              <div className="flex items-end justify-between px-4 pb-3 pt-0 w-full">
-                <ResultsActionsBar
-                  onDownload={handleDownload}
-                  toggled={toggled}
-                  onToggle={() => setToggled(t => !t)}
+            {hasTableData ? (
+              <ResultTable result={tab.result} error={resultTableError} />
+            ) : (
+              <div className="bg-gray-100 rounded-lg font-din text-gray-400 flex items-center justify-center w-full h-32 text-lg flex-1">
+                No Data
+              </div>
+            )}
+            {/* Bottom bar: buttons left, stats right */}
+            <div className="flex items-end justify-between px-4 pb-3 pt-0 w-full">
+              <ResultsActionsBar
+                onDownload={handleDownload}
+                toggled={toggled}
+                onToggle={() => setToggled(t => !t)}
+              />
+              <div className="flex flex-1 items-center justify-end">
+                <ResultsStatsBar
+                  numRows={numRows}
+                  numColumns={numColumns}
+                  elapsedMs={tab?.result?.elapsedMs ?? undefined}
                 />
-                <div className="flex flex-1 items-center justify-end">
-                  <ResultsStatsBar
-                    numRows={numRows}
-                    numColumns={numColumns}
-                    elapsedMs={tab?.result?.elapsedMs ?? undefined}
-                  />
-                </div>
               </div>
             </div>
           </div>
-        </CollapsibleContent>
-      </Collapsible>
+        </div>
+      </CollapsibleContent>
       {/* Results "footer"/bar with collapse/expand at very bottom */}
       <div
         className="flex items-center justify-between px-0 py-2 bg-white border-t border-gray-200 select-none"
@@ -226,9 +220,8 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
           </button>
         </CollapsibleTrigger>
       </div>
-    </div>
+    </Collapsible>
   );
 };
 
 export default TabResultsSection;
-
