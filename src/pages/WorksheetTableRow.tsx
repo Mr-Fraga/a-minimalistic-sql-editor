@@ -4,6 +4,16 @@ import { Folder, File, Trash, Copy } from "lucide-react";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 
+// Helper to determine if a file row matches selectedFile (handle folders as not selectable)
+const isFileSelected = (row: any, selectedFile: any) => {
+  if (!selectedFile) return false;
+  // Only match files
+  if (row.type !== "query") return false;
+  if (row.name !== selectedFile.name) return false;
+  if (row.parentFolder !== selectedFile.parentFolder) return false;
+  return true;
+};
+
 const WorksheetTableRow = ({
   row,
   expandedFolders,
@@ -18,6 +28,8 @@ const WorksheetTableRow = ({
   handleDuplicateFile,
   setModalState,
   worksheetData,
+  onSelectFile,
+  selectedFile,
 }) => {
   if (!row) return null;
 
@@ -30,19 +42,26 @@ const WorksheetTableRow = ({
   const folderIsEmpty =
     folderObj && Array.isArray(folderObj.files) && folderObj.files.length === 0;
 
+  const handleClick = (evt: React.MouseEvent) => {
+    handleRowClick(evt, row);
+    if (!isFolder && onSelectFile) {
+      onSelectFile(row);
+    }
+  };
+
   return (
     <TableRow
       key={row.key}
       className={
-        isFolder && draggingFile
-          ? "outline outline-2 outline-blue-400"
-          : isSelected(row)
+        isFileSelected(row, selectedFile)
           ? "bg-blue-100"
+          : isFolder && draggingFile
+          ? "outline outline-2 outline-blue-400"
           : ""
       }
       onDrop={isFolder ? (evt) => handleFolderDrop(row.name, evt) : undefined}
       onDragOver={isFolder ? handleFolderDragOver : undefined}
-      onClick={(evt) => handleRowClick(evt, row)}
+      onClick={handleClick}
       style={{ cursor: row.type === "query" ? "pointer" : undefined }}
     >
       <TableCell>
@@ -66,7 +85,7 @@ const WorksheetTableRow = ({
         ) : (
           <div
             className={`flex items-center gap-2 cursor-grab ${
-              isSelected(row) ? "bg-blue-100" : ""
+              isFileSelected(row, selectedFile) ? "bg-blue-100" : ""
             }`}
             draggable
             onDragStart={(evt) => handleDragStart(evt, row.name, row.parentFolder)}

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -5,8 +6,8 @@ import { useWorksheets } from "@/contexts/WorksheetsContext";
 import DeleteFileModal from "@/components/DeleteFileModal";
 import WorksheetsTable from "./WorksheetsTable";
 import NewFolderInput from "./NewFolderInput";
+import { Card, CardContent } from "@/components/ui/card";
 
-// Top-level WorksheetsPage
 const WorksheetsPage: React.FC = () => {
   const { worksheetData, setWorksheetData } = useWorksheets();
 
@@ -25,7 +26,14 @@ const WorksheetsPage: React.FC = () => {
   const [creatingFolder, setCreatingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
 
-  // Folder creation handler – passed down to input/modal
+  // New: selected file for preview section
+  const [selectedFile, setSelectedFile] = useState<any>(null);
+
+  // Handler for selecting a file (passed to the table)
+  const handleSelectFile = (file: any) => {
+    setSelectedFile(file);
+  };
+
   const handleCreateFolder = () => {
     if (!newFolderName.trim()) return;
     const exists = worksheetData.some(
@@ -51,7 +59,6 @@ const WorksheetsPage: React.FC = () => {
   const handleDeleteConfirmed = () => {
     if (!modalState.fileName) return;
     if (modalState.type === "folder") {
-      // Folder deletion: Only allow if empty
       setWorksheetData(prev =>
         prev.filter(
           item =>
@@ -59,7 +66,6 @@ const WorksheetsPage: React.FC = () => {
         )
       );
     } else if (modalState.type === "query") {
-      // File deletion as before
       setWorksheetData(prev => {
         if (!modalState.parentFolder) {
           return prev.filter(item => !(item.type === "query" && item.name === modalState.fileName));
@@ -74,6 +80,16 @@ const WorksheetsPage: React.FC = () => {
       });
     }
     setModalState({ open: false, type: undefined, fileName: null, parentFolder: undefined });
+    // Also clear preview if the deleted file is being previewed
+    if (
+      selectedFile &&
+      selectedFile.name === modalState.fileName &&
+      // match parent folder or root
+      ((modalState.parentFolder && selectedFile.parentFolder === modalState.parentFolder) ||
+        (!modalState.parentFolder && !selectedFile.parentFolder))
+    ) {
+      setSelectedFile(null);
+    }
   };
 
   return (
@@ -127,7 +143,25 @@ const WorksheetsPage: React.FC = () => {
           draggingFile={draggingFile}
           setDraggingFile={setDraggingFile}
           setModalState={setModalState}
+          onSelectFile={handleSelectFile}
+          selectedFile={selectedFile}
         />
+        {/* Preview Section */}
+        <div className="mt-12">
+          <h1 className="text-2xl font-bold mb-2">Preview</h1>
+          <Card className="border border-gray-200 rounded-lg mt-2 shadow-sm bg-gray-50">
+            <CardContent className="pt-4 pb-6 min-h-[120px] flex flex-col justify-center">
+              {selectedFile && selectedFile.type === "query" ? (
+                <>
+                  <div className="mb-2 font-semibold text-lg text-gray-800">{selectedFile.name}</div>
+                  <div className="text-gray-600">Mocked contents of {selectedFile.name}</div>
+                </>
+              ) : (
+                <div className="text-gray-400 text-center">No file selected</div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
       <DeleteFileModal
         open={modalState.open}

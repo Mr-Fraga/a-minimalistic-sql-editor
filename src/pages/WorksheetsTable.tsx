@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   Table,
@@ -32,6 +33,8 @@ const WorksheetsTable = ({
   draggingFile,
   setDraggingFile,
   setModalState,
+  onSelectFile,
+  selectedFile,
 }: {
   worksheetData: any[];
   setWorksheetData: (cb: (prev: any[]) => any[]) => void;
@@ -43,6 +46,8 @@ const WorksheetsTable = ({
   draggingFile: any;
   setDraggingFile: React.Dispatch<React.SetStateAction<any>>;
   setModalState: React.Dispatch<React.SetStateAction<any>>;
+  onSelectFile: (file: any) => void;    // new
+  selectedFile: any;    // new
 }) => {
   const logic = useWorksheetsTableLogic({
     worksheetData,
@@ -55,6 +60,8 @@ const WorksheetsTable = ({
     setDraggingFile,
     setModalState,
     search,
+    onSelectFile,      // pass along
+    selectedFile,      // pass along
   });
 
   return (
@@ -123,6 +130,8 @@ const WorksheetsTable = ({
               handleDuplicateFile={logic.handleDuplicateFile}
               setModalState={logic.setModalState}
               worksheetData={worksheetData}
+              onSelectFile={onSelectFile}
+              selectedFile={selectedFile}
             />
           ))}
         </TableBody>
