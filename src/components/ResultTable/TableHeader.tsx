@@ -66,9 +66,15 @@ export const TableHeader: React.FC<Props> = ({
               {sortCol !== idx && <span className="w-3 h-3"></span>}
             </span>
           </span>
-          {/* Filter input for this column only (popover style under header) */}
+          {/* --- Filter input for this column only (popover style under header) --- */}
           {filterOpen[idx] && (
-            <div className="absolute left-0 mt-2 z-10 bg-white border border-gray-200 rounded shadow p-2 min-w-[140px]" style={{ top: "100%" }}>
+            <div
+              className="absolute left-0 z-10 bg-white border border-gray-200 shadow rounded font-din mt-1 min-w-[95px] p-1"
+              style={{
+                top: "100%",
+                fontFamily: '"DIN Next","DIN Next LT Pro","DINNextLTPro-Regular","DINNextLTPro","DIN",sans-serif',
+              }}
+            >
               <Input
                 autoFocus
                 value={filters[idx] ?? ""}
@@ -81,21 +87,32 @@ export const TableHeader: React.FC<Props> = ({
                   });
                 }}
                 placeholder="Filter"
-                className="h-8 py-0 px-2 text-xs border-gray-200 bg-gray-50 mb-1"
-                style={{ minWidth: 60 }}
+                className="h-7 py-0 px-2 text-xs border-gray-200 bg-gray-50 mb-0 rounded font-din"
+                style={{
+                  minWidth: 60,
+                  fontFamily: '"DIN Next","DIN Next LT Pro","DINNextLTPro-Regular","DINNextLTPro","DIN",sans-serif',
+                  fontSize: "0.88rem",
+                }}
                 onKeyDown={e => {
-                  if (e.key === "Escape") setFilterOpen(prev =>
-                    prev.map((v, i) => (i === idx ? false : v))
-                  );
+                  if (e.key === "Escape")
+                    setFilterOpen(prev =>
+                      prev.map((v, i) => (i === idx ? false : v))
+                    );
                   e.stopPropagation();
                 }}
               />
               <button
                 type="button"
-                className="w-full text-xs text-gray-500 hover:text-blue-700"
-                onClick={() => setFilterOpen(prev =>
-                  prev.map((v, i) => (i === idx ? false : v))
-                )}
+                className="w-full text-[11px] font-din font-normal text-gray-400 hover:text-blue-700 mt-1"
+                style={{
+                  padding: "2px 0",
+                  fontFamily: '"DIN Next","DIN Next LT Pro","DINNextLTPro-Regular","DINNextLTPro","DIN",sans-serif',
+                }}
+                onClick={() =>
+                  setFilterOpen(prev =>
+                    prev.map((v, i) => (i === idx ? false : v))
+                  )
+                }
               >
                 Close
               </button>
@@ -106,3 +123,4 @@ export const TableHeader: React.FC<Props> = ({
     </tr>
   </thead>
 );
+
