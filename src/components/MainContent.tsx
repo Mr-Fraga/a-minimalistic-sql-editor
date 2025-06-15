@@ -1,3 +1,4 @@
+
 import React, { useCallback, useState } from "react";
 import { useQueryApi } from "@/hooks/useQueryApi";
 import { useCsvExport } from "@/hooks/useCsvExport";
@@ -110,7 +111,9 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
           />
         ) : (
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-gray-400 text-center">No tab selected</p>
+            <div className="bg-gray-100 rounded-lg font-din text-gray-400 flex items-center justify-center max-w-md w-full h-32 mx-auto text-lg">
+              No Data
+            </div>
           </div>
         )}
       </div>
@@ -121,3 +124,4 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
 export default MainContent;
 
 // Note: This now uses the TabsContext for all tab state.
+
