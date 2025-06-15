@@ -291,23 +291,43 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
           onValueChange={val => {
             if (val === "DEV" || val === "STG" || val === "PRD") setEnv(val);
           }}
-          className="gap-1"
+          className="w-full"
         >
-          <ToggleGroupItem value="DEV" aria-label="DEV"
-            className={`text-xs px-3 py-1 rounded font-din ${env === "DEV" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"}`}
-            style={{ fontFamily: '"DIN Next","DIN Next LT Pro","DINNextLTPro-Regular","DINNextLTPro","DIN",sans-serif', minWidth: 42 }}
+          <ToggleGroupItem
+            value="DEV"
+            aria-label="DEV"
+            className={`flex-1 text-xs py-2 font-din transition-colors ${env === "DEV" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"} rounded-lg first:rounded-l-lg last:rounded-r-lg`}
+            style={{
+              fontFamily: '"DIN Next","DIN Next LT Pro","DINNextLTPro-Regular","DINNextLTPro","DIN",sans-serif',
+              minWidth: 0, // allow flex to shrink
+              borderRadius: "1.5rem",
+              marginRight: "-1px", // slight overlap for seamless look
+            }}
           >
             DEV
           </ToggleGroupItem>
-          <ToggleGroupItem value="STG" aria-label="STG"
-            className={`text-xs px-3 py-1 rounded font-din ${env === "STG" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"}`}
-            style={{ fontFamily: '"DIN Next","DIN Next LT Pro","DINNextLTPro-Regular","DINNextLTPro","DIN",sans-serif', minWidth: 42 }}
+          <ToggleGroupItem
+            value="STG"
+            aria-label="STG"
+            className={`flex-1 text-xs py-2 font-din transition-colors ${env === "STG" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"} rounded-lg first:rounded-l-lg last:rounded-r-lg`}
+            style={{
+              fontFamily: '"DIN Next","DIN Next LT Pro","DINNextLTPro-Regular","DINNextLTPro","DIN",sans-serif',
+              minWidth: 0,
+              borderRadius: "1.5rem",
+              marginRight: "-1px",
+            }}
           >
             STG
           </ToggleGroupItem>
-          <ToggleGroupItem value="PRD" aria-label="PRD"
-            className={`text-xs px-3 py-1 rounded font-din ${env === "PRD" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"}`}
-            style={{ fontFamily: '"DIN Next","DIN Next LT Pro","DINNextLTPro-Regular","DINNextLTPro","DIN",sans-serif', minWidth: 42 }}
+          <ToggleGroupItem
+            value="PRD"
+            aria-label="PRD"
+            className={`flex-1 text-xs py-2 font-din transition-colors ${env === "PRD" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"} rounded-lg first:rounded-l-lg last:rounded-r-lg`}
+            style={{
+              fontFamily: '"DIN Next","DIN Next LT Pro","DINNextLTPro-Regular","DINNextLTPro","DIN",sans-serif',
+              minWidth: 0,
+              borderRadius: "1.5rem",
+            }}
           >
             PRD
           </ToggleGroupItem>
