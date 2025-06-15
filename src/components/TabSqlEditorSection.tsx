@@ -23,7 +23,7 @@ interface TabSqlEditorSectionProps {
   onRun: (selection?: string) => void;
   onRunAll: () => void;
   style?: React.CSSProperties;
-  // NEW COLLAPSIBLE props
+  // COLLAPSIBLE props
   collapsed?: boolean;
   onCollapseToggle?: () => void;
   disableCollapse?: boolean;
@@ -41,9 +41,10 @@ const TabSqlEditorSection: React.FC<TabSqlEditorSectionProps> = ({
   onCollapseToggle,
   disableCollapse = false,
 }) => (
+  // Only ONE bar + trigger!
   <Collapsible open={!collapsed}>
     <div className="flex flex-col min-h-0">
-      {/* Collapse trigger bar */}
+      {/* The ONLY label/trigger */}
       <div className="flex items-center py-1 px-2 justify-between bg-white border-b border-gray-200 select-none">
         <span className="font-din font-bold text-base text-gray-800 ml-1" style={{ letterSpacing: "0.04em" }}>
           SQL Editor
