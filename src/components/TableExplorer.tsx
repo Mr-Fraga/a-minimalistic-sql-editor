@@ -9,6 +9,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import SchemaExplorer from "./SchemaExplorer";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 // --- Extended dummy schemas and tables for exploration! --- //
 const rand = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
@@ -201,6 +202,8 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
 }) => {
   const [search, setSearch] = useState("");
   const [openSchemas, setOpenSchemas] = useState<Record<string, boolean>>({});
+  // Add environment state
+  const [env, setEnv] = useState<"DEV" | "STG" | "PRD">("DEV");
 
   // Reset openSchemas when the list of schemas, or the role, changes
   React.useEffect(() => {
@@ -277,10 +280,39 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
       }}
     >
       {/* Title uses 'Explorer' in sentence case, styled for tab view consistency */}
-      {/* Match font with SQL Editor (remove font-mono if SQL Editor doesn't use it) */}
       <h2 className="font-bold text-base text-gray-800 mb-2 ml-4" style={{ letterSpacing: "0.04em", textTransform: "none" }}>
         Explorer
       </h2>
+      {/* Environment ToggleGroup */}
+      <div className="mb-3 px-4 flex justify-start">
+        <ToggleGroup
+          type="single"
+          value={env}
+          onValueChange={val => {
+            if (val === "DEV" || val === "STG" || val === "PRD") setEnv(val);
+          }}
+          className="gap-1"
+        >
+          <ToggleGroupItem value="DEV" aria-label="DEV"
+            className={`text-xs px-3 py-1 rounded font-din ${env === "DEV" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"}`}
+            style={{ fontFamily: '"DIN Next","DIN Next LT Pro","DINNextLTPro-Regular","DINNextLTPro","DIN",sans-serif', minWidth: 42 }}
+          >
+            DEV
+          </ToggleGroupItem>
+          <ToggleGroupItem value="STG" aria-label="STG"
+            className={`text-xs px-3 py-1 rounded font-din ${env === "STG" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"}`}
+            style={{ fontFamily: '"DIN Next","DIN Next LT Pro","DINNextLTPro-Regular","DINNextLTPro","DIN",sans-serif', minWidth: 42 }}
+          >
+            STG
+          </ToggleGroupItem>
+          <ToggleGroupItem value="PRD" aria-label="PRD"
+            className={`text-xs px-3 py-1 rounded font-din ${env === "PRD" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"}`}
+            style={{ fontFamily: '"DIN Next","DIN Next LT Pro","DINNextLTPro-Regular","DINNextLTPro","DIN",sans-serif', minWidth: 42 }}
+          >
+            PRD
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
       {/* Search Input */}
       <div className="mb-4 px-2">
         <input
