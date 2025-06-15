@@ -15,6 +15,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 import EnvToggle from "./EnvToggle";
 import SchemaExplorerList from "./SchemaExplorerList";
+import TableTooltipContent from "./TableTooltipContent";
 
 interface TableExplorerProps {
   onInsertSchemaTable?: (schema: string, table: string) => void;
@@ -260,22 +261,39 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
         <CollapsibleContent>
           <ul className="my-2">
             {pinnedTables.map(({ schema, table }) => {
-              // Pin color black if selected, grey otherwise
-              const isSelected = false; // Add logic if you want to highlight the active/selected one, for now always grey unless you specify selection logic
+              // Find table metadata
+              const tableMeta = getPinnedTableMeta(schema, table);
+              // Determine selected status (for black pin)
+              const isSelected = false; // Update if you introduce active table selection logic
               return (
                 <li key={pinnedId(schema, table)}>
-                  <button
-                    className="flex items-center gap-2 px-2 py-1 rounded group hover:bg-black hover:text-white text-sm w-full justify-between"
-                    onClick={() => handleTableClick(schema, table)}
-                  >
-                    <span className="font-medium flex-1 text-left">{schema}.{table}</span>
-                    <Pin
-                      fill="none"
-                      color={(/* If you have selection logic, add here: isSelected ? "#000" : "#9ca3af" */"#9ca3af")}
-                      className="shrink-0 ml-2"
-                      size={14}
-                    />
-                  </button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        className="flex items-center gap-2 px-6 py-1 rounded group hover:bg-black hover:text-white text-sm w-full justify-between"
+                        style={{ marginLeft: 0 }} // To align exactly with title, px-6 sets the left padding
+                        onClick={() => handleTableClick(schema, table)}
+                        type="button"
+                      >
+                        <span className="font-medium flex-1 text-left">{schema}.{table}</span>
+                        <Pin
+                          fill="none"
+                          color={isSelected ? "#000" : "#9ca3af"}
+                          className="shrink-0 ml-2"
+                          size={16}
+                        />
+                      </button>
+                    </TooltipTrigger>
+                    {tableMeta && (
+                      <TooltipContent className="p-3 max-w-xs break-words" side="right">
+                        <TableTooltipContent
+                          schema={schema}
+                          table={tableMeta}
+                          onInsertColumn={onInsertColumn}
+                        />
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
                 </li>
               )
             })}
