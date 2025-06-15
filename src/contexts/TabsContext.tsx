@@ -62,7 +62,7 @@ export function TabsProvider({ children }: { children: ReactNode }) {
     tabs[0]?.id || null
   );
 
-  // Add worksheet file context access:
+  // -- Worksheets context access --
   const worksheets = useWorksheets();
   const worksheetData = worksheets?.worksheetData || [];
   const setWorksheetData = worksheets?.setWorksheetData;
@@ -70,7 +70,7 @@ export function TabsProvider({ children }: { children: ReactNode }) {
   // activeTab getter
   const activeTab = tabs.find((tab) => tab.id === activeTabId) || null;
 
-  // Helper: Find next New Tab N number (existing tabs and worksheet files considered)
+  // Helper: Find next New Tab N number
   function getNextNewTabIndex() {
     const tabNumbers = tabs
       .map(t => t.name.match(/^New Tab (\d+)$/))
@@ -100,11 +100,10 @@ export function TabsProvider({ children }: { children: ReactNode }) {
     return i;
   }
 
-  // Add a new blank tab and make it active
+  // --- Add tab and file ---
   const addTab = () => {
     const id = generateTabId();
     const tabIdx = getNextNewTabIndex();
-
     const tabBaseName = `New Tab ${tabIdx}`;
     const fileName = `${tabBaseName}.sql`;
 
@@ -118,7 +117,7 @@ export function TabsProvider({ children }: { children: ReactNode }) {
     setTabs((prev) => [...prev, newTab]);
     setActiveTabId(id);
 
-    // Add this tab as a new file to Worksheets root (if not already present)
+    // Add this tab as a new file to Worksheets root (if not present)
     if (
       setWorksheetData &&
       !worksheetData.some(e => e.type === "query" && e.name === fileName)
@@ -131,19 +130,79 @@ export function TabsProvider({ children }: { children: ReactNode }) {
           name: fileName,
           createdAt: now,
           updatedAt: now,
-          comment: "New tab query"
+          comment: "New tab query",
+          sql: "", // save the SQL content for syncing with tab
         }
       ]);
     }
   };
 
-  // Update fields of a tab
+  // --- Update tab fields and worksheet file content! ---
   const updateTab = (id: string, updatedFields: Partial<TabType>) => {
     setTabs((prevTabs) =>
       prevTabs.map((tab) =>
         tab.id === id ? { ...tab, ...updatedFields } : tab
       )
     );
+    // If SQL or name changed, update corresponding worksheet file as well
+    const changedTab = tabs.find((tab) => tab.id === id);
+    if (setWorksheetData && changedTab) {
+      const updatedName = updatedFields.name ?? changedTab.name;
+      const prevName = changedTab.name;
+      const updatedSql =
+        updatedFields.sql !== undefined ? updatedFields.sql : changedTab.sql;
+
+      setWorksheetData(prev => {
+        function updateEntry(entry) {
+          if (entry.type === "query" && entry.name === prevName + ".sql") {
+            return { ...entry, name: updatedName + ".sql", sql: updatedSql };
+          }
+          if (entry.type === "folder") {
+            return {
+              ...entry,
+              files: entry.files.map(f =>
+                f.name === prevName + ".sql"
+                  ? { ...f, name: updatedName + ".sql", sql: updatedSql }
+                  : f
+              ),
+            };
+          }
+          return entry;
+        }
+        return prev.map(updateEntry);
+      });
+    }
+  };
+
+  // --- Rename tab and worksheet file as well ---
+  const renameTab = (id: string, name: string) => {
+    setTabs((prevTabs) =>
+      prevTabs.map((tab) => (tab.id === id ? { ...tab, name } : tab))
+    );
+    // Also rename worksheet file if exists
+    const tab = tabs.find(t => t.id === id);
+    if (tab && setWorksheetData) {
+      const prevName = tab.name;
+      setWorksheetData(prev => {
+        function updateEntry(entry) {
+          if (entry.type === "query" && entry.name === prevName + ".sql") {
+            return { ...entry, name: name + ".sql" };
+          }
+          if (entry.type === "folder") {
+            return {
+              ...entry,
+              files: entry.files.map(f =>
+                f.name === prevName + ".sql"
+                  ? { ...f, name: name + ".sql" }
+                  : f
+              ),
+            };
+          }
+          return entry;
+        }
+        return prev.map(updateEntry);
+      });
+    }
   };
 
   // Remove a tab and update activeTabId accordingly
@@ -165,13 +224,6 @@ export function TabsProvider({ children }: { children: ReactNode }) {
 
   // Close tab alias for removeTab
   const closeTab = removeTab;
-
-  // Rename tab
-  const renameTab = (id: string, name: string) => {
-    setTabs((prevTabs) =>
-      prevTabs.map((tab) => (tab.id === id ? { ...tab, name } : tab))
-    );
-  };
 
   // Duplicate a tab
   const duplicateTab = (id: string) => {

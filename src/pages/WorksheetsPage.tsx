@@ -96,11 +96,15 @@ const WorksheetsPage: React.FC = () => {
   // Helper: get latest SQL for selected file (by name & maybe by folder too)
   function getSelectedFileSql(selectedFile: any): string | null {
     if (!selectedFile || selectedFile.type !== "query") return null;
-    // Find a tab with this file name
-    const matchingTab = tabs.find(tab => tab.name === selectedFile.name);
+    // Find a tab with this file name (matching tab name to file name minus ".sql")
+    const cleanedFileName =
+      selectedFile.name.endsWith(".sql")
+        ? selectedFile.name.slice(0, -4)
+        : selectedFile.name;
+    const matchingTab = tabs.find(tab => tab.name === cleanedFileName);
     if (matchingTab) return matchingTab.sql;
 
-    // Else, find file in worksheetData: at root or inside folder
+    // Else, find file in worksheetData: at root or inside folder, prefer .sql field if present
     let found: any = worksheetData.find(
       item => item.type === "query" && item.name === selectedFile.name
     );
@@ -113,7 +117,7 @@ const WorksheetsPage: React.FC = () => {
         }
       }
     }
-    if (found) return found.sql || "-- SQL not available --";
+    if (found) return found.sql !== undefined ? found.sql : "-- SQL not available --";
     return "-- SQL not available --";
   }
 

@@ -319,6 +319,9 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
     );
   };
 
+  // --- Collapsible state for Explorer (schema section), open by default ---
+  const [showExplorer, setShowExplorer] = useState(true);
+
   // Move pinned tables above Explorer title, and restyle as requested
   return (
     <div
@@ -332,32 +335,46 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
     >
       {/* Pinned Tables as first section */}
       {renderPinnedTables()}
-      {/* Explorer Title */}
-      <h2 className="font-bold text-base text-gray-800 mb-2 mt-4 ml-4" style={{ letterSpacing: "0.04em", textTransform: "none" }}>
-        Explorer
-      </h2>
-      {/* Environment ToggleGroup */}
-      <div className="mb-3 px-4 flex justify-start">
-        <EnvToggle
-          value={env}
-          onChange={setEnv}
-        />
-      </div>
-      {/* Search Input */}
-      <div className="mb-4 px-2">
-        <input
-          placeholder="Search tables..."
-          className="h-8 text-sm px-3 border rounded-lg w-full bg-white focus:outline-none focus:ring-2 focus:ring-primary"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-      </div>
-      {/* No tables found message */}
-      {filteredSchemas.length === 0 && (
-        <div className="text-xs text-gray-400 px-2">No tables found</div>
-      )}
-      {/* Schema List with pin icons */}
-      {renderSchemaExplorerList()}
+      {/* Explorer - make schemas section collapsible and open by default */}
+      <Collapsible open={showExplorer} onOpenChange={setShowExplorer}>
+        <div
+          className="flex items-center justify-between px-4 mt-4 select-none cursor-pointer"
+          onClick={() => setShowExplorer(v => !v)}
+        >
+          <h2 className="font-bold text-base text-gray-800 mb-2 mt-0" style={{ letterSpacing: "0.04em", textTransform: "none" }}>
+            Explorer
+          </h2>
+          {showExplorer ? (
+            <ChevronDown className="w-4 h-4 text-gray-500" />
+          ) : (
+            <ChevronRight className="w-4 h-4 text-gray-500" />
+          )}
+        </div>
+        <CollapsibleContent>
+          {/* Environment ToggleGroup */}
+          <div className="mb-3 px-4 flex justify-start">
+            <EnvToggle
+              value={env}
+              onChange={setEnv}
+            />
+          </div>
+          {/* Search Input */}
+          <div className="mb-4 px-2">
+            <input
+              placeholder="Search tables..."
+              className="h-8 text-sm px-3 border rounded-lg w-full bg-white focus:outline-none focus:ring-2 focus:ring-primary"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
+          {/* No tables found message */}
+          {filteredSchemas.length === 0 && (
+            <div className="text-xs text-gray-400 px-2">No tables found</div>
+          )}
+          {/* Schema List with pin icons */}
+          {renderSchemaExplorerList()}
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   );
 };
