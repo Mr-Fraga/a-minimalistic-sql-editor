@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import ResultTable from "@/components/ResultTable";
 import { ResultsActionsBar } from "@/components/ResultTable/ResultsActionsBar";
@@ -130,25 +129,23 @@ const ResultsContainer: React.FC<ResultsContainerProps> = ({
   const hasTableData = !!(tab?.result && Array.isArray(tab.result.columns) && tab.result.columns.length > 0);
 
   // ---- MAIN RENDER ----
+  // When collapsed: only show bar, fixed small height, relative position (not absolute), does not overlap sidebar
+  // When expanded: normal results height
 
-  // These styles apply "absolute bottom-0" only when collapsed.
   return (
     <Collapsible open={!collapsed}>
       <div
-        className={[
-          "flex flex-col min-h-0 w-full bg-white",
-          collapsed ? "absolute left-0 right-0 bottom-0 w-full z-20" : "relative",
-        ].join(" ")}
+        className="flex flex-col min-h-0 w-full bg-white"
         style={
           collapsed
             ? {
-                // Only show the collapsed bar at the bottom, do not take extra space
-                height: "auto",
-                minHeight: 0,
-                maxHeight: "40px",
+                height: 40,
+                minHeight: 32,
+                maxHeight: 48,
                 padding: 0,
                 margin: 0,
-                position: "absolute",
+                position: "relative",
+                zIndex: 1, // stays above sql editor, but no overlay
               }
             : {
                 height: resultsHeight,
@@ -158,93 +155,98 @@ const ResultsContainer: React.FC<ResultsContainerProps> = ({
                 padding: 0,
                 margin: 0,
                 position: "relative",
+                zIndex: 1,
               }
         }
       >
         {/* Provide gap above Results only if not collapsed */}
         {!collapsed && <div className="h-5" aria-hidden />}
         <CollapsibleContent asChild>
-          <div className="flex flex-col min-h-0 w-full h-full bg-white">
-            {/* Results bar and drag handle always at top of results */}
-            <div
-              className="flex items-center justify-between px-0 pt-0 pb-2 w-full"
-              style={{
-                userSelect: "none",
-                minHeight: 32,
-                border: 0,
-                zIndex: 3,
-              }}
-            >
+          {/* Only render content if not collapsed */}
+          {!collapsed && (
+            <div className="flex flex-col min-h-0 w-full h-full bg-white">
+              {/* Results bar and drag handle always at top of results */}
               <div
-                className="flex-1 flex items-center"
-                onMouseDown={collapsed ? undefined : handleDragStart}
-                role="separator"
-                aria-label="Drag to resize results"
-                tabIndex={0}
+                className="flex items-center justify-between px-0 pt-0 pb-2 w-full"
                 style={{
-                  cursor: collapsed ? undefined : "ns-resize",
+                  userSelect: "none",
+                  minHeight: 32,
+                  border: 0,
+                  zIndex: 3,
                 }}
               >
-                <h2 className="font-din font-bold text-base text-gray-800 ml-4" style={{ letterSpacing: "0.04em" }}>
-                  Results
-                </h2>
-              </div>
-              <CollapsibleTrigger
-                asChild
-                disabled={disableCollapse}
-              >
-                <button
-                  type="button"
-                  aria-label={collapsed ? "Expand Results" : "Collapse Results"}
-                  onClick={onCollapseToggle}
-                  className="ml-2 mr-3 text-gray-500 bg-transparent hover:text-black rounded p-1 transition"
+                <div
+                  className="flex-1 flex items-center"
+                  onMouseDown={collapsed ? undefined : handleDragStart}
+                  role="separator"
+                  aria-label="Drag to resize results"
+                  tabIndex={0}
                   style={{
-                    transform: collapsed ? "rotate(0deg)" : "rotate(180deg)",
-                    transition: "transform 0.3s",
+                    cursor: collapsed ? undefined : "ns-resize",
                   }}
                 >
-                  {collapsed ? <ChevronDown size={20}/> : <ChevronUp size={20}/>}
-                </button>
-              </CollapsibleTrigger>
-            </div>
-            <div className="flex flex-col flex-1 min-h-0 justify-between">
-              <div className="flex-1 min-h-0 flex">
-                {hasTableData ? (
-                  <ResultTable result={tab.result} error={resultTableError} />
-                ) : (
-                  <div className="bg-gray-100 rounded-lg font-din text-gray-400 flex items-center justify-center w-full h-full min-h-0 flex-1 text-lg">
-                    No Data
-                  </div>
-                )}
+                  <h2 className="font-din font-bold text-base text-gray-800 ml-4" style={{ letterSpacing: "0.04em" }}>
+                    Results
+                  </h2>
+                </div>
+                <CollapsibleTrigger
+                  asChild
+                  disabled={disableCollapse}
+                >
+                  <button
+                    type="button"
+                    aria-label={collapsed ? "Expand Results" : "Collapse Results"}
+                    onClick={onCollapseToggle}
+                    className="ml-2 mr-3 text-gray-500 bg-transparent hover:text-black rounded p-1 transition"
+                    style={{
+                      transform: collapsed ? "rotate(0deg)" : "rotate(180deg)",
+                      transition: "transform 0.3s",
+                    }}
+                  >
+                    {collapsed ? <ChevronDown size={20}/> : <ChevronUp size={20}/>}
+                  </button>
+                </CollapsibleTrigger>
               </div>
-              <div className="flex items-end justify-between px-4 pb-3 pt-0 mt-6 w-full">
-                <ResultsActionsBar
-                  onDownload={handleDownload}
-                  toggled={toggled}
-                  onToggle={() => setToggled(t => !t)}
-                />
-                <div className="flex flex-1 items-center justify-end">
-                  <ResultsStatsBar
-                    numRows={numRows}
-                    numColumns={numColumns}
-                    elapsedMs={tab?.result?.elapsedMs ?? undefined}
+              <div className="flex flex-col flex-1 min-h-0 justify-between">
+                <div className="flex-1 min-h-0 flex">
+                  {hasTableData ? (
+                    <ResultTable result={tab.result} error={resultTableError} />
+                  ) : (
+                    <div className="bg-gray-100 rounded-lg font-din text-gray-400 flex items-center justify-center w-full h-full min-h-0 flex-1 text-lg">
+                      No Data
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-end justify-between px-4 pb-3 pt-0 mt-6 w-full">
+                  <ResultsActionsBar
+                    onDownload={handleDownload}
+                    toggled={toggled}
+                    onToggle={() => setToggled(t => !t)}
                   />
+                  <div className="flex flex-1 items-center justify-end">
+                    <ResultsStatsBar
+                      numRows={numRows}
+                      numColumns={numColumns}
+                      elapsedMs={tab?.result?.elapsedMs ?? undefined}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </CollapsibleContent>
-        {/* When collapsed, show just the results bar at the absolute bottom */}
+        {/* When collapsed, show just the results bar at the bottom */}
         {collapsed && (
           <div
-            className="flex items-center justify-between px-0 py-2 bg-white border-t border-gray-200 select-none"
+            className="flex items-center justify-between px-0 py-2 bg-white border-t border-gray-200 select-none h-full"
             style={{
               userSelect: "none",
               minHeight: 32,
+              maxHeight: 48,
               border: 0,
-              zIndex: 4,
               width: "100%",
               boxShadow: "0px -2px 6px rgba(0,0,0,0.01)",
+              zIndex: 2,
             }}
           >
             <div className="flex-1 flex items-center">
