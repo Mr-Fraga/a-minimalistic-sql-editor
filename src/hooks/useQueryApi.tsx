@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { toast } from "@/hooks/use-toast";
-import { TabType } from "./useTabsState";
+import { TabType } from "@/contexts/TabsContext";
 
 // You should provide MOCK_RESULT identical to MainContent usage
 const MOCK_RESULT = {

@@ -1,6 +1,5 @@
-
 import { toast } from "@/hooks/use-toast";
-import { TabType } from "./useTabsState";
+import { TabType } from "@/contexts/TabsContext";
 
 export function useCsvExport(activeTab: TabType | undefined | null) {
   // CSV Export

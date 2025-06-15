@@ -120,3 +120,4 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
 export default MainContent;
 
 // Note: This now uses the TabsContext for all tab state.
+
