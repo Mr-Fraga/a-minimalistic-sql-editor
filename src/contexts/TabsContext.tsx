@@ -1,103 +1,33 @@
+
 import React, { createContext, useContext, useState, useCallback, ReactNode } from "react";
 import { useWorksheets } from "./WorksheetsContext";
-
-// The type for a tab in our app
-export interface TabType {
-  id: string;
-  name: string;
-  sql: string;
-  result: {
-    columns: any[];
-    rows: any[];
-    elapsedMs?: number;
-  };
-  error: string | null;
-  isRunning: boolean;
-  comment?: string;
-}
-
-// Modifiable fields by the context consumer
-interface TabsContextType {
-  tabs: TabType[];
-  setTabs: React.Dispatch<React.SetStateAction<TabType[]>>;
-  activeTabId: string | null;
-  setActiveTabId: (id: string) => void;
-  activeTab: TabType | null;
-  addTab: () => void;
-  updateTab: (id: string, updatedFields: Partial<TabType>) => void;
-  removeTab: (id: string) => void;
-  closeTab: (id: string) => void;
-  renameTab: (id: string, name: string) => void;
-  duplicateTab: (id: string) => void;
-  DEFAULT_SQL: string;
-}
-
-const TabsContext = createContext<TabsContextType | undefined>(undefined);
+import { TabType, TabsContextType } from "./TabsTypes";
+import { MOCK_SQL, MOCK_RESULT, DEFAULT_TAB } from "./TabsMocks";
+import { generateTabId } from "./TabsUtils";
 
 // Default SQL for new tabs (BLANK for your requirement)
 const DEFAULT_SQL = "";
 
-// --- SETUP DEFAULTS ---
-const MOCK_SQL = `SELECT * FROM users LIMIT 10;`; // Replace with your mock query if different
-
-// Move MOCK_RESULT constant here (copy from useQueryApi for consistency)
-const MOCK_RESULT = {
-  columns: ["id", "name", "email", "phone", "country_code"],
-  rows: [
-    [1, "Alice", "alice@email.com", "555-0100", "US"],
-    [2, "Bob", "bob@email.com", "555-0101", "CA"],
-    [3, "Charlie", "charlie@email.com", "555-0102", "UK"],
-    [4, "David", "david@email.com", "555-0103", "AU"],
-    [5, "Eva", "eva@email.com", "555-0104", "DE"],
-    [6, "Frank", "frank@email.com", "555-0105", "FR"],
-    [7, "Grace", "grace@email.com", "555-0106", "ES"],
-    [8, "Hannah", "hannah@email.com", "555-0107", "IT"],
-    [9, "Ian", "ian@email.com", "555-0108", "NL"],
-    [10, "Julia", "julia@email.com", "555-0109", "CH"],
-    [11, "Kyle", "kyle@email.com", "555-0110", "AT"],
-    [12, "Luna", "luna@email.com", "555-0111", "SE"],
-    [13, "Maya", "maya@email.com", "555-0112", "NO"],
-    [14, "Noah", "noah@email.com", "555-0113", "DK"],
-    [15, "Olivia", "olivia@email.com", "555-0114", "FI"],
-  ]
-};
-
-const DEFAULT_TAB = {
-  name: "Initial Tab",
-  sql: MOCK_SQL, // initial tab gets mock query
-  result: { columns: [], rows: [] },
-  error: null,
-  isRunning: false,
-  comment: "",
-};
-
-// Utility: generate a random string for tab ids
-function generateTabId() {
-  return Math.random().toString(36).substr(2, 9);
-}
+const TabsContext = createContext<TabsContextType | undefined>(undefined);
 
 export function TabsProvider({ children }: { children: ReactNode }) {
-  // For the initial tab, set the mock result
   const [tabs, setTabs] = useState<TabType[]>([
     {
       ...DEFAULT_TAB,
       id: generateTabId(),
-      result: MOCK_RESULT, // INITIAL TAB gets the mock result straight away
+      result: MOCK_RESULT,
     },
   ]);
   const [activeTabId, setActiveTabId] = useState<string | null>(
     tabs[0]?.id || null
   );
 
-  // -- Worksheets context access --
   const worksheets = useWorksheets();
   const worksheetData = worksheets?.worksheetData || [];
   const setWorksheetData = worksheets?.setWorksheetData;
 
-  // activeTab getter
   const activeTab = tabs.find((tab) => tab.id === activeTabId) || null;
 
-  // Helper: Find next New Tab N number
   function getNextNewTabIndex() {
     const tabNumbers = tabs
       .map(t => t.name.match(/^New Tab (\d+)$/))
@@ -127,7 +57,6 @@ export function TabsProvider({ children }: { children: ReactNode }) {
     return i;
   }
 
-  // --- Add tab and file ---
   const addTab = () => {
     const id = generateTabId();
     const tabIdx = getNextNewTabIndex();
@@ -138,13 +67,13 @@ export function TabsProvider({ children }: { children: ReactNode }) {
       ...DEFAULT_TAB,
       id,
       name: tabBaseName,
-      sql: "", // blank for new tabs
+      sql: "",
+      result: { columns: [], rows: [] },
     };
 
     setTabs((prev) => [...prev, newTab]);
     setActiveTabId(id);
 
-    // Add this tab as a new file to Worksheets root (if not present)
     if (
       setWorksheetData &&
       !worksheetData.some(e => e.type === "query" && e.name === fileName)
@@ -158,20 +87,18 @@ export function TabsProvider({ children }: { children: ReactNode }) {
           createdAt: now,
           updatedAt: now,
           comment: "New tab query",
-          sql: "", // save the SQL content for syncing with tab
+          sql: "",
         }
       ]);
     }
   };
 
-  // --- Update tab fields and worksheet file content! ---
   const updateTab = (id: string, updatedFields: Partial<TabType>) => {
     setTabs((prevTabs) =>
       prevTabs.map((tab) =>
         tab.id === id ? { ...tab, ...updatedFields } : tab
       )
     );
-    // If SQL or name changed, update corresponding worksheet file as well
     const changedTab = tabs.find((tab) => tab.id === id);
     if (setWorksheetData && changedTab) {
       const updatedName = updatedFields.name ?? changedTab.name;
@@ -201,12 +128,10 @@ export function TabsProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // --- Rename tab and worksheet file as well ---
   const renameTab = (id: string, name: string) => {
     setTabs((prevTabs) =>
       prevTabs.map((tab) => (tab.id === id ? { ...tab, name } : tab))
     );
-    // Also rename worksheet file if exists
     const tab = tabs.find(t => t.id === id);
     if (tab && setWorksheetData) {
       const prevName = tab.name;
@@ -232,14 +157,13 @@ export function TabsProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Remove a tab and update activeTabId accordingly
   const removeTab = useCallback((id: string) => {
     setTabs((prevTabs) => {
       const idx = prevTabs.findIndex((tab) => tab.id === id);
       if (prevTabs.length <= 1) {
         const newId = generateTabId();
         setActiveTabId(newId);
-        return [{ ...DEFAULT_TAB, id: newId }];
+        return [{ ...DEFAULT_TAB, id: newId, result: MOCK_RESULT }];
       }
       const newTabs = prevTabs.filter((tab) => tab.id !== id);
       if (activeTabId === id) {
@@ -249,10 +173,8 @@ export function TabsProvider({ children }: { children: ReactNode }) {
     });
   }, [activeTabId]);
 
-  // Close tab alias for removeTab
   const closeTab = removeTab;
 
-  // Duplicate a tab
   const duplicateTab = (id: string) => {
     setTabs((prevTabs) => {
       const idx = prevTabs.findIndex((tab) => tab.id === id);
@@ -263,11 +185,9 @@ export function TabsProvider({ children }: { children: ReactNode }) {
         ...tab,
         id: newId,
         name: tab.name + " (Copy)",
-        // Also carry over sql and result; error/isRunning always reset
         error: null,
         isRunning: false,
       };
-      // Insert the duplicate right after the original
       const newTabs = [...prevTabs];
       newTabs.splice(idx + 1, 0, copy);
       setActiveTabId(newId);
