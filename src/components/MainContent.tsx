@@ -3,7 +3,8 @@ import React, { useCallback, useState } from "react";
 import { useQueryApi } from "@/hooks/useQueryApi";
 import { useCsvExport } from "@/hooks/useCsvExport";
 import { SqlEditorImperativeHandle } from "@/components/SqlEditor";
-import TabView from "@/components/TabBar";
+import TabBar from "@/components/TabBar";
+import TabView from "@/components/TabView";
 import { useTabs } from "@/contexts/TabsContext";
 
 interface MainContentProps {
@@ -84,7 +85,8 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
 
   return (
     <div className="flex-1 flex flex-col h-full">
-      <TabView
+      {/* Use TabBar for tab navigation */}
+      <TabBar
         tabs={tabs}
         activeTabId={activeTabId}
         setActiveTabId={setActiveTabId}
