@@ -11,6 +11,10 @@ import { toast } from "@/hooks/use-toast";
 import SchemaExplorer from "./SchemaExplorer";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
+import EnvToggle from "./EnvToggle";
+import SchemaExplorerList from "./SchemaExplorerList";
+import { Input } from "@/components/ui/input";
+
 // --- Extended dummy schemas and tables for exploration! --- //
 const rand = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
 function range(n: number) {
@@ -285,53 +289,10 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
       </h2>
       {/* Environment ToggleGroup */}
       <div className="mb-3 px-4 flex justify-start">
-        <ToggleGroup
-          type="single"
+        <EnvToggle
           value={env}
-          onValueChange={val => {
-            if (val === "DEV" || val === "STG" || val === "PRD") setEnv(val);
-          }}
-          className="w-full"
-        >
-          <ToggleGroupItem
-            value="DEV"
-            aria-label="DEV"
-            className={`flex-1 text-xs py-2 font-din transition-colors ${env === "DEV" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"} rounded-lg first:rounded-l-lg last:rounded-r-lg`}
-            style={{
-              fontFamily: '"DIN Next","DIN Next LT Pro","DINNextLTPro-Regular","DINNextLTPro","DIN",sans-serif',
-              minWidth: 0, // allow flex to shrink
-              borderRadius: "1.5rem",
-              marginRight: "-1px", // slight overlap for seamless look
-            }}
-          >
-            DEV
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            value="STG"
-            aria-label="STG"
-            className={`flex-1 text-xs py-2 font-din transition-colors ${env === "STG" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"} rounded-lg first:rounded-l-lg last:rounded-r-lg`}
-            style={{
-              fontFamily: '"DIN Next","DIN Next LT Pro","DINNextLTPro-Regular","DINNextLTPro","DIN",sans-serif',
-              minWidth: 0,
-              borderRadius: "1.5rem",
-              marginRight: "-1px",
-            }}
-          >
-            STG
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            value="PRD"
-            aria-label="PRD"
-            className={`flex-1 text-xs py-2 font-din transition-colors ${env === "PRD" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"} rounded-lg first:rounded-l-lg last:rounded-r-lg`}
-            style={{
-              fontFamily: '"DIN Next","DIN Next LT Pro","DINNextLTPro-Regular","DINNextLTPro","DIN",sans-serif',
-              minWidth: 0,
-              borderRadius: "1.5rem",
-            }}
-          >
-            PRD
-          </ToggleGroupItem>
-        </ToggleGroup>
+          onChange={setEnv}
+        />
       </div>
       {/* Search Input */}
       <div className="mb-4 px-2">
@@ -347,21 +308,13 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
         <div className="text-xs text-gray-400 px-2">No tables found</div>
       )}
       {/* Schema List */}
-      <ul className="space-y-2 flex-1 overflow-y-auto px-2">
-        {filteredSchemas.map((schema) => (
-          <li key={schema.schema}>
-            <SchemaExplorer
-              // Use consistent font class for schema and tables
-              schemaName={schema.schema}
-              tables={schema.tables}
-              open={openSchemas[schema.schema]}
-              onToggleOpen={toggleSchema}
-              onInsertSchemaTable={onInsertSchemaTable}
-              onInsertColumn={onInsertColumn}
-            />
-          </li>
-        ))}
-      </ul>
+      <SchemaExplorerList
+        schemas={filteredSchemas}
+        openSchemas={openSchemas}
+        onToggleOpen={toggleSchema}
+        onInsertSchemaTable={onInsertSchemaTable}
+        onInsertColumn={onInsertColumn}
+      />
     </div>
   );
 };
