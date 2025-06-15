@@ -141,9 +141,8 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
 
   return (
     <Collapsible open={!collapsed}>
-      {/* When expanded, show the Results bar and table/content above it */}
       <div
-        className="flex flex-col min-h-0 w-full bg-white"
+        className={`flex flex-col min-h-0 w-full bg-white ${collapsed ? "" : "mt-3"}`}
         style={{
           height: collapsed ? undefined : resultsHeight,
           minHeight: collapsed ? undefined : 80,
@@ -154,9 +153,8 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
           position: "relative",
         }}
       >
-        {/* CollapsibleContent: The result content (table, actions, stats) */}
         <CollapsibleContent asChild>
-          <div className="flex flex-col min-h-0 w-full" style={{ background: "#fff" }}>
+          <div className="flex flex-col min-h-0 w-full" style={{ background: "#fff", height: "100%" }}>
             {/* Results bar (title+collapse) - shown at top when expanded */}
             <div
               className="flex items-center justify-between px-0 pt-0 pb-2 w-full"
@@ -201,26 +199,30 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
               </CollapsibleTrigger>
             </div>
             {/* Table and actions */}
-            {hasTableData ? (
-              <ResultTable result={tab.result} error={resultTableError} />
-            ) : (
-              <div className="bg-gray-100 rounded-lg font-din text-gray-400 flex items-center justify-center w-full h-32 text-lg flex-1">
-                No Data
-              </div>
-            )}
-            {/* Bottom bar: buttons left, stats right */}
-            <div className="flex items-end justify-between px-4 pb-3 pt-0 w-full">
-              <ResultsActionsBar
-                onDownload={handleDownload}
-                toggled={toggled}
-                onToggle={() => setToggled(t => !t)}
-              />
-              <div className="flex flex-1 items-center justify-end">
-                <ResultsStatsBar
-                  numRows={numRows}
-                  numColumns={numColumns}
-                  elapsedMs={tab?.result?.elapsedMs ?? undefined}
+            <div className="flex flex-col flex-1 min-h-0">
+              {hasTableData ? (
+                <div className="flex-1 min-h-0 flex">
+                  <ResultTable result={tab.result} error={resultTableError} />
+                </div>
+              ) : (
+                <div className="bg-gray-100 rounded-lg font-din text-gray-400 flex items-center justify-center w-full flex-1 min-h-0 h-full text-lg">
+                  No Data
+                </div>
+              )}
+              {/* Footer: Results actions and stats with extra top margin */}
+              <div className="flex items-end justify-between px-4 pb-3 pt-0 mt-3 w-full">
+                <ResultsActionsBar
+                  onDownload={handleDownload}
+                  toggled={toggled}
+                  onToggle={() => setToggled(t => !t)}
                 />
+                <div className="flex flex-1 items-center justify-end">
+                  <ResultsStatsBar
+                    numRows={numRows}
+                    numColumns={numColumns}
+                    elapsedMs={tab?.result?.elapsedMs ?? undefined}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -243,7 +245,6 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
             }}
           >
             <div className="flex-1 flex items-center">
-              {/* No drag handle when collapsed */}
               <h2 className="font-din font-bold text-base text-gray-800 ml-4" style={{ letterSpacing: "0.04em" }}>
                 Results
               </h2>
