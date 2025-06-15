@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   DropdownMenu,
@@ -49,6 +48,14 @@ const AccountSection: React.FC<AccountSectionProps> = ({
   // Find role label
   const roleLabel = ROLES.find((r) => r.key === role)?.label ?? ROLES[0].label;
 
+  // The avatar background depends on the role
+  let avatarBg = "bg-gray-200";
+  if (role === "admin") {
+    avatarBg = "bg-red-500";
+  } else if (role === "sensitive") {
+    avatarBg = "bg-yellow-400";
+  }
+
   // Avatar click toggles the menu
   const handleAvatarClick = () => {
     setDropdownOpen((prev) => !prev);
@@ -66,7 +73,7 @@ const AccountSection: React.FC<AccountSectionProps> = ({
     setDropdownOpen(false);
   };
 
-  // Handle role change, show toast, then close dropdown
+  // Handle role change, show toast, then close dropdown, but DO NOT disable avatar at any time
   const handleRoleChange = (newRole: string) => {
     setRole(newRole);
     const label = ROLES.find((r) => r.key === newRole)?.label || newRole;
@@ -90,8 +97,8 @@ const AccountSection: React.FC<AccountSectionProps> = ({
             onKeyDown={handleAvatarKeyDown}
             onBlur={handleAvatarBlur}
           >
-            <Avatar className="h-12 w-12 border-2 border-gray-200 shadow bg-gray-200">
-              <AvatarFallback className="bg-gray-200 text-black font-bold text-xl flex items-center justify-center border-2 border-gray-200">
+            <Avatar className={`h-12 w-12 border-2 border-gray-200 shadow ${avatarBg}`}>
+              <AvatarFallback className={`${avatarBg} text-black font-bold text-xl flex items-center justify-center border-2 border-gray-200`}>
                 J
               </AvatarFallback>
             </Avatar>
