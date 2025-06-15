@@ -117,6 +117,9 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
     resultTableError = tab.error;
   }
 
+  // New: check if we have table data (columns)
+  const hasTableData = !!(tab?.result && Array.isArray(tab.result.columns) && tab.result.columns.length > 0);
+
   return (
     <div
       className="flex flex-col min-h-[80px] bg-white overflow-hidden relative select-none"
@@ -142,9 +145,16 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
         <div className="flex-1"></div>
       </div>
 
-      {/* Results Table */}
+      {/* Results Table or Placeholder */}
       <div className="flex-1 flex flex-col min-h-0 h-full px-0 pt-4 pb-2 w-full">
-        <ResultTable result={tab.result} error={resultTableError} />
+        {hasTableData ? (
+          <ResultTable result={tab.result} error={resultTableError} />
+        ) : (
+          // Placeholder matching WorksheetsPage gray rectangle style
+          <div className="bg-gray-100 rounded-lg font-din text-gray-400 flex items-center justify-center max-w-md w-full h-32 mx-auto text-lg">
+            No Data
+          </div>
+        )}
       </div>
 
       {/* Bottom bar: buttons left, stats right */}
@@ -169,3 +179,4 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
 };
 
 export default TabResultsSection;
+
