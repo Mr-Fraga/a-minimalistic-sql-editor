@@ -1,5 +1,5 @@
-
 import React, { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { useWorksheets } from "./WorksheetsContext";
 
 // The type for a tab in our app
 export interface TabType {
@@ -59,15 +59,63 @@ export function TabsProvider({ children }: { children: ReactNode }) {
     tabs[0]?.id || null
   );
 
+  // Add worksheet file context access:
+  const worksheets = useWorksheets();
+  // Defensive fallback if worksheet context is not defined
+  const worksheetData = worksheets?.worksheetData || [];
+  const setWorksheetData = worksheets?.setWorksheetData;
+
   // activeTab getter
   const activeTab = tabs.find((tab) => tab.id === activeTabId) || null;
 
   // Add a new blank tab and make it active
   const addTab = () => {
     const id = generateTabId();
-    const newTab: TabType = { ...DEFAULT_TAB, id, sql: "" };
+    // Generate a unique name for the new tab/file
+    let baseName = "New Tab";
+    // Ensure name is unique among open tabs and worksheet files
+    let counter = 1;
+    let name = baseName;
+    const tabNames = tabs.map(t => t.name);
+    const fileNames =
+      worksheetData.flatMap(entry => {
+        if (entry.type === "query") return [entry.name];
+        if (entry.type === "folder") return entry.files.map(f => f.name);
+        return [];
+      });
+    while (tabNames.includes(name) || fileNames.includes(name + ".sql")) {
+      name = `${baseName} (${counter++})`;
+    }
+    // Make filename have .sql extension
+    const fileName = name + ".sql";
+
+    const newTab: TabType = {
+      ...DEFAULT_TAB,
+      id,
+      name: fileName,
+      sql: "",
+    };
+
     setTabs((prev) => [...prev, newTab]);
     setActiveTabId(id);
+
+    // Also add this tab as a new file to Worksheets root (if not already present)
+    if (
+      setWorksheetData &&
+      !worksheetData.some(e => e.type === "query" && e.name === fileName)
+    ) {
+      const now = new Date().toISOString().split("T")[0];
+      setWorksheetData(prev => [
+        ...prev,
+        {
+          type: "query",
+          name: fileName,
+          createdAt: now,
+          updatedAt: now,
+          comment: "New tab query"
+        }
+      ]);
+    }
   };
 
   // Update fields of a tab
