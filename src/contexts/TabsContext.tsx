@@ -37,9 +37,12 @@ const TabsContext = createContext<TabsContextType | undefined>(undefined);
 // Default SQL for new tabs (BLANK for your requirement)
 const DEFAULT_SQL = "";
 
+// --- SETUP DEFAULTS ---
+const MOCK_SQL = `SELECT * FROM users LIMIT 10;`; // Replace with your mock query if different
+
 const DEFAULT_TAB = {
-  name: "New Tab",
-  sql: DEFAULT_SQL,
+  name: "Initial Tab",
+  sql: MOCK_SQL, // initial tab gets mock query
   result: { columns: [], rows: [] },
   error: null,
   isRunning: false,
@@ -61,45 +64,61 @@ export function TabsProvider({ children }: { children: ReactNode }) {
 
   // Add worksheet file context access:
   const worksheets = useWorksheets();
-  // Defensive fallback if worksheet context is not defined
   const worksheetData = worksheets?.worksheetData || [];
   const setWorksheetData = worksheets?.setWorksheetData;
 
   // activeTab getter
   const activeTab = tabs.find((tab) => tab.id === activeTabId) || null;
 
+  // Helper: Find next New Tab N number (existing tabs and worksheet files considered)
+  function getNextNewTabIndex() {
+    const tabNumbers = tabs
+      .map(t => t.name.match(/^New Tab (\d+)$/))
+      .filter(Boolean)
+      .map(match => parseInt(match![1], 10));
+    const fileNumbers = worksheetData
+      .flatMap(entry => {
+        if (entry.type === "query") {
+          const m = entry.name.match(/^New Tab (\d+)\.sql$/);
+          return m ? [parseInt(m[1], 10)] : [];
+        }
+        if (entry.type === "folder") {
+          return entry.files
+            .map(f =>
+              f.name.match(/^New Tab (\d+)\.sql$/)
+            )
+            .filter(Boolean)
+            .map(m => parseInt(m![1], 10));
+        }
+        return [];
+      });
+    const usedNumbers = [...tabNumbers, ...fileNumbers];
+    let i = 1;
+    while (usedNumbers.includes(i)) {
+      i++;
+    }
+    return i;
+  }
+
   // Add a new blank tab and make it active
   const addTab = () => {
     const id = generateTabId();
-    // Generate a unique name for the new tab/file
-    let baseName = "New Tab";
-    // Ensure name is unique among open tabs and worksheet files
-    let counter = 1;
-    let name = baseName;
-    const tabNames = tabs.map(t => t.name);
-    const fileNames =
-      worksheetData.flatMap(entry => {
-        if (entry.type === "query") return [entry.name];
-        if (entry.type === "folder") return entry.files.map(f => f.name);
-        return [];
-      });
-    while (tabNames.includes(name) || fileNames.includes(name + ".sql")) {
-      name = `${baseName} (${counter++})`;
-    }
-    // Make filename have .sql extension
-    const fileName = name + ".sql";
+    const tabIdx = getNextNewTabIndex();
+
+    const tabBaseName = `New Tab ${tabIdx}`;
+    const fileName = `${tabBaseName}.sql`;
 
     const newTab: TabType = {
       ...DEFAULT_TAB,
       id,
-      name: fileName,
-      sql: "",
+      name: tabBaseName,
+      sql: "", // blank for new tabs
     };
 
     setTabs((prev) => [...prev, newTab]);
     setActiveTabId(id);
 
-    // Also add this tab as a new file to Worksheets root (if not already present)
+    // Add this tab as a new file to Worksheets root (if not already present)
     if (
       setWorksheetData &&
       !worksheetData.some(e => e.type === "query" && e.name === fileName)
