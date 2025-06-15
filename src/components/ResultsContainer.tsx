@@ -22,7 +22,7 @@ interface ResultsContainerProps {
   onDownloadCsv?: (rowsToExport?: Array<any[]>) => void;
   collapsed: boolean;
   onCollapseToggle?: () => void;
-  disableCollapse: boolean;
+  disableCollapse?: boolean; // <-- now optional
 }
 
 const ResultsContainer: React.FC<ResultsContainerProps> = ({
