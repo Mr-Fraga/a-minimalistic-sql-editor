@@ -259,17 +259,26 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
         </div>
         <CollapsibleContent>
           <ul className="my-2">
-            {pinnedTables.map(({ schema, table }) => (
-              <li key={pinnedId(schema, table)}>
-                <button
-                  className="flex items-center gap-2 px-2 py-1 rounded group hover:bg-black hover:text-white text-sm w-full"
-                  onClick={() => handleTableClick(schema, table)}
-                >
-                  <Pin fill="none" color="#9ca3af" className="shrink-0" size={14} />
-                  <span className="font-medium">{schema}.{table}</span>
-                </button>
-              </li>
-            ))}
+            {pinnedTables.map(({ schema, table }) => {
+              // Pin color black if selected, grey otherwise
+              const isSelected = false; // Add logic if you want to highlight the active/selected one, for now always grey unless you specify selection logic
+              return (
+                <li key={pinnedId(schema, table)}>
+                  <button
+                    className="flex items-center gap-2 px-2 py-1 rounded group hover:bg-black hover:text-white text-sm w-full justify-between"
+                    onClick={() => handleTableClick(schema, table)}
+                  >
+                    <span className="font-medium flex-1 text-left">{schema}.{table}</span>
+                    <Pin
+                      fill="none"
+                      color={(/* If you have selection logic, add here: isSelected ? "#000" : "#9ca3af" */"#9ca3af")}
+                      className="shrink-0 ml-2"
+                      size={14}
+                    />
+                  </button>
+                </li>
+              )
+            })}
           </ul>
         </CollapsibleContent>
       </Collapsible>
