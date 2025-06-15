@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Table,
@@ -251,17 +250,38 @@ const WorksheetsTable = ({
             >
               <TableCell>
                 {row.type === "folder" ? (
-                  <button
-                    className="flex items-center gap-2"
-                    onClick={() => toggleFolder(row.name)}
-                    title={expandedFolders[row.name] ? "Collapse folder" : "Expand folder"}
-                  >
-                    <Folder size={16} className="text-black" />
-                    <span className="font-semibold">{row.name}</span>
-                    <span className="ml-1 text-xs text-gray-400">
-                      {expandedFolders[row.name] ? "▾" : "▸"}
-                    </span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      className="flex items-center gap-2"
+                      onClick={() => toggleFolder(row.name)}
+                      title={expandedFolders[row.name] ? "Collapse folder" : "Expand folder"}
+                    >
+                      <Folder size={16} className="text-black" />
+                      <span className="font-semibold">{row.name}</span>
+                      <span className="ml-1 text-xs text-gray-400">
+                        {expandedFolders[row.name] ? "▾" : "▸"}
+                      </span>
+                    </button>
+                    <button
+                      className="text-gray-400 hover:text-red-600 ml-3"
+                      onClick={() => {
+                        // Find the folder in worksheetData
+                        const folderObj = worksheetData.find(
+                          (item: any) => item.type === "folder" && item.name === row.name
+                        );
+                        setModalState({
+                          open: true,
+                          type: "folder",
+                          fileName: row.name,
+                          parentFolder: undefined,
+                          folderIsEmpty: Array.isArray(folderObj?.files) && folderObj.files.length === 0,
+                        });
+                      }}
+                      title="Delete Folder"
+                    >
+                      <Trash size={16} />
+                    </button>
+                  </div>
                 ) : (
                   <div
                     className="flex items-center gap-2 cursor-grab"
@@ -296,7 +316,7 @@ const WorksheetsTable = ({
                     <button
                       className="text-gray-400 hover:text-red-600"
                       onClick={() =>
-                        setModalState({ open: true, fileName: row.name, parentFolder: row.parentFolder })
+                        setModalState({ open: true, type: "query", fileName: row.name, parentFolder: row.parentFolder })
                       }
                       title="Delete"
                     >

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,9 +13,11 @@ const WorksheetsPage: React.FC = () => {
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
   const [modalState, setModalState] = useState<{
     open: boolean;
+    type?: "query" | "folder";
     fileName: string | null;
     parentFolder: string | undefined;
-  }>({ open: false, fileName: null, parentFolder: undefined });
+    folderIsEmpty?: boolean;
+  }>({ open: false, fileName: null, parentFolder: undefined, type: undefined });
 
   const [search, setSearch] = useState("");
   const [comments, setComments] = useState<{ [key: string]: string }>({});
@@ -45,6 +46,34 @@ const WorksheetsPage: React.FC = () => {
     ]);
     setNewFolderName("");
     setCreatingFolder(false);
+  };
+
+  const handleDeleteConfirmed = () => {
+    if (!modalState.fileName) return;
+    if (modalState.type === "folder") {
+      // Folder deletion: Only allow if empty
+      setWorksheetData(prev =>
+        prev.filter(
+          item =>
+            !(item.type === "folder" && item.name === modalState.fileName)
+        )
+      );
+    } else if (modalState.type === "query") {
+      // File deletion as before
+      setWorksheetData(prev => {
+        if (!modalState.parentFolder) {
+          return prev.filter(item => !(item.type === "query" && item.name === modalState.fileName));
+        }
+        return prev.map(item => {
+          if (item.type !== "folder" || item.name !== modalState.parentFolder) return item;
+          return {
+            ...item,
+            files: item.files.filter((f: any) => f.name !== modalState.fileName),
+          };
+        });
+      });
+    }
+    setModalState({ open: false, type: undefined, fileName: null, parentFolder: undefined });
   };
 
   return (
@@ -104,24 +133,9 @@ const WorksheetsPage: React.FC = () => {
         open={modalState.open}
         onOpenChange={open => setModalState(ms => ({ ...ms, open }))}
         fileName={modalState.fileName}
-        onConfirm={() => {
-          if (modalState.fileName) {
-            // Remove file from worksheetsData – modal always for query row
-            setWorksheetData(prev => {
-              if (!modalState.parentFolder) {
-                return prev.filter(item => !(item.type === "query" && item.name === modalState.fileName));
-              }
-              return prev.map(item => {
-                if (item.type !== "folder" || item.name !== modalState.parentFolder) return item;
-                return {
-                  ...item,
-                  files: item.files.filter((f: any) => f.name !== modalState.fileName),
-                };
-              });
-            });
-            setModalState({ open: false, fileName: null, parentFolder: undefined });
-          }
-        }}
+        type={modalState.type}
+        folderIsEmpty={modalState.folderIsEmpty}
+        onConfirm={handleDeleteConfirmed}
       />
     </div>
   );
