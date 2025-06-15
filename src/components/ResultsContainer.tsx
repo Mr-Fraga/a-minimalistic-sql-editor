@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import ResultTable from "@/components/ResultTable";
 import { ResultsActionsBar } from "@/components/ResultTable/ResultsActionsBar";
@@ -131,95 +130,84 @@ const ResultsContainer: React.FC<ResultsContainerProps> = ({
 
   const hasTableData = !!(tab?.result && Array.isArray(tab.result.columns) && tab.result.columns.length > 0);
 
+  // -- CORE LAYOUT CHANGES --
+  // The outer div becomes relative/flex to stay at the bottom
+
   return (
-    <Collapsible open={!collapsed}>
-      <div
-        className="flex flex-col min-h-0 w-full bg-white"
-        style={
-          collapsed
-            ? {
-                height: 40,
-                minHeight: 32,
-                maxHeight: 48,
-                padding: 0,
-                margin: 0,
-                position: "relative",
-                zIndex: 1, // stays above sql editor, but no overlay
-              }
-            : {
-                height: resultsHeight,
-                minHeight: 80,
-                maxHeight: 600,
-                flex: "0 0 auto",
-                padding: 0,
-                margin: 0,
-                position: "relative",
-                zIndex: 1,
-              }
-        }
-      >
-        {/* Provide gap above Results only if not collapsed */}
-        {!collapsed && <div className="h-5" aria-hidden />}
-        <CollapsibleContent asChild>
-          {!collapsed && (
-            <div className="flex flex-col min-h-0 w-full h-full bg-white">
-              <div
-                className="flex items-center justify-between px-0 pt-0 pb-2 w-full"
-                style={{
-                  userSelect: "none",
-                  minHeight: 32,
-                  border: 0,
-                  zIndex: 3,
-                }}
-              >
-                <ResultsDragHandle
-                  collapsed={collapsed}
-                  onDragStart={handleDragStart}
-                />
-                <ResultsHeaderBar
-                  collapsed={collapsed}
-                  onCollapseToggle={onCollapseToggle}
-                  disableCollapse={disableCollapse}
-                />
-              </div>
-              <div className="flex flex-col flex-1 min-h-0 justify-between">
-                <div className="flex-1 min-h-0 flex">
-                  {hasTableData ? (
-                    <ResultTable result={tab.result} error={resultTableError} />
-                  ) : (
-                    <div className="bg-gray-100 rounded-lg font-din text-gray-400 flex items-center justify-center w-full h-full min-h-0 flex-1 text-lg">
-                      No Data
-                    </div>
-                  )}
+    <div className="flex flex-col min-h-0 w-full bg-white"
+      style={{
+        height: collapsed
+          ? 40
+          : resultsHeight,
+        minHeight: collapsed ? 32 : MIN_RESULTS_HEIGHT,
+        maxHeight: collapsed ? 48 : MAX_RESULTS_HEIGHT,
+        flex: "0 0 auto",
+        padding: 0,
+        margin: 0,
+        position: "relative",
+        zIndex: 1,
+      }}
+    >
+      {/* Provide gap above Results only if not collapsed */}
+      {!collapsed && <div className="h-5" aria-hidden />}
+      {!collapsed ? (
+        <div className="flex flex-col min-h-0 w-full h-full bg-white">
+          <div
+            className="flex items-center justify-between px-0 pt-0 pb-2 w-full"
+            style={{
+              userSelect: "none",
+              minHeight: 32,
+              border: 0,
+              zIndex: 3,
+            }}
+          >
+            <ResultsDragHandle
+              collapsed={collapsed}
+              onDragStart={handleDragStart}
+            />
+            <ResultsHeaderBar
+              collapsed={collapsed}
+              onCollapseToggle={onCollapseToggle}
+              disableCollapse={disableCollapse}
+            />
+          </div>
+          <div className="flex flex-col flex-1 min-h-0 justify-between">
+            <div className="flex-1 min-h-0 flex">
+              {hasTableData ? (
+                <ResultTable result={tab.result} error={resultTableError} />
+              ) : (
+                <div className="bg-gray-100 rounded-lg font-din text-gray-400 flex items-center justify-center w-full h-full min-h-0 flex-1 text-lg">
+                  No Data
                 </div>
-                <div className="flex items-end justify-between px-4 pb-3 pt-0 mt-6 w-full">
-                  <ResultsActionsBar
-                    onDownload={handleDownload}
-                    toggled={toggled}
-                    onToggle={() => setToggled(t => !t)}
-                  />
-                  <div className="flex flex-1 items-center justify-end">
-                    <ResultsStatsBar
-                      numRows={numRows}
-                      numColumns={numColumns}
-                      elapsedMs={tab?.result?.elapsedMs ?? undefined}
-                    />
-                  </div>
-                </div>
+              )}
+            </div>
+            <div className="flex items-end justify-between px-4 pb-3 pt-0 mt-6 w-full">
+              <ResultsActionsBar
+                onDownload={handleDownload}
+                toggled={toggled}
+                onToggle={() => setToggled(t => !t)}
+              />
+              <div className="flex flex-1 items-center justify-end">
+                <ResultsStatsBar
+                  numRows={numRows}
+                  numColumns={numColumns}
+                  elapsedMs={tab?.result?.elapsedMs ?? undefined}
+                />
               </div>
             </div>
-          )}
-        </CollapsibleContent>
-        {/* When collapsed, show just the results bar at the bottom */}
-        {collapsed && (
+          </div>
+        </div>
+      ) : (
+        // If collapsed, pin the bar to the bottom using flex children order (always at section's bottom)
+        <div className="flex flex-col justify-end h-full min-h-0">
           <ResultsCollapsedBar
             collapsed={collapsed}
             onCollapseToggle={onCollapseToggle}
             disableCollapse={disableCollapse}
           />
-        )}
-      </div>
-    </Collapsible>
+        </div>
+      )}
+    </div>
   );
 };
 
