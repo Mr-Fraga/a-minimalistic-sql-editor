@@ -12,6 +12,8 @@ export function useWorksheetsTableLogic(params: {
   setDraggingFile: React.Dispatch<React.SetStateAction<any>>;
   setModalState: React.Dispatch<React.SetStateAction<any>>;
   search: string;
+  onSelectFile?: (file: any) => void;
+  selectedFile?: any;
 }) {
   const {
     worksheetData,
