@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useCallback, useMemo, useState } from "react";
 import { useWorksheets } from "./WorksheetsContext";
 
@@ -46,7 +45,7 @@ export const TabsProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // INITIAL STATE
   const [tabs, setTabs] = useState<TabType[]>([
-    { ...DEFAULT_TAB, id: generateId(), name: "Tab 1" },
+    { ...DEFAULT_TAB, id: generateId(), name: "new_tab" },
   ]);
   const [activeTabId, setActiveTabId] = useState<string | null>(tabs[0]?.id || null);
 
@@ -57,7 +56,21 @@ export const TabsProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // --- Actions ---
   const addTab = useCallback(() => {
-    const newTab: TabType = { ...DEFAULT_TAB, id: generateId() };
+    // Generate a unique default tab name: new_tab, new_tab 2, new_tab 3, etc.
+    const baseName = "new_tab";
+    // Get all names that match new_tab or new_tab [number] format
+    const existingNames = tabs.map(tab => tab.name);
+    let newTabName = baseName;
+    if (existingNames.includes(baseName)) {
+      // look for an available number: new_tab 2, new_tab 3, etc.
+      let suffix = 2;
+      while (existingNames.includes(`${baseName} ${suffix}`)) {
+        suffix += 1;
+      }
+      newTabName = `${baseName} ${suffix}`;
+    }
+
+    const newTab: TabType = { ...DEFAULT_TAB, id: generateId(), name: newTabName };
     setTabs(prevTabs => {
       const newTabs = [...prevTabs, newTab];
       return newTabs;
@@ -65,16 +78,14 @@ export const TabsProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setActiveTabId(newTab.id);
 
     // Create worksheet entry with tab name
-    const worksheetName = "Untitled_" + newTab.id.slice(0, 6) + ".sql";
-    addWorksheetQuery(worksheetName, "Created from tab");
-
-    // Also set tab name for the tab itself
+    addWorksheetQuery(newTabName, "Created from tab");
+    // Also set tab name for the tab itself (redundant but consistent with code style)
     setTabs(prevTabs =>
       prevTabs.map(tab =>
-        tab.id === newTab.id ? { ...tab, name: worksheetName } : tab
+        tab.id === newTab.id ? { ...tab, name: newTabName } : tab
       )
     );
-  }, [addWorksheetQuery]);
+  }, [tabs, addWorksheetQuery]);
 
   const duplicateTab = useCallback(
     (id: string) => {
