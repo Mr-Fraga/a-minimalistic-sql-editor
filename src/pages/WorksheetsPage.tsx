@@ -10,116 +10,7 @@ import {
 import { Folder, File, Trash, Copy } from "lucide-react";
 import DeleteFileModal from "@/components/DeleteFileModal";
 import { Input } from "@/components/ui/input";
-
-// Updated worksheet mock data with comment fields
-const worksheetData = [
-  {
-    type: "folder",
-    name: "Finance",
-    createdAt: "2024-01-03",
-    updatedAt: "2024-06-10",
-    comment: "Quarterly finance queries",
-    files: [
-      {
-        type: "query",
-        name: "income_statement_2024.sql",
-        createdAt: "2024-01-12",
-        updatedAt: "2024-02-22",
-        comment: "Latest income statement script",
-      },
-      {
-        type: "query",
-        name: "accounts_payable_audit.sql",
-        createdAt: "2024-03-01",
-        updatedAt: "2024-05-08",
-        comment: "Audit for payables",
-      },
-      {
-        type: "query",
-        name: "cash_flow_monthly.sql",
-        createdAt: "2024-03-11",
-        updatedAt: "2024-06-01",
-        comment: "Monthly cash flow",
-      },
-    ],
-  },
-  {
-    type: "folder",
-    name: "HR",
-    createdAt: "2024-02-15",
-    updatedAt: "2024-05-16",
-    comment: "HR queries",
-    files: [
-      {
-        type: "query",
-        name: "employee_hires.sql",
-        createdAt: "2024-04-15",
-        updatedAt: "2024-05-15",
-        comment: "Employee hiring report",
-      },
-    ],
-  },
-  {
-    type: "query",
-    name: "project_status_update.sql",
-    createdAt: "2024-04-14",
-    updatedAt: "2024-06-13",
-    comment: "Status report for all projects",
-  },
-];
-
-const initialWorksheetData = worksheetData;
-
-// Flatten the data for easier table mapping
-function flattenData(
-  data: typeof initialWorksheetData,
-  expandedFolders: Record<string, boolean>
-) {
-  const rows: Array<{
-    key: string;
-    type: string;
-    name: string;
-    parentFolder?: string;
-    createdAt: string;
-    updatedAt: string;
-    comment?: string;
-  }> = [];
-  for (const item of data) {
-    if (item.type === "folder") {
-      rows.push({
-        key: item.name,
-        type: item.type,
-        name: item.name,
-        createdAt: item.createdAt,
-        updatedAt: item.updatedAt,
-        comment: item.comment,
-      });
-      if (expandedFolders[item.name]) {
-        for (const file of item.files) {
-          rows.push({
-            key: `${item.name}/${file.name}`,
-            type: file.type,
-            name: file.name,
-            parentFolder: item.name,
-            createdAt: file.createdAt,
-            updatedAt: file.updatedAt,
-            comment: file.comment,
-          });
-        }
-      }
-    } else {
-      rows.push({
-        key: item.name,
-        type: item.type,
-        name: item.name,
-        createdAt: item.createdAt,
-        updatedAt: item.updatedAt,
-        comment: item.comment,
-      });
-    }
-  }
-  return rows;
-}
+import { useWorksheets } from "@/contexts/WorksheetsContext";
 
 // Table column types
 const sortFields = [
@@ -134,6 +25,9 @@ const sortFields = [
 type SortField = typeof sortFields[number]["key"];
 
 const WorksheetsPage: React.FC = () => {
+  // Use global worksheet data
+  const { worksheetData, setWorksheetData } = useWorksheets();
+
   // Sorting state
   const [sort, setSort] = useState<{ field: SortField; direction: "asc" | "desc" }>({
     field: "name",
@@ -141,8 +35,6 @@ const WorksheetsPage: React.FC = () => {
   });
   // Track which folders are expanded
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
-  // Worksheet data can now be mutated
-  const [data, setData] = useState(initialWorksheetData);
   // For delete modal
   const [modalState, setModalState] = useState<{
     open: boolean;
@@ -156,12 +48,14 @@ const WorksheetsPage: React.FC = () => {
   // COMMENTS state: a map of key -> comment (so edits stay persistent in UI)
   const [comments, setComments] = useState<{[key: string]: string}>({});
 
+  const data = worksheetData;
+
   // Handler to duplicate a file (either in a folder or root)
   const handleDuplicateFile = (
     parentFolder: string | undefined,
     fileName: string
   ) => {
-    setData((prev) => {
+    setWorksheetData((prev) => {
       function createCopyName(
         existingNames: string[],
         baseName: string
@@ -208,10 +102,7 @@ const WorksheetsPage: React.FC = () => {
           const fileIdx = item.files.findIndex((f: any) => f.name === fileName);
           const newFiles = [...item.files];
           newFiles.splice(fileIdx + 1, 0, clone);
-          return {
-            ...item,
-            files: newFiles,
-          };
+          return { ...item, files: newFiles };
         });
       }
     });
@@ -219,7 +110,7 @@ const WorksheetsPage: React.FC = () => {
 
   // To handle file deletion
   const handleDeleteFile = (parentFolder: string | undefined, fileName: string) => {
-    setData(prev => {
+    setWorksheetData(prev => {
       if (!parentFolder) {
         return prev.filter(item => !(item.type === "query" && item.name === fileName));
       }
@@ -233,6 +124,57 @@ const WorksheetsPage: React.FC = () => {
     });
     setModalState({ open: false, fileName: null, parentFolder: undefined });
   };
+
+  // Flatten the data for easier table mapping
+  function flattenData(
+    data: typeof worksheetData,
+    expandedFolders: Record<string, boolean>
+  ) {
+    const rows: Array<{
+      key: string;
+      type: string;
+      name: string;
+      parentFolder?: string;
+      createdAt: string;
+      updatedAt: string;
+      comment?: string;
+    }> = [];
+    for (const item of data) {
+      if (item.type === "folder") {
+        rows.push({
+          key: item.name,
+          type: item.type,
+          name: item.name,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+          comment: item.comment,
+        });
+        if (expandedFolders[item.name]) {
+          for (const file of item.files) {
+            rows.push({
+              key: `${item.name}/${file.name}`,
+              type: file.type,
+              name: file.name,
+              parentFolder: item.name,
+              createdAt: file.createdAt,
+              updatedAt: file.updatedAt,
+              comment: file.comment,
+            });
+          }
+        }
+      } else {
+        rows.push({
+          key: item.name,
+          type: item.type,
+          name: item.name,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+          comment: item.comment,
+        });
+      }
+    }
+    return rows;
+  }
 
   // Flatten for current data
   let rows = flattenData(data, expandedFolders);

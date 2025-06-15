@@ -5,6 +5,7 @@ import { useCsvExport } from "@/hooks/useCsvExport";
 import { SqlEditorImperativeHandle } from "@/components/SqlEditor";
 import TabView from "@/components/TabView";
 import TabBar from "@/components/TabBar";
+import { useWorksheets } from "@/contexts/WorksheetsContext";
 
 interface MainContentProps {
   sqlEditorRef: React.RefObject<SqlEditorImperativeHandle | null>;
@@ -13,6 +14,7 @@ interface MainContentProps {
 const DEFAULT_RESULTS_HEIGHT = 320;
 
 const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
+  const { addWorksheetQuery } = useWorksheets();
   const {
     tabs,
     setTabs,
@@ -25,7 +27,7 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
     updateTab,
     renameTab,
     DEFAULT_SQL,
-  } = useTabsState();
+  } = useTabsState({ addWorksheetQuery });
 
   const { runSql, formatSql } = useQueryApi({ updateTab, DEFAULT_SQL });
   const { onDownloadCsv } = useCsvExport(activeTab);

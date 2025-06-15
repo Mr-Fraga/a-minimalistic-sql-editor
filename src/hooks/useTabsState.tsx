@@ -1,7 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
 
-// Removed useLocalStorage import
-
 export type TabType = {
   id: string;
   name: string;
@@ -25,8 +23,13 @@ function generateId() {
   return Math.random().toString(36).substring(2, 15);
 }
 
-export function useTabsState() {
-  // Use in-memory state only
+type UseTabsStateProps = {
+  addWorksheetQuery?: (name: string, comment?: string) => void;
+};
+
+export function useTabsState(props?: UseTabsStateProps) {
+  const addWorksheetQuery = props?.addWorksheetQuery;
+
   const [tabs, setTabs] = useState<TabType[]>([
     { ...DEFAULT_TAB, id: generateId(), name: "Tab 1" },
   ]);
@@ -45,7 +48,13 @@ export function useTabsState() {
     const newTabs = [...tabs, newTab];
     setTabs(newTabs);
     setActiveTabId(newTab.id);
-  }, [tabs]);
+
+    // Add worksheet row
+    if (addWorksheetQuery) {
+      const worksheetName = "Untitled_" + newTab.id.slice(0, 6) + ".sql";
+      addWorksheetQuery(worksheetName, "Created from tab");
+    }
+  }, [tabs, addWorksheetQuery]);
 
   const duplicateTab = useCallback(
     (id: string) => {
