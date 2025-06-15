@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import ResultTable from "@/components/ResultTable";
 import { ResultsActionsBar } from "@/components/ResultTable/ResultsActionsBar";
@@ -134,15 +133,15 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
   // New: check if we have table data (columns)
   const hasTableData = !!(tab?.result && Array.isArray(tab.result.columns) && tab.result.columns.length > 0);
 
-  // --- LAYOUT CHANGE SECTION ---
-
-  // The results bar should be above the table when expanded,
-  // and only bar (at bottom) when collapsed. So we always render the bar at bottom.
+  // Ensure correct layout:
+  // - Add space (mt-5) between editor and results section (should be handled by parent but safe to enforce here)
+  // - When results expanded: results bar at top, then table, then footer
+  // - When collapsed: only bar at bottom
 
   return (
     <Collapsible open={!collapsed}>
       <div
-        className={`flex flex-col min-h-0 w-full bg-white ${collapsed ? "" : "mt-3"}`}
+        className={`flex flex-col min-h-0 w-full bg-white ${collapsed ? "" : "mt-5"}`}
         style={{
           height: collapsed ? undefined : resultsHeight,
           minHeight: collapsed ? undefined : 80,
@@ -153,9 +152,9 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
           position: "relative",
         }}
       >
+        {/* Main results content only rendered if expanded - bar, table, footer */}
         <CollapsibleContent asChild>
-          <div className="flex flex-col min-h-0 w-full" style={{ background: "#fff", height: "100%" }}>
-            {/* Results bar (title+collapse) - shown at top when expanded */}
+          <div className="flex flex-col min-h-0 w-full h-full" style={{ background: "#fff" }}>
             <div
               className="flex items-center justify-between px-0 pt-0 pb-2 w-full"
               style={{
@@ -198,19 +197,18 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
                 </button>
               </CollapsibleTrigger>
             </div>
-            {/* Table and actions */}
-            <div className="flex flex-col flex-1 min-h-0">
-              {hasTableData ? (
-                <div className="flex-1 min-h-0 flex">
+            <div className="flex flex-col flex-1 min-h-0 justify-between">
+              <div className="flex-1 min-h-0 flex">
+                {hasTableData ? (
                   <ResultTable result={tab.result} error={resultTableError} />
-                </div>
-              ) : (
-                <div className="bg-gray-100 rounded-lg font-din text-gray-400 flex items-center justify-center w-full flex-1 min-h-0 h-full text-lg">
-                  No Data
-                </div>
-              )}
-              {/* Footer: Results actions and stats with extra top margin */}
-              <div className="flex items-end justify-between px-4 pb-3 pt-0 mt-3 w-full">
+                ) : (
+                  <div className="bg-gray-100 rounded-lg font-din text-gray-400 flex items-center justify-center w-full h-full min-h-0 flex-1 text-lg">
+                    No Data
+                  </div>
+                )}
+              </div>
+              {/* Extra spacing above footer */}
+              <div className="flex items-end justify-between px-4 pb-3 pt-0 mt-6 w-full">
                 <ResultsActionsBar
                   onDownload={handleDownload}
                   toggled={toggled}
@@ -227,7 +225,6 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
             </div>
           </div>
         </CollapsibleContent>
-        {/* When collapsed, show the bar at the bottom (with no table/stats/actions above) */}
         {collapsed && (
           <div
             className="flex items-center justify-between px-0 py-2 bg-white border-t border-gray-200 select-none"
