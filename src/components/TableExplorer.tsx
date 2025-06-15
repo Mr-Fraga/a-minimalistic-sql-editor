@@ -262,7 +262,47 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
     );
   };
 
-  // Remove vertical margin and start with flush title for better alignment in TabView
+  // --- NEW: Collapsible state for pinned tables ---
+  const [showPinned, setShowPinned] = useState(false);
+
+  // --- Collapsible for pinned tables, now at the top ---
+  const renderPinnedTables = () => {
+    if (!pinnedTables.length) return null;
+    return (
+      <Collapsible open={showPinned} onOpenChange={setShowPinned}>
+        <div
+          className="flex items-center justify-between px-4 pt-4 select-none cursor-pointer"
+          onClick={() => setShowPinned((v) => !v)}
+        >
+          <span className="font-bold text-base text-gray-800" style={{ letterSpacing: "0.04em", textTransform: "none" }}>
+            Pinned Tables
+          </span>
+          {showPinned ? (
+            <ChevronDown className="w-4 h-4 text-gray-500" />
+          ) : (
+            <ChevronRight className="w-4 h-4 text-gray-500" />
+          )}
+        </div>
+        <CollapsibleContent>
+          <ul className="my-2">
+            {pinnedTables.map(({ schema, table }) => (
+              <li key={pinnedId(schema, table)}>
+                <button
+                  className="flex items-center gap-2 px-2 py-1 rounded group hover:bg-black hover:text-white text-sm w-full"
+                  onClick={() => handleTableClick(schema, table)}
+                >
+                  <Pin fill="#000" color="#000" className="shrink-0" size={14} />
+                  <span className="font-medium">{schema}.{table}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </CollapsibleContent>
+      </Collapsible>
+    );
+  };
+
+  // Move pinned tables above Explorer title, and restyle as requested
   return (
     <div
       className="h-full border-l bg-white min-w-[220px] flex flex-col"
@@ -273,8 +313,10 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
         ...style
       }}
     >
-      {/* Title uses 'Explorer' in sentence case, styled for tab view consistency */}
-      <h2 className="font-bold text-base text-gray-800 mb-2 ml-4" style={{ letterSpacing: "0.04em", textTransform: "none" }}>
+      {/* Pinned Tables as first section */}
+      {renderPinnedTables()}
+      {/* Explorer Title */}
+      <h2 className="font-bold text-base text-gray-800 mb-2 mt-4 ml-4" style={{ letterSpacing: "0.04em", textTransform: "none" }}>
         Explorer
       </h2>
       {/* Environment ToggleGroup */}
@@ -284,8 +326,6 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
           onChange={setEnv}
         />
       </div>
-      {/* Pinned Tables Section */}
-      {renderPinnedTables()}
       {/* Search Input */}
       <div className="mb-4 px-2">
         <input
