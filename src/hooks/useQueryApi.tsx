@@ -1,3 +1,4 @@
+
 import { useCallback } from "react";
 import { toast } from "@/hooks/use-toast";
 import { TabType } from "@/contexts/TabsContext";
@@ -9,6 +10,18 @@ const MOCK_RESULT = {
     [1, "Alice", "alice@email.com"],
     [2, "Bob", "bob@email.com"],
     [3, "Charlie", "charlie@email.com"],
+    [4, "David", "david@email.com"],
+    [5, "Eva", "eva@email.com"],
+    [6, "Frank", "frank@email.com"],
+    [7, "Grace", "grace@email.com"],
+    [8, "Hannah", "hannah@email.com"],
+    [9, "Ian", "ian@email.com"],
+    [10, "Julia", "julia@email.com"],
+    [11, "Kyle", "kyle@email.com"],
+    [12, "Luna", "luna@email.com"],
+    [13, "Maya", "maya@email.com"],
+    [14, "Noah", "noah@email.com"],
+    [15, "Olivia", "olivia@email.com"],
   ]
 };
 
@@ -97,3 +110,4 @@ export function useQueryApi({ updateTab, DEFAULT_SQL }: {
 
   return { runSql, formatSql };
 }
+
