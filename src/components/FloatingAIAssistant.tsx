@@ -46,7 +46,7 @@ const FloatingAIAssistant: React.FC = () => {
         <img
           src={MANUEL_IMG}
           alt="M.A.N.U.E.L assistant"
-          className="w-10 h-10 rounded-full object-cover border-2 border-yellow-300"
+          className="w-10 h-10 rounded-full object-cover"
         />
       </button>
       {open && (
@@ -63,7 +63,7 @@ const FloatingAIAssistant: React.FC = () => {
               <img
                 src={MANUEL_IMG}
                 alt="M.A.N.U.E.L assistant"
-                className="w-6 h-6 rounded-full object-cover border border-yellow-400"
+                className="w-6 h-6 rounded-full object-cover"
               />
               <span className="text-sm font-semibold text-gray-700">M.A.N.U.E.L (demo)</span>
             </div>
