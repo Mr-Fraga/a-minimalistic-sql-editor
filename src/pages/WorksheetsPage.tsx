@@ -7,9 +7,10 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import { Folder, File, Trash, Copy } from "lucide-react";
+import { Folder, File, Trash, Copy, Plus } from "lucide-react";
 import DeleteFileModal from "@/components/DeleteFileModal";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button"; // using shadcn UI button
 import { useWorksheets } from "@/contexts/WorksheetsContext";
 
 // Table column types
@@ -48,9 +49,112 @@ const WorksheetsPage: React.FC = () => {
   // COMMENTS state: a map of key -> comment (so edits stay persistent in UI)
   const [comments, setComments] = useState<{[key: string]: string}>({});
 
+  // DRAG & DROP State
+  const [draggingFile, setDraggingFile] = useState<{
+    fileName: string;
+    parentFolder?: string;
+  } | null>(null);
+
+  // FOLDER CREATE State
+  const [creatingFolder, setCreatingFolder] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
+
   const data = worksheetData;
 
-  // Handler to duplicate a file (either in a folder or root)
+  // DRAG & DROP Handlers
+  const handleDragStart = (evt: React.DragEvent, fileName: string, parentFolder?: string) => {
+    setDraggingFile({ fileName, parentFolder });
+    evt.dataTransfer.effectAllowed = "move";
+    evt.dataTransfer.setData("application/lovable-query-file", JSON.stringify({fileName, parentFolder}));
+  };
+
+  const handleDragEnd = () => {
+    setDraggingFile(null);
+  };
+
+  // Accept drop only on folders!
+  const handleFolderDrop = (folderName: string, evt: React.DragEvent) => {
+    evt.preventDefault();
+    let file: { fileName: string, parentFolder?: string };
+    try {
+      const d = evt.dataTransfer.getData("application/lovable-query-file");
+      file = JSON.parse(d);
+    } catch {
+      setDraggingFile(null);
+      return;
+    }
+    // Prevent self-drop or folder->folder
+    if (!file || !file.fileName) return;
+
+    setWorksheetData(prev => {
+      // Remove from root or previous folder
+      let removed: any = {};
+      let updated = prev
+        .map(entry => {
+          if (entry.type === "folder" && entry.files) {
+            // Remove from source folder (if moving from one to another)
+            if (entry.name === file.parentFolder) {
+              const idx = entry.files.findIndex((f: any) => f.name === file.fileName);
+              if (idx > -1) {
+                removed = entry.files[idx];
+                const newFiles = [...entry.files.slice(0, idx), ...entry.files.slice(idx + 1)];
+                return { ...entry, files: newFiles };
+              }
+            }
+            // Just leave all others alone
+            return entry;
+          } else if (entry.type === "query" && !file.parentFolder && entry.name === file.fileName) {
+            // Remove from root
+            removed = entry;
+            return null;
+          }
+          return entry;
+        })
+        .filter(Boolean);
+      // Now, add to target folder
+      updated = updated.map(entry => {
+        if (entry.type === "folder" && entry.name === folderName && removed.name) {
+          // Prevent duplicate names
+          if (!entry.files.some((f: any) => f.name === removed.name)) {
+            return { ...entry, files: [...entry.files, removed] };
+          }
+        }
+        return entry;
+      });
+      return updated;
+    });
+    setDraggingFile(null);
+  };
+
+  // Allow drag over folder
+  const handleFolderDragOver = (evt: React.DragEvent) => {
+    evt.preventDefault();
+    evt.dataTransfer.dropEffect = "move";
+  };
+
+  // Allow creating a new folder
+  const handleCreateFolder = () => {
+    if (!newFolderName.trim()) return;
+    const exists = worksheetData.some(
+      entry => entry.type === "folder" && entry.name === newFolderName.trim()
+    );
+    if (exists) return; // don't allow duplicate
+    const now = new Date().toISOString().split("T")[0];
+    setWorksheetData(prev => [
+      ...prev,
+      {
+        type: "folder",
+        name: newFolderName.trim(),
+        createdAt: now,
+        updatedAt: now,
+        comment: "",
+        files: [],
+      }
+    ]);
+    setNewFolderName("");
+    setCreatingFolder(false);
+  };
+
   const handleDuplicateFile = (
     parentFolder: string | undefined,
     fileName: string
@@ -231,9 +335,20 @@ const WorksheetsPage: React.FC = () => {
   return (
     <div className="flex-1 w-full h-full bg-white p-0 px-10 md:px-20">
       <div className="w-full pt-12">
-        {/* Header row: title on left, search on right */}
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold mb-0">Your queries</h1>
+        {/* Header row: title on left, search on right, and New Folder button */}
+        <div className="flex justify-between items-center mb-4 gap-4">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold mb-0">Your queries</h1>
+            <Button
+              size="sm"
+              variant="outline"
+              className="ml-2"
+              onClick={() => setCreatingFolder(true)}
+            >
+              <Plus size={16} />
+              New Folder
+            </Button>
+          </div>
           <div className="w-full max-w-xs flex justify-end">
             <Input
               type="text"
@@ -245,6 +360,34 @@ const WorksheetsPage: React.FC = () => {
             />
           </div>
         </div>
+
+        {/* New Folder Modal/Inline Input */}
+        {creatingFolder && (
+          <div className="mb-4 flex gap-2 items-center">
+            <Input
+              autoFocus
+              placeholder="Enter folder name"
+              value={newFolderName}
+              onChange={e => setNewFolderName(e.target.value)}
+              className="w-64"
+            />
+            <Button
+              size="sm"
+              onClick={handleCreateFolder}
+              disabled={!newFolderName.trim()}
+            >
+              Create
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => { setCreatingFolder(false); setNewFolderName(""); }}
+            >
+              Cancel
+            </Button>
+          </div>
+        )}
+
         <Table className="w-full">
           <TableHeader>
             <TableRow>
@@ -356,7 +499,26 @@ const WorksheetsPage: React.FC = () => {
           </TableHeader>
           <TableBody>
             {rows.map((row) => (
-              <TableRow key={row.key}>
+              <TableRow
+                key={row.key}
+                // Add highlighted border if folder is the drop target
+                className={
+                  row.type === "folder" && draggingFile
+                    ? "outline outline-2 outline-blue-400"
+                    : ""
+                }
+                // Drag-n-drop drop events for folders only
+                onDrop={
+                  row.type === "folder"
+                    ? evt => handleFolderDrop(row.name, evt)
+                    : undefined
+                }
+                onDragOver={
+                  row.type === "folder"
+                    ? handleFolderDragOver
+                    : undefined
+                }
+              >
                 <TableCell>
                   {row.type === "folder" ? (
                     <button
@@ -371,7 +533,13 @@ const WorksheetsPage: React.FC = () => {
                       </span>
                     </button>
                   ) : (
-                    <div className="flex items-center gap-2">
+                    <div
+                      className="flex items-center gap-2 cursor-grab"
+                      draggable
+                      onDragStart={evt => handleDragStart(evt, row.name, row.parentFolder)}
+                      onDragEnd={handleDragEnd}
+                      title="Drag to folder"
+                    >
                       <File size={16} className="text-blue-400" />
                       <span>{row.name}</span>
                     </div>
