@@ -1,178 +1,30 @@
+
 import React, { useState } from "react";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from "@/components/ui/table";
-import { Folder, File, Trash, Copy, Plus } from "lucide-react";
-import DeleteFileModal from "@/components/DeleteFileModal";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useWorksheets } from "@/contexts/WorksheetsContext";
+import DeleteFileModal from "@/components/DeleteFileModal";
+import WorksheetsTable from "./WorksheetsTable";
+import NewFolderInput from "./NewFolderInput";
 
-// Table column types
-const sortFields = [
-  { key: "name", label: "Name" },
-  { key: "type", label: "Type" },
-  { key: "createdAt", label: "Created At" },
-  { key: "updatedAt", label: "Updated At" },
-  { key: "comment", label: "Comment" },
-  { key: "owner", label: "Owner" }
-] as const;
-
-type SortField = typeof sortFields[number]["key"];
-
+// Top-level WorksheetsPage
 const WorksheetsPage: React.FC = () => {
-  // Use global worksheet data
   const { worksheetData, setWorksheetData } = useWorksheets();
 
-  // Sorting state
-  const [sort, setSort] = useState<{ field: SortField; direction: "asc" | "desc" }>({
-    field: "name",
-    direction: "asc",
-  });
-  // Track which folders are expanded
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
-  // For delete modal
   const [modalState, setModalState] = useState<{
     open: boolean;
     fileName: string | null;
     parentFolder: string | undefined;
   }>({ open: false, fileName: null, parentFolder: undefined });
 
-  // SEARCH state
-  const [search, setSearch] = useState<string>("");
-
-  // COMMENTS state: a map of key -> comment (so edits stay persistent in UI)
-  const [comments, setComments] = useState<{[key: string]: string}>({});
-
-  // DRAG & DROP State
-  const [draggingFile, setDraggingFile] = useState<{
-    fileName: string;
-    parentFolder?: string;
-  } | null>(null);
-
-  // FOLDER CREATE State
+  const [search, setSearch] = useState("");
+  const [comments, setComments] = useState<{ [key: string]: string }>({});
+  const [draggingFile, setDraggingFile] = useState<{ fileName: string; parentFolder?: string } | null>(null);
   const [creatingFolder, setCreatingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
 
-  const data = worksheetData;
-
-  // DRAG & DROP Handlers
-  const handleDragStart = (evt: React.DragEvent, fileName: string, parentFolder?: string) => {
-    setDraggingFile({ fileName, parentFolder });
-    evt.dataTransfer.effectAllowed = "move";
-    evt.dataTransfer.setData("application/lovable-query-file", JSON.stringify({fileName, parentFolder}));
-  };
-
-  const handleDragEnd = () => {
-    setDraggingFile(null);
-  };
-
-  // Handles queries dropped on a folder
-  const handleFolderDrop = (folderName: string, evt: React.DragEvent) => {
-    evt.preventDefault();
-    let file: { fileName: string, parentFolder?: string };
-    try {
-      const d = evt.dataTransfer.getData("application/lovable-query-file");
-      file = JSON.parse(d);
-    } catch {
-      setDraggingFile(null);
-      return;
-    }
-    if (!file || !file.fileName) return;
-    setWorksheetData(prev => {
-      let removed: any = {};
-      let updated = prev
-        .map(entry => {
-          if (entry.type === "folder" && entry.files) {
-            if (entry.name === file.parentFolder) {
-              const idx = entry.files.findIndex((f: any) => f.name === file.fileName);
-              if (idx > -1) {
-                removed = entry.files[idx];
-                const newFiles = [...entry.files.slice(0, idx), ...entry.files.slice(idx + 1)];
-                return { ...entry, files: newFiles };
-              }
-            }
-            return entry;
-          } else if (entry.type === "query" && !file.parentFolder && entry.name === file.fileName) {
-            removed = entry;
-            return null;
-          }
-          return entry;
-        })
-        .filter(Boolean);
-      // Now, add to target folder
-      updated = updated.map(entry => {
-        if (entry.type === "folder" && entry.name === folderName && removed.name) {
-          if (!entry.files.some((f: any) => f.name === removed.name)) {
-            return { ...entry, files: [...entry.files, removed] };
-          }
-        }
-        return entry;
-      });
-      return updated;
-    });
-    setDraggingFile(null);
-  };
-
-  // -- NEW: Handle drop to anywhere NOT a folder => move to root --
-  const handleRootDrop = (evt: React.DragEvent) => {
-    evt.preventDefault();
-    let file: { fileName: string; parentFolder?: string };
-    try {
-      const d = evt.dataTransfer.getData("application/lovable-query-file");
-      file = JSON.parse(d);
-    } catch {
-      setDraggingFile(null);
-      return;
-    }
-    // Only handle if coming from inside a folder to the root
-    if (!file || !file.fileName || !file.parentFolder) return;
-    setWorksheetData(prev => {
-      let removed: any = {};
-      // Remove from parent folder
-      let updated = prev.map(entry => {
-        if (entry.type === "folder" && entry.name === file.parentFolder) {
-          const idx = entry.files.findIndex((f: any) => f.name === file.fileName);
-          if (idx > -1) {
-            removed = entry.files[idx];
-            const newFiles = [...entry.files.slice(0, idx), ...entry.files.slice(idx + 1)];
-            return { ...entry, files: newFiles };
-          }
-        }
-        return entry;
-      });
-      // Add to root after all folders
-      if (removed && removed.name) {
-        // Insert at end of root queries, after all folders
-        const firstQueryIdx = updated.findIndex(entry => entry.type === "query");
-        if (firstQueryIdx === -1) {
-          updated = [...updated, removed];
-        } else {
-          updated = [
-            ...updated.slice(0, firstQueryIdx),
-            removed,
-            ...updated.slice(firstQueryIdx),
-          ];
-        }
-      }
-      // Remove possible undefined
-      return updated.filter(Boolean);
-    });
-    setDraggingFile(null);
-  };
-
-  // Allow drag over folder
-  const handleFolderDragOver = (evt: React.DragEvent) => {
-    evt.preventDefault();
-    evt.dataTransfer.dropEffect = "move";
-  };
-
-  // Allow creating a new folder
+  // Folder creation handler – passed down to input/modal
   const handleCreateFolder = () => {
     if (!newFolderName.trim()) return;
     const exists = worksheetData.some(
@@ -195,188 +47,11 @@ const WorksheetsPage: React.FC = () => {
     setCreatingFolder(false);
   };
 
-  const handleDuplicateFile = (
-    parentFolder: string | undefined,
-    fileName: string
-  ) => {
-    setWorksheetData((prev) => {
-      function createCopyName(
-        existingNames: string[],
-        baseName: string
-      ): string {
-        const copyPattern = /\s?\(copy(?: (\d+))?\)$/i;
-        const rawBase =
-          baseName.replace(copyPattern, "") || baseName;
-        let copyName = `${rawBase} (copy).sql`;
-        let i = 1;
-        while (existingNames.includes(copyName)) {
-          copyName = `${rawBase} (copy ${++i}).sql`;
-        }
-        return copyName;
-      }
-
-      function cloneFileEntry(file: any, name: string) {
-        return {
-          ...file,
-          name,
-          updatedAt: new Date().toISOString().split("T")[0],
-          createdAt: new Date().toISOString().split("T")[0],
-        };
-      }
-
-      if (!parentFolder) {
-        const rootFiles = prev.filter((item) => item.type === "query");
-        const fileToCopy = rootFiles.find((f) => f.name === fileName);
-        if (!fileToCopy) return prev;
-        const allNames = rootFiles.map((f) => f.name);
-        const newName = createCopyName(allNames, fileToCopy.name.replace(/\.sql$/, ""));
-        const idx = prev.findIndex((item) => item.type === "query" && item.name === fileName);
-        const clone = cloneFileEntry(fileToCopy, newName);
-        const newArr = [...prev];
-        newArr.splice(idx + 1, 0, clone);
-        return newArr;
-      } else {
-        return prev.map((item) => {
-          if (item.type !== "folder" || item.name !== parentFolder) return item;
-          const fileToCopy = item.files.find((f: any) => f.name === fileName);
-          if (!fileToCopy) return item;
-          const existingNames = item.files.map((f: any) => f.name);
-          const newName = createCopyName(existingNames, fileToCopy.name.replace(/\.sql$/, ""));
-          const clone = cloneFileEntry(fileToCopy, newName);
-          const fileIdx = item.files.findIndex((f: any) => f.name === fileName);
-          const newFiles = [...item.files];
-          newFiles.splice(fileIdx + 1, 0, clone);
-          return { ...item, files: newFiles };
-        });
-      }
-    });
-  };
-
-  // To handle file deletion
-  const handleDeleteFile = (parentFolder: string | undefined, fileName: string) => {
-    setWorksheetData(prev => {
-      if (!parentFolder) {
-        return prev.filter(item => !(item.type === "query" && item.name === fileName));
-      }
-      return prev.map(item => {
-        if (item.type !== "folder" || item.name !== parentFolder) return item;
-        return {
-          ...item,
-          files: item.files.filter((f: any) => f.name !== fileName),
-        };
-      });
-    });
-    setModalState({ open: false, fileName: null, parentFolder: undefined });
-  };
-
-  // Flatten the data for easier table mapping
-  function flattenData(
-    data: typeof worksheetData,
-    expandedFolders: Record<string, boolean>
-  ) {
-    const rows: Array<{
-      key: string;
-      type: string;
-      name: string;
-      parentFolder?: string;
-      createdAt: string;
-      updatedAt: string;
-      comment?: string;
-    }> = [];
-    for (const item of data) {
-      if (item.type === "folder") {
-        rows.push({
-          key: item.name,
-          type: item.type,
-          name: item.name,
-          createdAt: item.createdAt,
-          updatedAt: item.updatedAt,
-          comment: item.comment,
-        });
-        if (expandedFolders[item.name]) {
-          for (const file of item.files) {
-            rows.push({
-              key: `${item.name}/${file.name}`,
-              type: file.type,
-              name: file.name,
-              parentFolder: item.name,
-              createdAt: file.createdAt,
-              updatedAt: file.updatedAt,
-              comment: file.comment,
-            });
-          }
-        }
-      } else {
-        rows.push({
-          key: item.name,
-          type: item.type,
-          name: item.name,
-          createdAt: item.createdAt,
-          updatedAt: item.updatedAt,
-          comment: item.comment,
-        });
-      }
-    }
-    return rows;
-  }
-
-  // Flatten for current data
-  let rows = flattenData(data, expandedFolders);
-
-  // Enhance: replace comment column values with state value for possible edits
-  rows = rows.map(row => ({
-    ...row,
-    comment: comments[row.key] !== undefined ? comments[row.key] : row.comment ?? "",
-  }));
-
-  // Filter by search (match on name, comment, or parentFolder)
-  if (search.trim()) {
-    const s = search.trim().toLowerCase();
-    rows = rows.filter(
-      row =>
-        row.name.toLowerCase().includes(s) ||
-        (row.comment && row.comment.toLowerCase().includes(s)) ||
-        (row.parentFolder && row.parentFolder.toLowerCase().includes(s))
-    );
-  }
-
-  // Sorting the flattened data
-  rows = [...rows].sort((a, b) => {
-    const multiplier = sort.direction === "asc" ? 1 : -1;
-    if (sort.field === "name") {
-      if (a.type === "folder" && b.parentFolder === a.name) return -1;
-      if (b.type === "folder" && a.parentFolder === b.name) return 1;
-      return a.name.localeCompare(b.name) * multiplier;
-    } else if (sort.field === "type") {
-      if (a.type !== b.type) return (a.type === "folder" ? -1 : 1) * multiplier;
-      return a.name.localeCompare(b.name) * multiplier;
-    } else if (sort.field === "createdAt" || sort.field === "updatedAt") {
-      const aVal = a[sort.field] || "";
-      const bVal = b[sort.field] || "";
-      if (!aVal) return 1;
-      if (!bVal) return -1;
-      return (aVal.localeCompare(bVal)) * multiplier;
-    } else if (sort.field === "comment") {
-      const aVal = a.comment || "";
-      const bVal = b.comment || "";
-      return (aVal.localeCompare(bVal)) * multiplier;
-    }
-    return 0;
-  });
-
-  const toggleFolder = (name: string) => {
-    setExpandedFolders((prev) => ({
-      ...prev,
-      [name]: !prev[name],
-    }));
-  };
-
-  // Render
   return (
     <div className="flex-1 w-full h-full bg-white p-0 px-10 md:px-20">
       <div className="w-full pt-12">
 
-        {/* Header: Title on left, search and New Folder (+) icon on right */}
+        {/* Header with search and plus button */}
         <div className="flex justify-between items-center mb-4 gap-4">
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold mb-0">Your queries</h1>
@@ -391,260 +66,60 @@ const WorksheetsPage: React.FC = () => {
               style={{ maxWidth: 350 }}
             />
             <Button
-              size="icon"
-              variant="outline"
-              className="ml-2"
               aria-label="New Folder"
+              variant="outline"
+              size="icon"
+              className="ml-2"
               onClick={() => setCreatingFolder(true)}
             >
-              <Plus size={20} />
+              <span className="sr-only">Add Folder</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
             </Button>
           </div>
         </div>
-
-        {/* New Folder Modal/Inline Input */}
+        {/* New folder input/modal */}
         {creatingFolder && (
-          <div className="mb-4 flex gap-2 items-center">
-            <Input
-              autoFocus
-              placeholder="Enter folder name"
-              value={newFolderName}
-              onChange={e => setNewFolderName(e.target.value)}
-              className="w-64"
-            />
-            <Button
-              size="sm"
-              onClick={handleCreateFolder}
-              disabled={!newFolderName.trim()}
-            >
-              Create
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => { setCreatingFolder(false); setNewFolderName(""); }}
-            >
-              Cancel
-            </Button>
-          </div>
+          <NewFolderInput
+            newFolderName={newFolderName}
+            setNewFolderName={setNewFolderName}
+            onCreate={handleCreateFolder}
+            onCancel={() => { setCreatingFolder(false); setNewFolderName(""); }}
+          />
         )}
-
-        {/* Table: add drop zone for root area */}
-        <div
-          onDrop={handleRootDrop}
-          onDragOver={e => {
-            // Only show as droppable if dragging file from folder
-            if (draggingFile && draggingFile.parentFolder) e.preventDefault();
-          }}
-          className={`
-            w-full
-            ${draggingFile && draggingFile.parentFolder
-              ? "outline outline-blue-400 outline-2 rounded"
-              : ""
-            }
-          `}
-          style={{ minHeight: 50 }}
-        >
-          <Table className="w-full">
-            <TableHeader>
-              <TableRow>
-                <TableHead
-                  className="cursor-pointer select-none"
-                  onClick={() =>
-                    setSort((prev) => ({
-                      field: "name",
-                      direction:
-                        prev.field === "name" && prev.direction === "asc"
-                          ? "desc"
-                          : "asc",
-                    }))
-                  }
-                >
-                  Name
-                  {sort.field === "name" && (
-                    <span className="ml-1">{sort.direction === "asc" ? "▲" : "▼"}</span>
-                  )}
-                </TableHead>
-                <TableHead
-                  className="cursor-pointer select-none"
-                  onClick={() =>
-                    setSort((prev) => ({
-                      field: "type",
-                      direction:
-                        prev.field === "type" && prev.direction === "asc"
-                          ? "desc"
-                          : "asc",
-                    }))
-                  }
-                >
-                  Type
-                  {sort.field === "type" && (
-                    <span className="ml-1">{sort.direction === "asc" ? "▲" : "▼"}</span>
-                  )}
-                </TableHead>
-                <TableHead
-                  className="cursor-pointer select-none"
-                  onClick={() =>
-                    setSort((prev) => ({
-                      field: "createdAt",
-                      direction:
-                        prev.field === "createdAt" && prev.direction === "asc"
-                          ? "desc"
-                          : "asc",
-                    }))
-                  }
-                >
-                  Created At
-                  {sort.field === "createdAt" && (
-                    <span className="ml-1">{sort.direction === "asc" ? "▲" : "▼"}</span>
-                  )}
-                </TableHead>
-                <TableHead
-                  className="cursor-pointer select-none"
-                  onClick={() =>
-                    setSort((prev) => ({
-                      field: "updatedAt",
-                      direction:
-                        prev.field === "updatedAt" && prev.direction === "asc"
-                          ? "desc"
-                          : "asc",
-                    }))
-                  }
-                >
-                  Updated At
-                  {sort.field === "updatedAt" && (
-                    <span className="ml-1">{sort.direction === "asc" ? "▲" : "▼"}</span>
-                  )}
-                </TableHead>
-                <TableHead
-                  className="cursor-pointer select-none"
-                  onClick={() =>
-                    setSort((prev) => ({
-                      field: "comment",
-                      direction:
-                        prev.field === "comment" && prev.direction === "asc"
-                          ? "desc"
-                          : "asc",
-                    }))
-                  }
-                >
-                  Comment
-                  {sort.field === "comment" && (
-                    <span className="ml-1">{sort.direction === "asc" ? "▲" : "▼"}</span>
-                  )}
-                </TableHead>
-                <TableHead
-                  className="cursor-pointer select-none"
-                  onClick={() =>
-                    setSort((prev) => ({
-                      field: "owner",
-                      direction:
-                        prev.field === "owner" && prev.direction === "asc"
-                          ? "desc"
-                          : "asc",
-                    }))
-                  }
-                >
-                  Owner
-                  {sort.field === "owner" && (
-                    <span className="ml-1">{sort.direction === "asc" ? "▲" : "▼"}</span>
-                  )}
-                </TableHead>
-                <TableHead className="w-1/5">Folder</TableHead>
-                <TableHead className="text-right"> </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.map((row) => (
-                <TableRow
-                  key={row.key}
-                  className={
-                    row.type === "folder" && draggingFile
-                      ? "outline outline-2 outline-blue-400"
-                      : ""
-                  }
-                  onDrop={
-                    row.type === "folder"
-                      ? evt => handleFolderDrop(row.name, evt)
-                      : undefined
-                  }
-                  onDragOver={
-                    row.type === "folder"
-                      ? handleFolderDragOver
-                      : undefined
-                  }
-                >
-                  <TableCell>
-                    {row.type === "folder" ? (
-                      <button
-                        className="flex items-center gap-2"
-                        onClick={() => toggleFolder(row.name)}
-                        title={expandedFolders[row.name] ? "Collapse folder" : "Expand folder"}
-                      >
-                        <Folder size={16} className="text-black" />
-                        <span className="font-semibold">{row.name}</span>
-                        <span className="ml-1 text-xs text-gray-400">
-                          {expandedFolders[row.name] ? "▾" : "▸"}
-                        </span>
-                      </button>
-                    ) : (
-                      <div
-                        className="flex items-center gap-2 cursor-grab"
-                        draggable
-                        onDragStart={evt => handleDragStart(evt, row.name, row.parentFolder)}
-                        onDragEnd={handleDragEnd}
-                        title="Drag to folder"
-                      >
-                        <File size={16} className="text-blue-400" />
-                        <span>{row.name}</span>
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell>{row.type === "folder" ? "Folder" : "File"}</TableCell>
-                  <TableCell>{row.createdAt || "-"}</TableCell>
-                  <TableCell>{row.updatedAt || "-"}</TableCell>
-                  <TableCell>{row.comment || "-"}</TableCell>
-                  <TableCell>john.smith</TableCell>
-                  <TableCell>
-                    {row.parentFolder ? row.parentFolder : row.type === "folder" ? "" : "-"}
-                  </TableCell>
-                  <TableCell className="flex gap-2 justify-end">
-                    {/* Only for query file rows */}
-                    {row.type === "query" && (
-                      <>
-                        <button
-                          className="text-gray-400 hover:text-blue-500"
-                          onClick={() => handleDuplicateFile(row.parentFolder, row.name)}
-                          title="Duplicate"
-                        >
-                          <Copy size={16} />
-                        </button>
-                        <button
-                          className="text-gray-400 hover:text-red-600"
-                          onClick={() =>
-                            setModalState({ open: true, fileName: row.name, parentFolder: row.parentFolder })
-                          }
-                          title="Delete"
-                        >
-                          <Trash size={16} />
-                        </button>
-                      </>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        {/* Worksheets table */}
+        <WorksheetsTable
+          worksheetData={worksheetData}
+          setWorksheetData={setWorksheetData}
+          expandedFolders={expandedFolders}
+          setExpandedFolders={setExpandedFolders}
+          search={search}
+          comments={comments}
+          setComments={setComments}
+          draggingFile={draggingFile}
+          setDraggingFile={setDraggingFile}
+          setModalState={setModalState}
+        />
       </div>
-      {/* Delete confirmation modal */}
       <DeleteFileModal
         open={modalState.open}
         onOpenChange={open => setModalState(ms => ({ ...ms, open }))}
         fileName={modalState.fileName}
         onConfirm={() => {
           if (modalState.fileName) {
-            handleDeleteFile(modalState.parentFolder, modalState.fileName);
+            // Remove file from worksheetsData – modal always for query row
+            setWorksheetData(prev => {
+              if (!modalState.parentFolder) {
+                return prev.filter(item => !(item.type === "query" && item.name === modalState.fileName));
+              }
+              return prev.map(item => {
+                if (item.type !== "folder" || item.name !== modalState.parentFolder) return item;
+                return {
+                  ...item,
+                  files: item.files.filter((f: any) => f.name !== modalState.fileName),
+                };
+              });
+            });
+            setModalState({ open: false, fileName: null, parentFolder: undefined });
           }
         }}
       />
