@@ -150,8 +150,8 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
         {hasTableData ? (
           <ResultTable result={tab.result} error={resultTableError} />
         ) : (
-          // Placeholder matching WorksheetsPage gray rectangle style
-          <div className="bg-gray-100 rounded-lg font-din text-gray-400 flex items-center justify-center max-w-md w-full h-32 mx-auto text-lg">
+          // Updated: end-to-end gray rectangle, stretches full width of results area
+          <div className="bg-gray-100 rounded-lg font-din text-gray-400 flex items-center justify-center w-full h-32 text-lg flex-1">
             No Data
           </div>
         )}
