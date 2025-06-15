@@ -156,6 +156,21 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
     onInsertSchemaTable?.(schema, table);
   };
 
+  // Helper: highlight letters in 'label' matching 'search'
+  function highlightMatch(label: string, search: string) {
+    if (!search) return label;
+    const idx = label.toLowerCase().indexOf(search.toLowerCase());
+    if (idx === -1) return label;
+    // Highlight only the first occurrence
+    return (
+      <>
+        {label.slice(0, idx)}
+        <span className="bg-yellow-200 font-semibold rounded">{label.slice(idx, idx + search.length)}</span>
+        {label.slice(idx + search.length)}
+      </>
+    );
+  }
+
   // --- NEW: Find details about a pinned table ---
   function getPinnedTableMeta(schema: string, table: string) {
     const schemaObj = SCHEMA_DATA.find(s => s.schema === schema);
@@ -165,7 +180,7 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
     return tableObj;
   }
 
-  // --- NEW: Pin icon for table list row ---
+  // --- UPDATED: Pin icon for table list row ---
   const renderTablePinIcon = (schema: string, table: string) => {
     const isPinned = pinnedTables.some(pt => pt.schema === schema && pt.table === table);
     return (
@@ -184,7 +199,7 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
     );
   };
 
-  // --- NEW: Custom SchemaExplorerList with pin icons passed as render prop ---
+  // --- UPDATED: Custom SchemaExplorerList with pin icons passed as render prop ---
   const renderSchemaExplorerList = () => (
     <ul className="space-y-2 flex-1 overflow-y-auto px-2">
       {filteredSchemas.map((schema) => (
@@ -214,7 +229,7 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
                           onClick={() => handleTableClick(schema.schema, table.name)}
                           type="button"
                         >
-                          {table.name}
+                          {highlightMatch(table.name, search)}
                         </button>
                       </TooltipTrigger>
                       <TooltipContent className="p-3 max-w-xs break-words">
@@ -240,7 +255,7 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
   // --- Collapsible state for pinned tables ---
   const [showPinned, setShowPinned] = useState(false);
 
-  // --- Collapsible for pinned tables, now at the top ---
+  // --- UPDATED: Collapsible for pinned tables, now at the top with search highlight ---
   const renderPinnedTables = () => {
     if (!pinnedTables.length) return null;
     return (
@@ -274,7 +289,9 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
                         onClick={() => handleTableClick(schema, table)}
                         type="button"
                       >
-                        <span className="flex-1 text-left">{schema}.{table}</span>
+                        <span className="flex-1 text-left">
+                          {highlightMatch(`${schema}.${table}`, search)}
+                        </span>
                         <Pin
                           fill="none"
                           color={isSelected ? "#000" : "#9ca3af"}
