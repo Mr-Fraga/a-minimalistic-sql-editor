@@ -253,7 +253,7 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
   );
 
   // --- Collapsible state for pinned tables ---
-  const [showPinned, setShowPinned] = useState(false);
+  const [showPinned, setShowPinned] = useState(true);
 
   // --- UPDATED: Collapsible for pinned tables, now at the top with search highlight ---
   const renderPinnedTables = () => {
