@@ -1,7 +1,6 @@
-
 import { useCallback } from "react";
 import { toast } from "@/hooks/use-toast";
-import { TabType } from "@/contexts/TabsContext";
+import { TabType } from "@/contexts/TabsTypes";
 
 // You should provide MOCK_RESULT identical to MainContent usage
 const MOCK_RESULT = {
@@ -110,4 +109,3 @@ export function useQueryApi({ updateTab, DEFAULT_SQL }: {
 
   return { runSql, formatSql };
 }
-
