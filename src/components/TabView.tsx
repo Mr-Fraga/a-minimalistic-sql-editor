@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import TabSqlEditorSection from "./TabSqlEditorSection";
 import TabResultsSection from "./TabResultsSection";
@@ -84,8 +83,6 @@ const TabView: React.FC<TabViewProps> = ({
             onRun={onRun}
             onRunAll={onRunAll}
             collapsed={collapseEditor}
-            onCollapseToggle={() => setCollapseEditor(v => !v)}
-            disableCollapse={collapseResults}
           />
           <TabResultsSection
             tab={tab}
