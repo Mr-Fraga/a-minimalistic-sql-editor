@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import ResultTable from "@/components/ResultTable";
 import { ResultsActionsBar } from "@/components/ResultTable/ResultsActionsBar";
@@ -135,25 +136,71 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
 
   // --- LAYOUT CHANGE SECTION ---
 
-  // Outer Collapsible wraps BOTH the bar and the content
+  // The results bar should be above the table when expanded,
+  // and only bar (at bottom) when collapsed. So we always render the bar at bottom.
+
   return (
     <Collapsible open={!collapsed}>
-      {/* Collapsible content (main table/results), hidden when collapsed */}
-      <CollapsibleContent asChild>
-        <div
-          className="flex flex-col min-h-0 w-full bg-white"
-          style={{
-            height: resultsHeight,
-            minHeight: 80,
-            maxHeight: 600,
-            transition: "height 0.08s",
-            flex: "0 0 auto",
-          }}
-        >
-          <div
-            className="flex-1 flex flex-col min-h-0 px-0 pt-4 pb-2 w-full"
-            style={{ background: "#fff" }}
-          >
+      {/* When expanded, show the Results bar and table/content above it */}
+      <div
+        className="flex flex-col min-h-0 w-full bg-white"
+        style={{
+          height: collapsed ? undefined : resultsHeight,
+          minHeight: collapsed ? undefined : 80,
+          maxHeight: collapsed ? undefined : 600,
+          flex: "0 0 auto",
+          padding: 0,
+          margin: 0,
+          position: "relative",
+        }}
+      >
+        {/* CollapsibleContent: The result content (table, actions, stats) */}
+        <CollapsibleContent asChild>
+          <div className="flex flex-col min-h-0 w-full" style={{ background: "#fff" }}>
+            {/* Results bar (title+collapse) - shown at top when expanded */}
+            <div
+              className="flex items-center justify-between px-0 pt-0 pb-2 w-full"
+              style={{
+                userSelect: "none",
+                minHeight: 32,
+                border: 0,
+                zIndex: 3,
+              }}
+            >
+              {/* Drag handle and label (show drag when expanded) */}
+              <div
+                className="flex-1 flex items-center"
+                onMouseDown={collapsed ? undefined : handleDragStart}
+                role="separator"
+                aria-label="Drag to resize results"
+                tabIndex={0}
+                style={{
+                  cursor: collapsed ? undefined : "ns-resize",
+                }}
+              >
+                <h2 className="font-din font-bold text-base text-gray-800 ml-4" style={{ letterSpacing: "0.04em" }}>
+                  Results
+                </h2>
+              </div>
+              <CollapsibleTrigger
+                asChild
+                disabled={disableCollapse}
+              >
+                <button
+                  type="button"
+                  aria-label={collapsed ? "Expand Results" : "Collapse Results"}
+                  onClick={onCollapseToggle}
+                  className="ml-2 mr-3 text-gray-500 bg-transparent hover:text-black rounded p-1 transition"
+                  style={{
+                    transform: collapsed ? "rotate(0deg)" : "rotate(180deg)",
+                    transition: "transform 0.3s",
+                  }}
+                >
+                  {collapsed ? <ChevronDown size={20}/> : <ChevronUp size={20}/>}
+                </button>
+              </CollapsibleTrigger>
+            </div>
+            {/* Table and actions */}
             {hasTableData ? (
               <ResultTable result={tab.result} error={resultTableError} />
             ) : (
@@ -177,48 +224,49 @@ const TabResultsSection: React.FC<TabResultsSectionProps> = ({
               </div>
             </div>
           </div>
-        </div>
-      </CollapsibleContent>
-      {/* Results "footer"/bar with collapse/expand at very bottom */}
-      <div
-        className="flex items-center justify-between px-0 py-2 bg-white border-t border-gray-200 select-none"
-        style={{
-          userSelect: "none",
-          minHeight: 32,
-          cursor: collapsed ? undefined : "ns-resize",
-          border: 0,
-          zIndex: 1,
-        }}
-      >
-        {/* Drag handle and label (only show drag when expanded) */}
-        <div
-          className="flex-1 flex items-center"
-          onMouseDown={collapsed ? undefined : handleDragStart}
-          role="separator"
-          aria-label="Drag to resize results"
-          tabIndex={0}
-        >
-          <h2 className="font-din font-bold text-base text-gray-800 ml-4" style={{ letterSpacing: "0.04em" }}>
-            Results
-          </h2>
-        </div>
-        <CollapsibleTrigger
-          asChild
-          disabled={disableCollapse}
-        >
-          <button
-            type="button"
-            aria-label={collapsed ? "Expand Results" : "Collapse Results"}
-            onClick={onCollapseToggle}
-            className="ml-2 mr-3 text-gray-500 bg-transparent hover:text-black rounded p-1 transition"
+        </CollapsibleContent>
+        {/* When collapsed, show the bar at the bottom (with no table/stats/actions above) */}
+        {collapsed && (
+          <div
+            className="flex items-center justify-between px-0 py-2 bg-white border-t border-gray-200 select-none"
             style={{
-              transform: collapsed ? "rotate(0deg)" : "rotate(180deg)",
-              transition: "transform 0.3s",
+              userSelect: "none",
+              minHeight: 32,
+              border: 0,
+              zIndex: 4,
+              position: "absolute",
+              left: 0,
+              right: 0,
+              bottom: 0,
+              width: "100%",
+              boxShadow: "0px -2px 6px rgba(0,0,0,0.01)",
             }}
           >
-            {collapsed ? <ChevronDown size={20}/> : <ChevronUp size={20}/>}
-          </button>
-        </CollapsibleTrigger>
+            <div className="flex-1 flex items-center">
+              {/* No drag handle when collapsed */}
+              <h2 className="font-din font-bold text-base text-gray-800 ml-4" style={{ letterSpacing: "0.04em" }}>
+                Results
+              </h2>
+            </div>
+            <CollapsibleTrigger
+              asChild
+              disabled={disableCollapse}
+            >
+              <button
+                type="button"
+                aria-label={collapsed ? "Expand Results" : "Collapse Results"}
+                onClick={onCollapseToggle}
+                className="ml-2 mr-3 text-gray-500 bg-transparent hover:text-black rounded p-1 transition"
+                style={{
+                  transform: collapsed ? "rotate(0deg)" : "rotate(180deg)",
+                  transition: "transform 0.3s",
+                }}
+              >
+                {collapsed ? <ChevronDown size={20}/> : <ChevronUp size={20}/>}
+              </button>
+            </CollapsibleTrigger>
+          </div>
+        )}
       </div>
     </Collapsible>
   );
