@@ -236,33 +236,7 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
     </ul>
   );
 
-  // --- NEW: Render pinned tables section ---
-  const renderPinnedTables = () => {
-    if (!pinnedTables.length) return null;
-    return (
-      <div className="mb-2 px-4">
-        <div className="text-xs text-gray-400 font-semibold mb-1 tracking-wide">Pinned Tables</div>
-        <ul>
-          {pinnedTables.map(({ schema, table }) => {
-            // Only schema.table shown, no description, black pin icon.
-            return (
-              <li key={pinnedId(schema, table)}>
-                <button
-                  className="flex items-center gap-2 px-2 py-1 rounded group hover:bg-black hover:text-white text-sm w-full"
-                  onClick={() => handleTableClick(schema, table)}
-                >
-                  <Pin fill="#000" color="#000" className="shrink-0" size={14} />
-                  <span className="font-medium">{schema}.{table}</span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    );
-  };
-
-  // --- NEW: Collapsible state for pinned tables ---
+  // --- Collapsible state for pinned tables ---
   const [showPinned, setShowPinned] = useState(false);
 
   // --- Collapsible for pinned tables, now at the top ---
