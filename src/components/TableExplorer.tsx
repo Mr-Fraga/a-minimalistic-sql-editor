@@ -255,31 +255,27 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
   // --- Collapsible state for pinned tables ---
   const [showPinned, setShowPinned] = useState(true);
 
-  // --- UPDATED: Collapsible for pinned tables, now at the top with search highlight ---
+  // --- UPDATED: Collapsible for pinned tables, now at the top, WITHOUT chevron icon ---
   const renderPinnedTables = () => {
     if (!pinnedTables.length) return null;
     return (
       <Collapsible open={showPinned} onOpenChange={setShowPinned}>
         <div
           className="flex items-center justify-between px-4 pt-4 select-none cursor-pointer"
-          onClick={() => setShowPinned((v) => !v)}
         >
-          <span className="font-bold text-base text-gray-800" style={{ letterSpacing: "0.04em", textTransform: "none" }}>
+          <span
+            className="font-bold text-base text-gray-800"
+            style={{ letterSpacing: "0.04em", textTransform: "none", cursor: "pointer" }}
+            onClick={() => setShowPinned((v) => !v)}
+          >
             Pinned Tables
           </span>
-          {showPinned ? (
-            <ChevronDown className="w-4 h-4 text-gray-500" />
-          ) : (
-            <ChevronRight className="w-4 h-4 text-gray-500" />
-          )}
         </div>
         <CollapsibleContent>
           <ul className="my-2">
             {pinnedTables.map(({ schema, table }) => {
-              // Find table metadata
               const tableMeta = getPinnedTableMeta(schema, table);
-              // Determine selected status (for black pin)
-              const isSelected = false; // Update if you introduce active table selection logic
+              const isSelected = false;
               return (
                 <li key={pinnedId(schema, table)}>
                   <Tooltip>
@@ -294,7 +290,7 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
                         </span>
                         <Pin
                           fill="none"
-                          color={isSelected ? "#000" : "#9ca3af"}
+                          color={"#9ca3af"}
                           className="shrink-0 ml-2"
                           size={16}
                         />
@@ -311,7 +307,7 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
                     )}
                   </Tooltip>
                 </li>
-              )
+              );
             })}
           </ul>
         </CollapsibleContent>
@@ -335,30 +331,26 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
     >
       {/* Pinned Tables as first section */}
       {renderPinnedTables()}
-      {/* Explorer - make schemas section collapsible and open by default */}
+      {/* Explorer section: NO chevron, collapse only with title click */}
       <Collapsible open={showExplorer} onOpenChange={setShowExplorer}>
         <div
-          className="flex items-center justify-between px-4 mt-4 select-none cursor-pointer"
-          onClick={() => setShowExplorer(v => !v)}
+          className="flex items-center justify-between px-4 mt-4 select-none"
         >
-          <h2 className="font-bold text-base text-gray-800 mb-2 mt-0" style={{ letterSpacing: "0.04em", textTransform: "none" }}>
+          <h2
+            className="font-bold text-base text-gray-800 mb-2 mt-0"
+            style={{ letterSpacing: "0.04em", textTransform: "none", cursor: "pointer" }}
+            onClick={() => setShowExplorer(v => !v)}
+          >
             Explorer
           </h2>
-          {showExplorer ? (
-            <ChevronDown className="w-4 h-4 text-gray-500" />
-          ) : (
-            <ChevronRight className="w-4 h-4 text-gray-500" />
-          )}
         </div>
         <CollapsibleContent>
-          {/* Environment ToggleGroup */}
           <div className="mb-3 px-4 flex justify-start">
             <EnvToggle
               value={env}
               onChange={setEnv}
             />
           </div>
-          {/* Search Input */}
           <div className="mb-4 px-2">
             <input
               placeholder="Search tables..."
@@ -367,11 +359,9 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
               onChange={e => setSearch(e.target.value)}
             />
           </div>
-          {/* No tables found message */}
           {filteredSchemas.length === 0 && (
             <div className="text-xs text-gray-400 px-2">No tables found</div>
           )}
-          {/* Schema List with pin icons */}
           {renderSchemaExplorerList()}
         </CollapsibleContent>
       </Collapsible>
