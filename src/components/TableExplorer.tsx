@@ -218,11 +218,11 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
                         </button>
                       </TooltipTrigger>
                       <TooltipContent className="p-3 max-w-xs break-words">
-                        {/* TableTooltipContent is hidden for brevity */}
-                        <div>
-                          <div className="font-bold">{schema.schema}.{table.name}</div>
-                          {table.description && <div className="text-xs mt-1">{table.description}</div>}
-                        </div>
+                        <TableTooltipContent
+                          schema={schema.schema}
+                          table={table}
+                          onInsertColumn={onInsertColumn}
+                        />
                       </TooltipContent>
                     </Tooltip>
                     {/* Pin icon */}
@@ -271,11 +271,10 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
                     <TooltipTrigger asChild>
                       <button
                         className="flex items-center gap-2 px-6 py-1 rounded group hover:bg-black hover:text-white text-sm w-full justify-between"
-                        style={{ marginLeft: 0 }} // To align exactly with title, px-6 sets the left padding
                         onClick={() => handleTableClick(schema, table)}
                         type="button"
                       >
-                        <span className="font-medium flex-1 text-left">{schema}.{table}</span>
+                        <span className="flex-1 text-left">{schema}.{table}</span>
                         <Pin
                           fill="none"
                           color={isSelected ? "#000" : "#9ca3af"}
