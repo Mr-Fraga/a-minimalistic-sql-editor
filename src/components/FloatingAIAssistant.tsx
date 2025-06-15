@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from "react";
+import { Lightbulb } from "lucide-react";
 
 const MANUEL_IMG = "/lovable-uploads/70d8a291-f407-4e6e-8650-bf88706b04d2.png";
 
@@ -36,18 +37,14 @@ const FloatingAIAssistant: React.FC = () => {
 
   return (
     <>
-      {/* Floating M.A.N.U.E.L Icon */}
+      {/* Floating Bulb Icon (for button) */}
       <button
         aria-label="Chat with M.A.N.U.E.L Assistant"
         className="fixed z-50 bottom-7 right-8 bg-white border border-gray-200 shadow-xl rounded-full p-2 flex items-center justify-center hover:bg-blue-50 transition-colors"
         style={{ boxShadow: "0 3px 18px 0 rgba(18,34,57,.16)", width: 52, height: 52 }}
         onClick={() => setOpen(true)}
       >
-        <img
-          src={MANUEL_IMG}
-          alt="M.A.N.U.E.L assistant"
-          className="w-10 h-10 rounded-full object-cover"
-        />
+        <Lightbulb className="w-8 h-8 text-yellow-400" />
       </button>
       {open && (
         <div
