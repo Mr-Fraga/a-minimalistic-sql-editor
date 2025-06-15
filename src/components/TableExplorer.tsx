@@ -172,13 +172,13 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
         type="button"
         aria-label={isPinned ? "Unpin table" : "Pin table"}
         tabIndex={0}
-        className={`p-1 ml-2 rounded ${isPinned ? "text-yellow-500" : "text-gray-400 hover:text-gray-500"}`}
+        className={`p-1 ml-2 rounded text-gray-400 hover:text-gray-500`}
         onClick={e => {
           e.stopPropagation();
           togglePinTable(schema, table);
         }}
       >
-        <Pin fill={isPinned ? "#facc15" : "none"} strokeWidth={2} size={16} />
+        <Pin fill="none" color="#9ca3af" strokeWidth={2} size={16} />
       </button>
     );
   };
@@ -265,7 +265,7 @@ const TableExplorer: React.FC<TableExplorerProps> = ({
                   className="flex items-center gap-2 px-2 py-1 rounded group hover:bg-black hover:text-white text-sm w-full"
                   onClick={() => handleTableClick(schema, table)}
                 >
-                  <Pin fill="#000" color="#000" className="shrink-0" size={14} />
+                  <Pin fill="none" color="#9ca3af" className="shrink-0" size={14} />
                   <span className="font-medium">{schema}.{table}</span>
                 </button>
               </li>
