@@ -13,7 +13,6 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 import EnvToggle from "./EnvToggle";
 import SchemaExplorerList from "./SchemaExplorerList";
-import { Input } from "@/components/ui/input";
 
 // --- Extended dummy schemas and tables for exploration! --- //
 const rand = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
