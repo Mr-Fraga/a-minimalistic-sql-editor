@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -7,9 +6,11 @@ import DeleteFileModal from "@/components/DeleteFileModal";
 import WorksheetsTable from "./WorksheetsTable";
 import NewFolderInput from "./NewFolderInput";
 import { Card, CardContent } from "@/components/ui/card";
+import { useTabs } from "@/contexts/TabsContext";
 
 const WorksheetsPage: React.FC = () => {
   const { worksheetData, setWorksheetData } = useWorksheets();
+  const { tabs } = useTabs(); // NEW: get all current open tabs
 
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
   const [modalState, setModalState] = useState<{
@@ -92,6 +93,30 @@ const WorksheetsPage: React.FC = () => {
     }
   };
 
+  // Helper: get latest SQL for selected file (by name & maybe by folder too)
+  function getSelectedFileSql(selectedFile: any): string | null {
+    if (!selectedFile || selectedFile.type !== "query") return null;
+    // Find a tab with this file name
+    const matchingTab = tabs.find(tab => tab.name === selectedFile.name);
+    if (matchingTab) return matchingTab.sql;
+
+    // Else, find file in worksheetData: at root or inside folder
+    let found: any = worksheetData.find(
+      item => item.type === "query" && item.name === selectedFile.name
+    );
+    if (!found) {
+      // search inside folders
+      for (const item of worksheetData) {
+        if (item.type === "folder") {
+          found = item.files.find(f => f.name === selectedFile.name);
+          if (found) break;
+        }
+      }
+    }
+    if (found) return found.sql || "-- SQL not available --";
+    return "-- SQL not available --";
+  }
+
   return (
     <div className="flex-1 w-full h-full bg-white p-0 px-10 md:px-20">
       <div className="w-full pt-12">
@@ -154,7 +179,10 @@ const WorksheetsPage: React.FC = () => {
               {selectedFile && selectedFile.type === "query" ? (
                 <>
                   <div className="mb-2 font-semibold text-lg text-gray-800">{selectedFile.name}</div>
-                  <div className="text-gray-600">Mocked contents of {selectedFile.name}</div>
+                  {/* NEW: Show SQL content */}
+                  <pre className="text-sm bg-gray-100 rounded px-3 py-2 text-gray-700 overflow-auto max-h-56 whitespace-pre-wrap mb-2">
+                    {getSelectedFileSql(selectedFile)}
+                  </pre>
                 </>
               ) : (
                 <div className="text-gray-400 text-center">No file selected</div>
