@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from "react";
-import { Bulb } from "lucide-react";
+import { Lightbulb } from "lucide-react";
 
 const mockMessages = [
   { from: "ai", text: "👋 Hello! Ask me anything about your SQL or schema." },
@@ -35,14 +35,14 @@ const FloatingAIAssistant: React.FC = () => {
 
   return (
     <>
-      {/* Floating Bulb Icon */}
+      {/* Floating Lightbulb Icon */}
       <button
         aria-label="Ask AI Assistant"
         className="fixed z-50 bottom-7 right-8 bg-white border border-gray-200 shadow-xl rounded-full p-3 flex items-center justify-center hover:bg-blue-50 transition-colors"
         style={{ boxShadow: "0 3px 18px 0 rgba(18,34,57,.16)" }}
         onClick={() => setOpen(true)}
       >
-        <Bulb size={28} className="text-yellow-400" />
+        <Lightbulb size={28} className="text-yellow-400" />
       </button>
       {open && (
         <div
@@ -55,7 +55,7 @@ const FloatingAIAssistant: React.FC = () => {
           {/* Chat Header */}
           <div className="flex items-center justify-between px-5 py-2 bg-blue-50 border-b border-gray-100">
             <div className="flex items-center gap-2">
-              <Bulb className="text-yellow-400" size={20} />
+              <Lightbulb className="text-yellow-400" size={20} />
               <span className="text-sm font-semibold text-gray-700">AI Assistant (demo)</span>
             </div>
             <button
