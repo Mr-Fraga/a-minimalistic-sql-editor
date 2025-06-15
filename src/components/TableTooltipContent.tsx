@@ -1,3 +1,4 @@
+
 import React from "react";
 
 function isSensitiveTable(tableName: string): boolean {
@@ -44,7 +45,7 @@ const TableTooltipContent: React.FC<TableTooltipContentProps> = ({
   table,
   onInsertColumn,
 }) => (
-  <div>
+  <div className="font-din">
     <div className="font-bold text-xs uppercase tracking-wider mb-1">
       {schema}.{table.name}
     </div>
@@ -78,3 +79,4 @@ const TableTooltipContent: React.FC<TableTooltipContentProps> = ({
 );
 
 export default TableTooltipContent;
+
