@@ -1,11 +1,10 @@
+
 import React, { useCallback, useState } from "react";
-import { useTabsState } from "@/hooks/useTabsState";
 import { useQueryApi } from "@/hooks/useQueryApi";
 import { useCsvExport } from "@/hooks/useCsvExport";
 import { SqlEditorImperativeHandle } from "@/components/SqlEditor";
-import TabView from "@/components/TabView";
-import TabBar from "@/components/TabBar";
-import { useWorksheets } from "@/contexts/WorksheetsContext";
+import TabView from "@/components/TabBar";
+import { useTabs } from "@/contexts/TabsContext";
 
 interface MainContentProps {
   sqlEditorRef: React.RefObject<SqlEditorImperativeHandle | null>;
@@ -14,7 +13,6 @@ interface MainContentProps {
 const DEFAULT_RESULTS_HEIGHT = 320;
 
 const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
-  const { addWorksheetQuery } = useWorksheets();
   const {
     tabs,
     setTabs,
@@ -27,14 +25,13 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
     updateTab,
     renameTab,
     DEFAULT_SQL,
-  } = useTabsState({ addWorksheetQuery });
+  } = useTabs();
 
   const { runSql, formatSql } = useQueryApi({ updateTab, DEFAULT_SQL });
   const { onDownloadCsv } = useCsvExport(activeTab);
 
   const [resultsHeights, setResultsHeights] = useState<{ [tabId: string]: number }>({});
 
-  // Ensure resultsHeight is always available for current tab
   const resultsHeight =
     (activeTab && resultsHeights[activeTab.id]) || DEFAULT_RESULTS_HEIGHT;
 
@@ -60,7 +57,6 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
   const onRun = useCallback(
     (selection?: string) => {
       if (!activeTab) return;
-      console.log("[MainContent] onRun called. selection:", selection, "activeTabId:", activeTab.id);
       runSql(selection !== undefined ? selection : activeTab.sql, activeTab.id);
     },
     [activeTab, runSql]
@@ -80,7 +76,6 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
 
   const role = "readonly";
 
-  // Add debug here
   React.useEffect(() => {
     if (activeTab) {
       console.log("[MainContent] Rendering TabView for tab.id:", activeTab.id, "| tab.result:", activeTab.result, "| tab.error:", activeTab.error);
@@ -89,7 +84,7 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
 
   return (
     <div className="flex-1 flex flex-col h-full">
-      <TabBar
+      <TabView
         tabs={tabs}
         activeTabId={activeTabId}
         setActiveTabId={setActiveTabId}
@@ -123,3 +118,5 @@ const MainContent: React.FC<MainContentProps> = ({ sqlEditorRef }) => {
 };
 
 export default MainContent;
+
+// Note: This now uses the TabsContext for all tab state.

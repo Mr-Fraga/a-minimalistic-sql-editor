@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
+import TabItem from "@/components/TabItem";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, X, Copy } from "lucide-react";
 import {
@@ -8,8 +9,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import CommentEditModal from "@/components/CommentEditModal";
-import TabItem from "./TabItem";
 import TabBarAddButton from "./TabBarAddButton";
+import { useTabs } from "@/contexts/TabsContext";
 
 interface TabType {
   id: string;
@@ -32,14 +33,16 @@ interface TabBarProps {
 }
 
 const TabBar: React.FC<TabBarProps> = ({
-  tabs,
-  activeTabId,
-  setActiveTabId,
-  addTab,
-  closeTab,
-  renameTab,
-  duplicateTab,
+  tabs: propsTabs,
+  activeTabId: propsActiveTabId,
+  setActiveTabId: propsSetActiveTabId,
+  addTab: propsAddTab,
+  closeTab: propsCloseTab,
+  renameTab: propsRenameTab,
+  duplicateTab: propsDuplicateTab,
 }) => {
+  const { tabs, activeTabId, setActiveTabId, addTab, closeTab, renameTab, duplicateTab } = useTabs();
+
   // State for editing tab name
   const [editTabId, setEditTabId] = React.useState<string | null>(null);
   const [tabNameDraft, setTabNameDraft] = React.useState<string>("");
