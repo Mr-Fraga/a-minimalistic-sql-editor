@@ -265,16 +265,23 @@ const WorksheetsTable = ({
                     <button
                       className="text-gray-400 hover:text-red-600 ml-3"
                       onClick={() => {
-                        // Find the folder in worksheetData
-                        const folderObj = worksheetData.find(
-                          (item: any) => item.type === "folder" && item.name === row.name
-                        );
+                        // Properly find the folder in worksheetData for an accurate files array
+                        let folderObj = null;
+                        // worksheetData may contain folders only at top level
+                        if (Array.isArray(worksheetData)) {
+                          folderObj = worksheetData.find(
+                            (item: any) => item.type === "folder" && item.name === row.name
+                          );
+                        }
+                        // Ensure folderIsEmpty is true only if files exists and is empty
+                        const folderIsEmpty =
+                          folderObj && Array.isArray(folderObj.files) && folderObj.files.length === 0;
                         setModalState({
                           open: true,
                           type: "folder",
                           fileName: row.name,
                           parentFolder: undefined,
-                          folderIsEmpty: Array.isArray(folderObj?.files) && folderObj.files.length === 0,
+                          folderIsEmpty,
                         });
                       }}
                       title="Delete Folder"
