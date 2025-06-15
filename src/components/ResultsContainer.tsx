@@ -38,7 +38,7 @@ const ResultsContainer: React.FC<ResultsContainerProps> = ({
   const dragStartHeight = useRef<number>(resultsHeight);
 
   const handleDragStart = (e: React.MouseEvent) => {
-    if (collapsed) return; // No resize when collapsed
+    if (collapsed) return;
     dragStartY.current = e.clientY;
     dragStartHeight.current = resultsHeight;
     window.addEventListener("mousemove", handleDrag);
@@ -129,21 +129,39 @@ const ResultsContainer: React.FC<ResultsContainerProps> = ({
 
   const hasTableData = !!(tab?.result && Array.isArray(tab.result.columns) && tab.result.columns.length > 0);
 
+  // ---- MAIN RENDER ----
+
+  // These styles apply "absolute bottom-0" only when collapsed.
   return (
     <Collapsible open={!collapsed}>
       <div
-        className="flex flex-col min-h-0 w-full bg-white"
-        style={{
-          height: collapsed ? undefined : resultsHeight,
-          minHeight: collapsed ? undefined : 80,
-          maxHeight: collapsed ? undefined : 600,
-          flex: "0 0 auto",
-          padding: 0,
-          margin: 0,
-          position: "relative",
-        }}
+        className={[
+          "flex flex-col min-h-0 w-full bg-white",
+          collapsed ? "absolute left-0 right-0 bottom-0 w-full z-20" : "relative",
+        ].join(" ")}
+        style={
+          collapsed
+            ? {
+                // Only show the collapsed bar at the bottom, do not take extra space
+                height: "auto",
+                minHeight: 0,
+                maxHeight: "40px",
+                padding: 0,
+                margin: 0,
+                position: "absolute",
+              }
+            : {
+                height: resultsHeight,
+                minHeight: 80,
+                maxHeight: 600,
+                flex: "0 0 auto",
+                padding: 0,
+                margin: 0,
+                position: "relative",
+              }
+        }
       >
-        {/* Provide gap above Results if not collapsed */}
+        {/* Provide gap above Results only if not collapsed */}
         {!collapsed && <div className="h-5" aria-hidden />}
         <CollapsibleContent asChild>
           <div className="flex flex-col min-h-0 w-full h-full bg-white">
@@ -189,7 +207,6 @@ const ResultsContainer: React.FC<ResultsContainerProps> = ({
                 </button>
               </CollapsibleTrigger>
             </div>
-            {/* Results table fills up available vertical space */}
             <div className="flex flex-col flex-1 min-h-0 justify-between">
               <div className="flex-1 min-h-0 flex">
                 {hasTableData ? (
@@ -200,7 +217,6 @@ const ResultsContainer: React.FC<ResultsContainerProps> = ({
                   </div>
                 )}
               </div>
-              {/* Footer bar */}
               <div className="flex items-end justify-between px-4 pb-3 pt-0 mt-6 w-full">
                 <ResultsActionsBar
                   onDownload={handleDownload}
@@ -218,7 +234,7 @@ const ResultsContainer: React.FC<ResultsContainerProps> = ({
             </div>
           </div>
         </CollapsibleContent>
-        {/* When collapsed, show just the results bar at the bottom */}
+        {/* When collapsed, show just the results bar at the absolute bottom */}
         {collapsed && (
           <div
             className="flex items-center justify-between px-0 py-2 bg-white border-t border-gray-200 select-none"
@@ -227,10 +243,6 @@ const ResultsContainer: React.FC<ResultsContainerProps> = ({
               minHeight: 32,
               border: 0,
               zIndex: 4,
-              position: "absolute",
-              left: 0,
-              right: 0,
-              bottom: 0,
               width: "100%",
               boxShadow: "0px -2px 6px rgba(0,0,0,0.01)",
             }}
