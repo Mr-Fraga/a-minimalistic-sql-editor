@@ -1,6 +1,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
-import { Lightbulb } from "lucide-react";
+
+const MANUEL_IMG = "/lovable-uploads/70d8a291-f407-4e6e-8650-bf88706b04d2.png";
 
 const mockMessages = [
   { from: "ai", text: "👋 Hello! Ask me anything about your SQL or schema." },
@@ -35,14 +36,18 @@ const FloatingAIAssistant: React.FC = () => {
 
   return (
     <>
-      {/* Floating Lightbulb Icon */}
+      {/* Floating M.A.N.U.E.L Icon */}
       <button
-        aria-label="Ask AI Assistant"
-        className="fixed z-50 bottom-7 right-8 bg-white border border-gray-200 shadow-xl rounded-full p-3 flex items-center justify-center hover:bg-blue-50 transition-colors"
-        style={{ boxShadow: "0 3px 18px 0 rgba(18,34,57,.16)" }}
+        aria-label="Chat with M.A.N.U.E.L Assistant"
+        className="fixed z-50 bottom-7 right-8 bg-white border border-gray-200 shadow-xl rounded-full p-2 flex items-center justify-center hover:bg-blue-50 transition-colors"
+        style={{ boxShadow: "0 3px 18px 0 rgba(18,34,57,.16)", width: 52, height: 52 }}
         onClick={() => setOpen(true)}
       >
-        <Lightbulb size={28} className="text-yellow-400" />
+        <img
+          src={MANUEL_IMG}
+          alt="M.A.N.U.E.L assistant"
+          className="w-10 h-10 rounded-full object-cover border-2 border-yellow-300"
+        />
       </button>
       {open && (
         <div
@@ -55,8 +60,12 @@ const FloatingAIAssistant: React.FC = () => {
           {/* Chat Header */}
           <div className="flex items-center justify-between px-5 py-2 bg-blue-50 border-b border-gray-100">
             <div className="flex items-center gap-2">
-              <Lightbulb className="text-yellow-400" size={20} />
-              <span className="text-sm font-semibold text-gray-700">AI Assistant (demo)</span>
+              <img
+                src={MANUEL_IMG}
+                alt="M.A.N.U.E.L assistant"
+                className="w-6 h-6 rounded-full object-cover border border-yellow-400"
+              />
+              <span className="text-sm font-semibold text-gray-700">M.A.N.U.E.L (demo)</span>
             </div>
             <button
               aria-label="Close chat"
